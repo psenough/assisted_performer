@@ -1,0 +1,98 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	-webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+	user-select: none;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	-webkit-tap-highlight-color: transparent;
+	background-color: #000;
+	/*-webkit-transform: translateZ(0);*/
+	-webkit-backface-visibility: hidden;
+}
+
+*:focus { outline:none; }
+
+html, body {
+	overflow:hidden;
+}
+
+.hidden {
+	display: hidden;
+}
+
+.background {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 0px;
+	height: 0px;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center top;
+	text-align: center;
+	z-index: 2;
+}
+
+.bg_0,
+.bg_0 {
+	background-image: url('../images/0_bg.jpg');
+}
+
+.btn {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 0px;
+	height: 0px;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: left top;
+	z-index: 21;
+	cursor: pointer;
+	background-color: transparent;
+}
+
+.asset {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 0px;
+	height: 0px;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: left top;
+	z-index: 15;
+	background-color: transparent;
+}
+
+canvas, img {
+    image-rendering: optimizeQuality;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+}
+
+.join_en_off {
+	background-image: url('../images/0_join_off.png');
+}
+
+.join_en_on {
+	background-image: url('../images/0_join_on.png');
+}
+
+.lag {
+	color: yellow;
+	position: absolute;
+	top: 0px;
+	left:0px;
+}
