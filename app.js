@@ -13,7 +13,8 @@ var http = require('http');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var app = express();
-
+//var easymidi = require('easymidi');
+//var outputmidi = null;
 
 
 //
@@ -29,7 +30,14 @@ stdin.on('data', function (data) {
     if (data == '\u001B\u005B\u0044') {
 		process.stdout.write('left');
 	}
-	if (data == '0') { gamedata = 0; } // reset game state
+	if (data == '0') { 
+		gamedata = 0;
+		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
+	} // reset game state
+	
+	//if (data == 'o') openMidi('RottenApple (1)');
+	//if (data == 's') sendMidi();
+	//if (data == 'c') closeMidi();
 	
     process.stdout.write('Captured Key : ' + data + "\n");
 });
@@ -75,6 +83,7 @@ var gamedata = '0||||';
 // express request handling
 //
 
+app.get('/', catchall);
 function catchall(req, res) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 	var team = 0; // default team 0
@@ -123,7 +132,10 @@ function catchall(req, res) {
 	res.render('assisted_performer', {title: 'Assisted Performer'});
 }
 
-app.get('/', catchall);
+app.get('/canvas', canvas);
+function canvas(req, res) {
+	res.render('canvas', {title: 'Assisted Performer Canvas'});
+}
 
 app.get('/favicon.ico', function(req, res){
 	var options = {
@@ -297,5 +309,127 @@ function onListening() {
   debug('Listening on port ' + server.address().port);
 }
 
+
+
+/*
+var midi = require('midi');
+
+// Set up a new output.
+var output = new midi.output();
+
+for (var i=0; i<output.getPortCount(); i++) {
+	// Get the name of a specified output port.
+	console.log(output.getPortName(i));
+}
+
+output.openPort(1);
+
+// Send a MIDI message.
+output.sendMessage([176,22,1]);
+
+// Close the port when done.
+output.closePort();
+*/
+
+/*
+function openMidi(thisname) {
+	outputmidi = new easymidi.Output(thisname);
+}
+
+function sendMidi() {
+	if (outputmidi != null) {
+		for (var i=0; i<127; i++) {
+			console.log(i);
+			outputmidi.send('cc', {
+			  controller: 37,
+			  value: i,
+			  channel: 0
+			});
+		}
+	}
+}
+
+function closeMidi() {
+	output.close();
+}
+*/
+
+
+// Start the Websocket server
+//var WebSocketServer = require('ws').Server;
+//var server = new WebSocketServer({port: 3001});
+var ws = require('websocket.io');
+var server = ws.listen(3001);
+
+var active_conn = [];
+var id = 0;
+
+var TYPE_CANVAS = '0';
+var TYPE_ASSISTED_PERFORMER = '1';
+var TYPE_NODE = '2';
+
+var list_of_requests = [];
+// Callback function for when the websocket connects
+server.on('connection', function (client) {
+    client.id = id++;
+    client.send(JSON.stringify({'uniqueID': '2'}));
+    active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}});
+    logme('active conns: ' + active_conn.length);
+
+    // Callback for when we receive a message from this client
+    client.on('message', function (data) {
+        logme('received: ' + data);
+		//logme('received something');
+
+        // crashes trying to parse, ignore
+        var parsed;
+        try {
+            parsed = JSON.parse(data);
+        } catch (e) {
+            //logme('received with bad json format: ' + data);
+            console.error(e);
+            return;
+        }
+
+        // fails to parse, ignore
+        if (!parsed) {
+            logme('received with bad json format2: ' + data);
+            return;
+        }
+
+        // keep latest message in memory
+        active_conn[thisid]['latest_message'] = parsed;
+
+        var timestamp = (new Date()).getTime();
+
+    });
+
+    // Callback for when when the websocket closes the connection
+    client.on('close', function () {
+        logme("websocket closed, removing it");
+        var thisid = getID(client.id);
+        if (thisid != -1) active_conn.splice(thisid, 1);
+    });
+
+    // Callback for when when the websocket raises an error
+    client.on('error', function () {
+        logme("websocket error, removing it");
+        var thisid = getID(client.id);
+        if (thisid != -1) active_conn.splice(thisid, 1);
+    });
+});
+
+function getID(thisid) {
+    for (var i = 0; i < active_conn.length; i++) {
+        if (active_conn[i]['uid'] == thisid) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function logme(thistext) {
+	console.log(thistext);
+}
 
 module.exports = app;
