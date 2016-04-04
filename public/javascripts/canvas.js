@@ -153,7 +153,7 @@ function connectWebSockets() {
 
 	this_ws.onopen = function() {
 		console.log("opened socket");
-		this_ws.send("game|readyforduty");
+		this_ws.send(JSON.stringify(params));
 	};
 
 	this_ws.onmessage = function(evt) {
@@ -192,11 +192,11 @@ function connectWebSockets() {
 
 	this_ws.onclose = function() {
 		console.log("closed socket");
-		if (!this_timeout) this_timeout = setTimeout(function(){this_connectWebSockets()},5000);
+		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 
 	this_ws.onerror = function() {
 		console.log("error on socket");
-		if (!this_timeout) this_timeout = setTimeout(function(){this_connectWebSockets()},5000);
+		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 };

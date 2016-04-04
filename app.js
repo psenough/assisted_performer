@@ -91,6 +91,7 @@ function catchall(req, res) {
 	// prepare to count teams
 	//var teamcount = [];
 	//for (var j=0; j<nteams; j++) teamcount[j] = 0;
+	var param = null;
 
 	// get timestamp
 	var d = new Date();
@@ -104,12 +105,11 @@ function catchall(req, res) {
 			team = connections[i]['team'];
 			connections[i]['lasttime'] = n;
 			found = true;
+			param = connections[i]['param'];
 		}
-
-		// count team connections while we are at it
-		//teamcount[connections[i]['team']] += 1;
 	}
 
+	
 	// if we are dealing with a new ip, give it one of the less assigned teams
 	// this value should be sent to the webpage somehow (on terminator it's being sent as part of the title)
 	// the webpage itself, not the server, sets what zone value is being sent back as a vote
@@ -121,12 +121,22 @@ function catchall(req, res) {
 		//	if (teamcount[k] < teamcount[lowestcountindex]) lowestcountindex = k;
 		//	teamstatus += teamcount[k] + ' :::: ';
 		//}
-		team = 0;//lowestcountindex;
+		//team = 0;//lowestcountindex;
 		//console.log(teamstatus);
 		
+		for (p in params) {
+			console.log(params[p]);
+			
+			if (!('taken' in params[p])) {
+				param = p;
+				params[p]['taken'] = true;
+				break;
+			}	
+		}
+		
 		// add the info to our connections records
-		connections.push({ip: ip, team: team, lasttime: n});
-		console.log('ip: ' + ip + ' added to team ' + team + ', total connections: ' + connections.length);
+		connections.push({ip: ip, params: [param], lasttime: n});
+		console.log('ip: ' + ip + ' controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
 	res.render('assisted_performer', {title: 'Assisted Performer'});
@@ -231,7 +241,8 @@ app.post('/ping', function(req, res) {
 	//winston.log('info', ip+',pingtime,'+lastpingtime);
 
 	//console.log('ping');
-	res.send('rcvd|'+gamedata);
+	res.setHeader("Assisted-Performer", JSON.stringify(params));
+	res.send('rcvd');
 });
 
 app.use(catchall);
@@ -364,9 +375,7 @@ var server = ws.listen(3001);
 var active_conn = [];
 var id = 0;
 
-var TYPE_CANVAS = '0';
-var TYPE_ASSISTED_PERFORMER = '1';
-var TYPE_NODE = '2';
+var params = {};
 
 var list_of_requests = [];
 // Callback function for when the websocket connects
@@ -396,9 +405,12 @@ server.on('connection', function (client) {
             logme('received with bad json format2: ' + data);
             return;
         }
+		
+		params = parsed;
 
         // keep latest message in memory
-        active_conn[thisid]['latest_message'] = parsed;
+		var thisid = getID(client.id);
+		if (thisid in active_conn) active_conn[thisid]['latest_message'] = parsed;
 
         var timestamp = (new Date()).getTime();
 

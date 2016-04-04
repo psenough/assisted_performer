@@ -8,93 +8,9 @@ var display_post_lag = true;
 navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
 function thisthing() {
-	var background = document.getElementById('background');
-	if (!background) {
-		background = document.createElement('div');
-		background.setAttribute('id','background');
-		background.setAttribute('class','background');
-		document.body.appendChild(background);
-	}
-
-	var rotation_canvas = document.getElementById('rotation_canvas');
-	if (!rotation_canvas) {
-		rotation_canvas = document.createElement('canvas');
-		rotation_canvas.setAttribute('id','rotation_canvas');
-		rotation_canvas.setAttribute('class','hidden');
-		document.body.appendChild(rotation_canvas);
-	}
-
-	var bw_fire_left = document.getElementById('bw_fire_left');
-	if (!bw_fire_left) {
-		bw_fire_left = document.createElement('div');
-		bw_fire_left.setAttribute('id', 'bw_fire_left');
-		bw_fire_left.setAttribute('class', 'hidden');
-		bw_fire_left.addEventListener("mousedown", function() {
-			// vote
-			sendvote(zonebase+1);
-			// place star back in it's initial place in case it's still flying
-			//var bw_star_left = document.getElementById('bw_star_left');
-			//if (bw_star_left) bw_star_left.style.top = bw_star_left_start+'px';
-			// fly it out
-			//fly_out('bw_star_left', 0.4, Expo.easeOut, bw_star_height*2, bw_star_left_start);
-			// and rumble
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		bw_fire_left.addEventListener('touchstart', function(e){
-			e.preventDefault();
-			if (client_state == 4) {
-				bw_fire_left.setAttribute('class', 'btn tap_on');
-				sendvote(zonebase+1);
-				// place star back in it's initial place in case it's still flying
-				//var bw_star_left = document.getElementById('bw_star_left');
-				//if (bw_star_left) bw_star_left.style.top = bw_star_left_start+'px';
-				// fly it out
-				//fly_out('bw_star_left', 0.4, Expo.easeOut, bw_star_height*2, bw_star_left_start);
-				if (navigator.vibrate) navigator.vibrate(100);
-			}
-		});
-		bw_fire_left.addEventListener('touchmove', function(e){
-			e.preventDefault();
-			if (client_state == 4) {
-				bw_fire_left.setAttribute('class', 'btn tap_on');
-			}
-		});
-		bw_fire_left.addEventListener('touchend', function(e){
-			e.preventDefault();
-			if (client_state == 4) {
-				var bw_star_left = document.getElementById('bw_star_left');
-				if (bw_star_left) bw_star_left.style.top = bw_star_left_start+'px';
-				bw_fire_left.setAttribute('class', 'btn tap_off');
-			}
-		});
-		document.body.appendChild(bw_fire_left);
-	}
-
-	var shield = document.getElementById('shield');
-	if (!shield) {
-		shield = document.createElement('div');
-		shield.setAttribute('id','shield');
-		shield.setAttribute('class','hidden');
-		document.body.appendChild(shield);
-	}
-	
-	if (display_post_lag) {
-		var lag = document.getElementById('lag');
-		if (!lag) {
-			lag = document.createElement('div');
-			lag.setAttribute('id','lag');
-			lag.setAttribute('class','lag');
-			document.body.appendChild(lag);
-		}
-	}
-	
-	setTimeout(calculate_buttons_position, 200);
-	
 	request_ping();
-	
 	setInterval(recheck_ping, max_timeout);
 }
-
 
 var rotation_canvas_animation = false;
 
@@ -203,40 +119,57 @@ function calculate_buttons_position() {
 		var usedheight = parseInt(usedwidth / gfxratio, 10);
 	}
 
-	// all backgrounds
-	
+	// background image
 	var background = document.getElementById('background');
 	if (background) {
-		switch (client_state) {
-			/*case 1:
-				var bg = (game_state-2);
-				if (bg < 0) bg = 0;
-				background.setAttribute('class','background bg_'+language+'_'+client_state+'_'+bg);
-			break;*/
-			case 3:
-				background.setAttribute('class','background bg_'+language+'_'+client_state+'_'+team);
-			break;
-			case 4:
-				switch (team) {
-					case 0:
-					case 5:
-						background.setAttribute('class','background bg_'+client_state+'_'+team);
-					break;
-					default:
-						background.setAttribute('class','background bg_'+client_state);
-					break;
-				}
-			break;
-			default:
-				background.setAttribute('class','background bg_'+language+'_'+client_state);
-			break;
-		}
 		
 		background.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
 		//background.style.top = parseInt(0,10) + 'px';
 
 		background.style.width = parseInt(usedwidth,10) + 'px';
 		background.style.height = parseInt(usedheight,10) + 'px';		
+	} else {
+		background = document.createElement('div');
+		background.setAttribute('id','background');
+		background.setAttribute('class','background');
+		document.body.appendChild(background);
+	}
+	
+	var index = 0;
+	for (param in params) {
+		
+		var add = document.getElementById('p' + param + 'add');
+		if (add) {
+			add.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
+			add.style.top = parseInt(usedheight*0.25,10) + 'px';
+
+			add.style.width = parseInt(usedwidth*0.5,10) + 'px';
+			add.style.height = parseInt(usedheight*0.5,10) + 'px';
+			
+			switch (client_state) {
+				case 4:
+					if (team == 1) add.setAttribute('class','btn tap_off');
+						else add.setAttribute('class','hidden');
+				break;
+				default:
+					add.setAttribute('class','hidden');
+				break;
+			}
+		} else {
+			add = document.createElement('div');
+			add.setAttribute('id', 'p' + param + 'add');
+			add.setAttribute('class', 'add');
+			document.body.appendChild(add);
+			//TODO: add action listener for add, affect within range and send vote to server
+		}
+
+		//TODO: add value
+		
+		//TODO: add minus
+		
+		//TODO: add subtitle
+		
+		index++;
 	}
 	
 	// rotation canvas
@@ -312,7 +245,7 @@ function calculate_buttons_position() {
 	
 }
 
-window.onload = function(){thisthing();};
+window.onload = function(){init();};
 
 window.onresize = function(){
 	calculate_buttons_position();
@@ -331,6 +264,8 @@ function sendvote(votetype, pvote) {
 	http.onreadystatechange = function() {
 		if(http.readyState == 4 && http.status == 200) {
 			console.log(http.responseText);
+			//var headers = http.getAllResponseHeaders();
+			//console.log(headers);
 		}
 	}
 	http.send(params);
@@ -370,65 +305,11 @@ function request_ping() {
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
 
-				gamedata = http.responseText.split('|');
-				console.log(gamedata);
-				
-				var displayflag = game_state;
-				
-				// don't allow to go anywhere else after reaching the final screen
-				// (people will have to go back to beacon to open a new webview if they want to play again)
-				if (displayflag == 10) return;
-				
-				game_state = parseInt(gamedata[1],10);
-				
-				// dont change state if the game is already under way (over game_state 1)
-				// wait until it is being changed from game_state 0 to 1 and 1 step at a time only
-				// never jump from 0 (our client default) to for example 3 (game already playing).
-				console.log(game_state + ' ' + displayflag + ' ' + (game_state - displayflag));
-				if ((game_state > 1) && ((game_state - displayflag) != 1)) {
-					// stay in old game state
-					game_state = displayflag;
-					return;
-				}
-				
-				var old_client_state = client_state;
-
-				// change from previous state, only trigger once
-				if (displayflag != game_state) {
-					switch(game_state) {
-						case 0:
-							client_state = 2;
-						break;
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-							if (client_state != 5) client_state = 2;
-						break;
-						case 6:
-							if (client_state != 5) {
-								client_state = 3;
-								request_idcard();
-							}
-						break;
-						case 7:
-						case 8:
-						case 9:
-							if (client_state != 5) client_state = 4;
-						break;
-						case 10:
-							if (client_state != 5) client_state = 5;
-						break;
-						//case 11:
-						//	window.close();
-						//	window.top.close();
-						//break;
-					}
-					
-					// transition between client_state 0 and client_state 1 happens when user presses the join button
-
-					if (old_client_state != client_state) calculate_buttons_position();
+				var headers = parseResponseHeaders(http.getAllResponseHeaders());
+				if ('Assisted-Performer' in headers) {
+					console.log(headers['Assisted-Performer']);
+					params = JSON.parse(headers['Assisted-Performer']);
+					calculate_buttons_position();
 				}
 			}
 		}
@@ -437,6 +318,26 @@ function request_ping() {
 	
 	var d2 = new Date();
 	pingout = d2.getTime();
+}
+
+var params = {};
+
+function parseResponseHeaders(headerStr) {
+  var headers = {};
+  if (!headerStr) {
+    return headers;
+  }
+  var headerPairs = headerStr.split('\u000d\u000a');
+  for (var i = 0, len = headerPairs.length; i < len; i++) {
+    var headerPair = headerPairs[i];
+    var index = headerPair.indexOf('\u003a\u0020');
+    if (index > 0) {
+      var key = headerPair.substring(0, index);
+      var val = headerPair.substring(index + 2);
+      headers[key] = val;
+    }
+  }
+  return headers;
 }
 
 document.addEventListener("keydown", keyDownTextField, false);
