@@ -200,3 +200,87 @@ function connectWebSockets() {
 		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 };
+
+
+// TODO: get live input https://webaudiodemos.appspot.com/input/index.html
+
+function initAudio() {
+    /*var irRRequest = new XMLHttpRequest();
+    irRRequest.open("GET", "sounds/cardiod-rear-levelled.wav", true);
+    irRRequest.responseType = "arraybuffer";
+    irRRequest.onload = function() {
+        audioContext.decodeAudioData( irRRequest.response, 
+            function(buffer) { reverbBuffer = buffer; } );
+    }
+    irRRequest.send();*/
+
+    /*o3djs.require('o3djs.shader');
+
+    analyser1 = audioContext.createAnalyser();
+    analyser1.fftSize = 1024;
+    analyser2 = audioContext.createAnalyser();
+    analyser2.fftSize = 1024;
+
+    analyserView1 = new AnalyserView("view1");
+    analyserView1.initByteBuffer( analyser1 );
+    analyserView2 = new AnalyserView("view2");
+    analyserView2.initByteBuffer( analyser2 );*/
+
+    /*if (!navigator.getUserMedia)
+        navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+    if (!navigator.getUserMedia)
+        return(alert("Error: getUserMedia not supported!"));
+
+    navigator.getUserMedia(constraints, gotStream, function(e) {
+            alert('Error getting audio');
+            console.log(e);
+        });
+
+    if ((typeof MediaStreamTrack === 'undefined')||(!MediaStreamTrack.getSources)){
+        console.log("This browser does not support MediaStreamTrack, so doesn't support selecting sources.\n\nTry Chrome Canary.");
+    } else {
+        MediaStreamTrack.getSources(gotSources);
+    }
+
+    document.getElementById("effect").onchange=changeEffect;*/
+	
+	MediaStreamTrack.getSources(gotSources);
+	
+	if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+	  console.log("enumerateDevices() not supported.");
+	  return;
+	}
+
+	// List cameras and microphones.
+
+	navigator.mediaDevices.enumerateDevices()
+	.then(function(devices) {
+	  devices.forEach(function(device) {
+		console.log(device.kind + ": " + device.label +
+					" id = " + device.deviceId);
+	  });
+	})
+	.catch(function(err) {
+	  console.log(err.name + ": " + err.message);
+	});
+	
+}
+
+function gotSources(sourceInfos) {
+	console.log(sourceInfos);
+    /*var audioSelect = document.getElementById("audioinput");
+    while (audioSelect.firstChild)
+        audioSelect.removeChild(audioSelect.firstChild);
+
+    for (var i = 0; i != sourceInfos.length; ++i) {
+        var sourceInfo = sourceInfos[i];
+        if (sourceInfo.kind === 'audio') {
+            var option = document.createElement("option");
+            option.value = sourceInfo.id;
+            option.text = sourceInfo.label || 'input ' + (audioSelect.length + 1);
+            audioSelect.appendChild(option);
+        }
+    }
+    audioSelect.onchange = changeInput;*/
+}
