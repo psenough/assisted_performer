@@ -17,7 +17,7 @@ var halfw;
 var halfh;
 
 var params = {
-	'rms': { 'min': 0.0, 'max': 1.0, 'default': 0.5, 'value': 0.5 }
+	'rms': { 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default': 0.5, 'value': 0.5 }
 };
 
 function drawCanvas() {
@@ -140,7 +140,7 @@ var words = [
 "test"
 ];
 
-var this_websockets = 'ws://localhost:3001';
+var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
 var this_ws = null;
 var this_timeout = false;
 
@@ -153,50 +153,33 @@ function connectWebSockets() {
 
 	this_ws.onopen = function() {
 		console.log("opened socket");
-		this_ws.send(JSON.stringify(params));
+		this_ws.send(JSON.stringify({'assisted_performer': 'canvas', 'params': params}));
 	};
 
 	this_ws.onmessage = function(evt) {
-		
+
 		console.log(evt.data);
-		
+
 		var parsed = JSON.parse(evt.data);
-		
+
 		for (instance in parsed) {
 			if (instance in params) {
-				params[instance]['value'] = parsed[instance]
+				params[instance]['value'] = parsed[instance];
 			}
 		}
-		
-		console.log(parsed['uniqueID']);
-		
-		/*
-		if (game) {
-		
-			switch(game.state) {
-			
-				case game.instructionsScreen: {
-						game.interactWithInstructions(evt.data);
-					}
-					break;
-				case game.gameScreen: {
-						game.interactWithGame(evt.data);
-					}
-					break;
-			}
-		} else {
-			console.log('no game, no message');
-		}*/
-	
+
+		console.log(parsed);
 	};
 
 	this_ws.onclose = function() {
 		console.log("closed socket");
+		this_ws = null;
 		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 
 	this_ws.onerror = function() {
 		console.log("error on socket");
+		this_ws = null;
 		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 };

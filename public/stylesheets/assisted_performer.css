@@ -96,3 +96,37 @@ canvas, img {
 	top: 0px;
 	left:0px;
 }
+
+.add_on {
+	background-image: url('../images/add_on.png');
+}
+
+.add_off {
+	background-image: url('../images/add_off.png');
+}
+
+.minus_on {
+	background-image: url('../images/minus_on.png');
+}
+
+.minus_off {
+	background-image: url('../images/minus_off.png');
+}
+
+.value {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 0px;
+	height: 0px;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: left top;
+	z-index: 18;
+	background-color: transparent;
+	text-align: center;
+	color: #FFF;
+	font-size: 2em;
+}

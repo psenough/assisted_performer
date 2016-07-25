@@ -53,7 +53,7 @@ stdin.resume();
 
 var httpServer = http.createServer(app);
 
-httpServer.listen(80); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+httpServer.listen(8080); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -168,6 +168,47 @@ app.get('/favicon.ico', function(req, res){
 	res.attachment(fileName);
 });
 
+
+app.post('/control', function(req, res) {
+	// get timestamp
+	var d = new Date();
+	var n = d.getTime();
+
+	var thisparam = req.body.param;
+	var thistype = req.body.type;
+	
+	if (thisparam in params) {
+		var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
+		switch(thistype) {
+			case 'add':
+				params[thisparam]['value'] += params[thisparam]['step'];
+				if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
+			break;
+			case 'minus':
+				params[thisparam]['value'] -= params[thisparam]['step'];
+				if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
+			break;
+			default:
+				console.log('weird type received:'+thistype);
+			break;
+		}
+		
+		// update param on canvas via websockets
+		sendWebSocketUpdateToCanvas(thisparam);
+	}
+
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	for (var i=0; i<connections.length; i++) {
+		if (ip == connections[i]['ip']) {
+			connections[i]['lasttime'] = n;
+			break;
+		}
+	}
+
+	res.send('rcvd|'+gamedata);
+});
+
+/*
 app.post('/vote', function(req, res) {
 	// get timestamp
 	var d = new Date();
@@ -209,7 +250,7 @@ app.post('/vote', function(req, res) {
 	//winston.log('info', ip+',vote,'+thisteam+','+thiszone+','+thisvote+','+thispvote);
 	res.send('rcvd|'+gamedata);
 });
-
+*/
 app.post('/ping', function(req, res) {
 	// get timestamp
 	var d = new Date();
@@ -382,7 +423,7 @@ var list_of_requests = [];
 server.on('connection', function (client) {
     client.id = id++;
     client.send(JSON.stringify({'uniqueID': '2'}));
-    active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}});
+    active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('active conns: ' + active_conn.length);
 
     // Callback for when we receive a message from this client
@@ -390,29 +431,79 @@ server.on('connection', function (client) {
         logme('received: ' + data);
 		//logme('received something');
 
-        // crashes trying to parse, ignore
-        var parsed;
-        try {
-            parsed = JSON.parse(data);
-        } catch (e) {
-            //logme('received with bad json format: ' + data);
-            console.error(e);
-            return;
-        }
-
-        // fails to parse, ignore
-        if (!parsed) {
-            logme('received with bad json format2: ' + data);
-            return;
-        }
+		var lmsg = data;
+		var type = null;
 		
-		params = parsed;
+		
+		// crashes trying to parse, ignore
+		var parsed;
+		try {
+			parsed = JSON.parse(data);
+		} catch (e) {
+			//logme('received with bad json format: ' + data);
+			console.error(e);
+			return;
+		}
 
-        // keep latest message in memory
+		// fails to parse, ignore
+		if (!parsed) {
+			logme('received with bad json format2: ' + data);
+			//return;
+		} else {
+			switch (parsed['assisted_performer']) {
+				case 'canvas':
+					params = parsed['params'];
+					type = 'canvas';
+				break;
+				case 'control':
+					type = 'canvas';
+					if ('params' in parsed) {
+						if (('param' in parsed['params']) && ('type' in parsed['params'])) {
+							var thisparam = parsed['params']['param'];
+							var thistype = parsed['params']['type'];
+							if (thisparam in params) {
+								var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
+								switch(thistype) {
+									case 'add':
+										params[thisparam]['value'] += params[thisparam]['step'];
+										if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
+									break;
+									case 'minus':
+										params[thisparam]['value'] -= params[thisparam]['step'];
+										if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
+									break;
+									default:
+										console.log('weird type received:'+thistype);
+									break;
+								}
+								
+								// update param on canvas via websockets
+								sendWebSocketUpdateToCanvas(thisparam);
+							}
+						}
+					}
+					if ('ping' in parsed) {
+						//TODO: send back a pong in similar way to POST pong
+						var thisid = getID(client.id);
+						if (thisid in active_conn) {
+							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'params': params}));
+							//active_conn[thisid]['socket'].send({'pong': 'pong'});
+						}
+					}
+				break;
+				default:
+					logme('unknown assisted perfomer');
+				break;
+			}
+		}
+		
+		// keep latest message in memory
 		var thisid = getID(client.id);
-		if (thisid in active_conn) active_conn[thisid]['latest_message'] = parsed;
-
-        var timestamp = (new Date()).getTime();
+		if (thisid in active_conn) {
+			active_conn[thisid]['latest_message'] = lmsg;
+			active_conn[thisid]['latest_timestamp'] = getTimestamp();
+			active_conn[thisid]['client_type'] = type;
+		}
 
     });
 
@@ -431,6 +522,18 @@ server.on('connection', function (client) {
     });
 });
 
+function sendWebSocketUpdateToCanvas(thisparam) {
+	if (thisparam in params) {
+		for (var i = 0; i < active_conn.length; i++) {
+			if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
+				var obj = {};
+				obj[thisparam] = params[thisparam]['value'];
+				active_conn[i]['socket'].send(JSON.stringify(obj));
+			}
+		}
+	}
+}
+
 function getID(thisid) {
     for (var i = 0; i < active_conn.length; i++) {
         if (active_conn[i]['uid'] == thisid) {
@@ -442,6 +545,10 @@ function getID(thisid) {
 
 function logme(thistext) {
 	console.log(thistext);
+}
+
+function getTimestamp() {
+	return (new Date()).getTime();
 }
 
 module.exports = app;
