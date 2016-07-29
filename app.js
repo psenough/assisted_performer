@@ -139,7 +139,7 @@ function catchall(req, res) {
 		console.log('ip: ' + ip + ' controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
-	res.render('assisted_performer', {title: 'Assisted Performer'});
+	res.render('assisted_performer_slider', {title: 'Assisted Performer Slider'});
 }
 
 app.get('/canvas', canvas);
