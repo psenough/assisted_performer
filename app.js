@@ -473,7 +473,9 @@ server.on('connection', function (client) {
 										if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
 									break;
 									default:
-										console.log('weird type received:'+thistype);
+										var value = parseFloat(thistype);
+										if ((value > params[thisparam]['min']) && (value < params[thisparam]['max'])) params[thisparam]['value'] = value;
+										//console.log('weird type received, assuming it\'s a direct value: '+thistype);
 									break;
 								}
 								

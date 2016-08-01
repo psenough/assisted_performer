@@ -13,6 +13,22 @@ var CONNECTION_MODE_ANY = 2; // try ws if ws exists, if not, try post
 
 var connection_mode = CONNECTION_MODE_ANY;
 
+/*
+var values=[]; //precalc
+function findNearest(includeLeft, includeRight, value) {
+	var nearest = null;
+	var diff = null;
+	for (var i = 0; i < values.length; i++) {
+		if ((includeLeft && values[i] <= value) || (includeRight && values[i] >= value)) {
+			var newDiff = Math.abs(value - values[i]);
+			if (diff == null || newDiff < diff) {
+				nearest = values[i];
+				diff = newDiff;
+			}
+		}
+	}
+	return nearest;
+}*/
 
 var inp_half_height = 0;
 var inp_start_y = 0;
@@ -82,29 +98,60 @@ function calculate_buttons_position() {
 		inp.addEventListener('touchmove', function(e){
 			e.preventDefault();
 			inp_dragging = true;
-			
+
 			// get movement positions
 			var px = e.changedTouches[0].pageX;
 			var py = e.changedTouches[0].pageY;
-			
+
 			// check bounds
-			var pad_top = usedheight - usedheight*.2;
-			var pad_bot = usedheight*.2;
-			if (py < pad_bot) py = pad_bot;
-			if (py > pad_top) py = pad_top;
-			
+			var pad_bot = usedheight - usedheight*.2;
+			var pad_top = usedheight*.25;
+			if (py > pad_bot) py = pad_bot;
+			if (py < pad_top) py = pad_top;
+
 			// drag the div to the correct place
 			inp.style.top = (py - inp_half_height) + 'px';
-			
-			// updated output box
-			var outp = document.getElementById('outp');
-			if (outp) outp.innerHTML = py;
+
+			//{"pong":"pong","params":{"rms":{"min":0,"max":1,"step":0.05,"default":0.5,"value":0.5}}}
+			// silly way to access key string of the only param
+			for (key in server_params) {
+				var pad_diff = (pad_bot - pad_top);
+				var val_diff = (server_params[key]['max'] - server_params[key]['min']);
+				//console.log(pad_bot + ' ' + pad_top + ' ' + (pad_bot - pad_top) + ' ' + (server_params[key]['max'] - server_params[key]['min']));
+				var value = server_params[key]['max'] - (((py - pad_top)/pad_diff) * val_diff);
+				
+				// clamp to stepped value
+				var diff = null;
+				var value2 = null;
+				for (var i = server_params[key]['min']; i < server_params[key]['max'] + server_params[key]['step']; i += server_params[key]['step'] ) {
+					var newDiff = Math.abs(value - i);
+					if (diff == null || newDiff < diff) {
+						value2 = i;
+						diff = newDiff;
+					}
+				}
+				var value3 = parseFloat(value2).toFixed(2);
+				console.log(value + ' ' + value2 + ' ' + value3);
+				
+				// updated output box
+				var outp = document.getElementById('outp');
+				if (outp) outp.innerHTML = key + ' ' + value3;
+				
+				// update nodejs
+				if ( server_params[key]['value'] != value3) {
+					sendvote(key, value3)
+				}
+				
+				// save value
+				server_params[key]['value'];
+
+				break;
+			}
 		});
 		inp.addEventListener('touchend', function(e){
 			e.preventDefault();
 			inp_dragging = false;
 		});
-		
 	}
 
 	var outp = document.getElementById('outp');
@@ -375,8 +422,11 @@ function connect_websockets() {
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
 
-				server_params = parsed['params'];
-				calculate_buttons_position();
+				if (({}).constructor !== server_params) {
+					server_params = parsed['params'];
+				}
+				//console.log(server_params);
+				//calculate_buttons_position();
 			}
 		
 			//TODO: check if we are getting a pong back, if we are, calculate ping time and display it
