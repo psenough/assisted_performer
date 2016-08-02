@@ -17,7 +17,9 @@ var halfw;
 var halfh;
 
 var params = {
-	'rms': { 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default': 0.5, 'value': 0.5 }
+	'rms': { 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default': 0.5, 'value': 0.5 },
+	'num': { 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default': 80.0, 'value': 80.0 },
+	'red': { 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default': 122.0, 'value': 122.0 }
 };
 
 function drawCanvas() {
@@ -29,6 +31,7 @@ function drawCanvas() {
 	var tradius = w;
 	var rms = 0.5;
 	
+	// default values
 	ctx.fillStyle = "rgba(122,12,78,1.0)";
 	ctx.fillRect(0,0,w,h);
 	
@@ -41,7 +44,9 @@ function drawCanvas() {
 		var cos1 = Math.cos((n2-n)/800)+1.0;
 		var cos2 = Math.cos((n2-n)/2800);
 		
-		var rms = params['rms']['value'];
+		rms = params['rms']['value'];
+		num = parseInt(params['num']['value'],10);
+		var red = parseInt(params['red']['value'],10);
 		
 		var calc = [];
 		for(var i=0; i<num; i++) {
@@ -55,7 +60,10 @@ function drawCanvas() {
 		var sizey = parseInt(10*(w/h),10);
 		
 		ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);//10*rms;
-		ctx.fillStyle = "rgba("+parseInt(155*cos1*0.5+50,10)+","+parseInt(25*sin1*rms*0.75,10)+",105,1.0)";
+		var r1 = parseInt(red*cos1*0.5+50,10);
+		if (r1 > 255) r1 = 255;
+		if (r1 < 0) r1 = 0;
+		ctx.fillStyle = "rgba("+r1+","+parseInt(25*sin1*rms*0.75,10)+",105,1.0)";
 		ctx.strokeStyle = "rgba(0,0,0,1.0)";
 		if (rms > 0.4) ctx.strokeStyle = ctx.fillStyle;
 

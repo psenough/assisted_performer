@@ -77,6 +77,52 @@ function calculate_buttons_position() {
 		inp.style.height = inp_half_height*2 + 'px';
 	}
 	
+	function update_value(px, py) {
+		// check bounds
+		var pad_bot = usedheight - usedheight*.2;
+		var pad_top = usedheight*.25;
+		if (py > pad_bot) py = pad_bot;
+		if (py < pad_top) py = pad_top;
+
+		// drag the div to the correct place
+		inp.style.top = (py - inp_half_height) + 'px';
+
+		//{"pong":"pong","params":{"rms":{"min":0,"max":1,"step":0.05,"default":0.5,"value":0.5}}}
+		// silly way to access key string of the only param
+		for (key in server_params) {
+			var pad_diff = (pad_bot - pad_top);
+			var val_diff = (server_params[key]['max'] - server_params[key]['min']);
+			//console.log(pad_bot + ' ' + pad_top + ' ' + (pad_bot - pad_top) + ' ' + (server_params[key]['max'] - server_params[key]['min']));
+			var value = server_params[key]['max'] - (((py - pad_top)/pad_diff) * val_diff);
+			
+			// clamp to stepped value
+			var diff = null;
+			var value2 = null;
+			for (var i = server_params[key]['min']; i < server_params[key]['max'] + server_params[key]['step']; i += server_params[key]['step'] ) {
+				var newDiff = Math.abs(value - i);
+				if (diff == null || newDiff < diff) {
+					value2 = i;
+					diff = newDiff;
+				}
+			}
+			var value3 = parseFloat(value2).toFixed(2);
+			console.log(value + ' ' + value2 + ' ' + value3);
+			
+			// updated output box
+			var outp = document.getElementById('outp');
+			if (outp) outp.innerHTML = key + ' ' + value3;
+			
+			// update nodejs
+			if ( server_params[key]['value'] != value3) {
+				sendvote(key, value3)
+			}
+			
+			// save value
+			server_params[key]['value'] = value3;
+
+			break;
+		}
+	}
 	var inp = document.getElementById('inp');
 	if (inp) {
 		inp_places();
@@ -87,8 +133,29 @@ function calculate_buttons_position() {
 		document.body.appendChild(inp);
 		inp_places();
 		
-		inp.addEventListener("mousedown", function() {
-			// do nothing
+		inp.addEventListener("mousedown", function(e) {
+			inp_dragging = true;
+			// get position
+			var px = e.clientX;
+			var py = e.clientY;
+			update_value(px,py);
+		});
+		inp.addEventListener("mousemove", function(e) {
+			if (inp_dragging) {
+				// get position
+				var px = e.clientX;
+				var py = e.clientY;
+
+				update_value(px,py);
+			}
+		});
+			inp.addEventListener("mouseup", function(e) {
+			// get position
+			var px = e.clientX;
+			var py = e.clientY;
+
+			update_value(px,py);
+			inp_dragging = false;
 		});
 		inp.addEventListener('touchstart', function(e){
 			e.preventDefault();
@@ -103,50 +170,7 @@ function calculate_buttons_position() {
 			var px = e.changedTouches[0].pageX;
 			var py = e.changedTouches[0].pageY;
 
-			// check bounds
-			var pad_bot = usedheight - usedheight*.2;
-			var pad_top = usedheight*.25;
-			if (py > pad_bot) py = pad_bot;
-			if (py < pad_top) py = pad_top;
-
-			// drag the div to the correct place
-			inp.style.top = (py - inp_half_height) + 'px';
-
-			//{"pong":"pong","params":{"rms":{"min":0,"max":1,"step":0.05,"default":0.5,"value":0.5}}}
-			// silly way to access key string of the only param
-			for (key in server_params) {
-				var pad_diff = (pad_bot - pad_top);
-				var val_diff = (server_params[key]['max'] - server_params[key]['min']);
-				//console.log(pad_bot + ' ' + pad_top + ' ' + (pad_bot - pad_top) + ' ' + (server_params[key]['max'] - server_params[key]['min']));
-				var value = server_params[key]['max'] - (((py - pad_top)/pad_diff) * val_diff);
-				
-				// clamp to stepped value
-				var diff = null;
-				var value2 = null;
-				for (var i = server_params[key]['min']; i < server_params[key]['max'] + server_params[key]['step']; i += server_params[key]['step'] ) {
-					var newDiff = Math.abs(value - i);
-					if (diff == null || newDiff < diff) {
-						value2 = i;
-						diff = newDiff;
-					}
-				}
-				var value3 = parseFloat(value2).toFixed(2);
-				console.log(value + ' ' + value2 + ' ' + value3);
-				
-				// updated output box
-				var outp = document.getElementById('outp');
-				if (outp) outp.innerHTML = key + ' ' + value3;
-				
-				// update nodejs
-				if ( server_params[key]['value'] != value3) {
-					sendvote(key, value3)
-				}
-				
-				// save value
-				server_params[key]['value'];
-
-				break;
-			}
+			update_value(px,py);
 		});
 		inp.addEventListener('touchend', function(e){
 			e.preventDefault();

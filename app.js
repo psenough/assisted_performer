@@ -79,6 +79,25 @@ var gamedata = '0||||';
 
 
 
+function removeTakenParamFromClosingIP(thisip) {
+	console.log('ip: ' + thisip);
+	for (c in connections) {
+		console.log('connection: ' + connections[c]['ip'] + ' ' + thisip);
+		if (connections[c]['ip'] == thisip) {
+			if (connections[c]['params']) {
+				console.log(connections[c]['params']);
+				for (p in connections[c]['params']) {
+					console.log('removing ' + p + ' ' + connections[c]['params'][p]);
+					if (connections[c]['params'][p] in params) {
+						delete params[connections[c]['params'][p]]['taken'];
+					}
+				}
+				break;
+			}
+		}
+	}
+}
+
 //
 // express request handling
 //
@@ -86,11 +105,6 @@ var gamedata = '0||||';
 app.get('/', catchall);
 function catchall(req, res) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	var team = 0; // default team 0
-
-	// prepare to count teams
-	//var teamcount = [];
-	//for (var j=0; j<nteams; j++) teamcount[j] = 0;
 	var param = null;
 
 	// get timestamp
@@ -110,23 +124,10 @@ function catchall(req, res) {
 	}
 
 	
-	// if we are dealing with a new ip, give it one of the less assigned teams
-	// this value should be sent to the webpage somehow (on terminator it's being sent as part of the title)
-	// the webpage itself, not the server, sets what zone value is being sent back as a vote
-	if (!found) {
-		//var teamstatus = 'teamstatus before add: ';
-		// find team with lowest count
-		//var lowestcountindex = 0;
-		//for (var k=0; k<nteams; k++) {
-		//	if (teamcount[k] < teamcount[lowestcountindex]) lowestcountindex = k;
-		//	teamstatus += teamcount[k] + ' :::: ';
-		//}
-		//team = 0;//lowestcountindex;
-		//console.log(teamstatus);
-		
-		for (p in params) {
-			console.log(params[p]);
-			
+	// if we are dealing with a new ip, give it an unused param
+	if (!found) 
+	{
+		for (p in params) {			
 			if (!('taken' in params[p])) {
 				param = p;
 				params[p]['taken'] = true;
@@ -135,8 +136,9 @@ function catchall(req, res) {
 		}
 		
 		// add the info to our connections records
+		// params is an array because we might want to pass multiple parameters to a controller at some point
 		connections.push({ip: ip, params: [param], lasttime: n});
-		console.log('ip: ' + ip + ' controlling param ' + param + ', total connections: ' + connections.length);
+		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
 	res.render('assisted_performer_slider', {title: 'Assisted Performer Slider'});
@@ -145,6 +147,7 @@ function catchall(req, res) {
 app.get('/canvas', canvas);
 function canvas(req, res) {
 	res.render('canvas', {title: 'Assisted Performer Canvas'});
+	// not adding our canvas to the connections list
 }
 
 app.get('/favicon.ico', function(req, res){
@@ -178,7 +181,7 @@ app.post('/control', function(req, res) {
 	var thistype = req.body.type;
 	
 	if (thisparam in params) {
-		var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
+		//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
 		switch(thistype) {
 			case 'add':
 				params[thisparam]['value'] += params[thisparam]['step'];
@@ -422,9 +425,11 @@ var list_of_requests = [];
 // Callback function for when the websocket connects
 server.on('connection', function (client) {
     client.id = id++;
+	//console.log(client.req.connection.remoteAddress);
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('active conns: ' + active_conn.length);
+	client.ra = client.req.connection.remoteAddress;
 
     // Callback for when we receive a message from this client
     client.on('message', function (data) {
@@ -433,7 +438,6 @@ server.on('connection', function (client) {
 
 		var lmsg = data;
 		var type = null;
-		
 		
 		// crashes trying to parse, ignore
 		var parsed;
@@ -454,15 +458,16 @@ server.on('connection', function (client) {
 				case 'canvas':
 					params = parsed['params'];
 					type = 'canvas';
+					//TODO: when received message with new parameters, should reassign on all existing connections
 				break;
 				case 'control':
-					type = 'canvas';
+					type = 'control';
 					if ('params' in parsed) {
 						if (('param' in parsed['params']) && ('type' in parsed['params'])) {
 							var thisparam = parsed['params']['param'];
 							var thistype = parsed['params']['type'];
 							if (thisparam in params) {
-								var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
+								//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
 								switch(thistype) {
 									case 'add':
 										params[thisparam]['value'] += params[thisparam]['step'];
@@ -485,11 +490,23 @@ server.on('connection', function (client) {
 						}
 					}
 					if ('ping' in parsed) {
-						//TODO: send back a pong in similar way to POST pong
+						// send back a pong in similar way to POST pong
 						var thisid = getID(client.id);
 						if (thisid in active_conn) {
-							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'params': params}));
-							//active_conn[thisid]['socket'].send({'pong': 'pong'});
+							
+							// only send the params assigned to this connection
+							var prr = {};
+							for (c in connections) {
+								//console.log('pong connection: ' + connections[c]['ip'] + ' ' + active_conn[thisid]['socket'].ra);
+								if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
+									if (connections[c]['params']) {
+										//console.log(connections[c]['params']);
+										prr[connections[c]['params']] = params[connections[c]['params']];
+									}
+								}
+							}
+							
+							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'params': prr}));
 						}
 					}
 				break;
@@ -506,6 +523,8 @@ server.on('connection', function (client) {
 			active_conn[thisid]['latest_timestamp'] = getTimestamp();
 			active_conn[thisid]['client_type'] = type;
 		}
+		
+		//TODO: if ip is not in the connections, send message to refresh page automatically
 
     });
 
@@ -513,14 +532,22 @@ server.on('connection', function (client) {
     client.on('close', function () {
         logme("websocket closed, removing it");
         var thisid = getID(client.id);
-        if (thisid != -1) active_conn.splice(thisid, 1);
+        if (thisid != -1) {
+			console.log('removing...' + client.ra);
+			if (client.ra) removeTakenParamFromClosingIP(client.ra);
+			active_conn.splice(thisid, 1);
+		}
     });
 
     // Callback for when when the websocket raises an error
     client.on('error', function () {
         logme("websocket error, removing it");
         var thisid = getID(client.id);
-        if (thisid != -1) active_conn.splice(thisid, 1);
+        if (thisid != -1) {
+			console.log('removing...' + client.ra);			
+			if (client.ra) removeTakenParamFromClosingIP(client.ra);
+			active_conn.splice(thisid, 1);
+		}
     });
 });
 
