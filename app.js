@@ -397,6 +397,7 @@ server.on('connection', function (client) {
 	logme('total ws active conns: ' + active_conn.length);
 
     client.on('message', function (data) {
+		//logme('got something');
         //logme('received: ' + data);
 		//logme('received something');
 
@@ -416,22 +417,28 @@ server.on('connection', function (client) {
 		// fails to parse, ignore
 		if (!parsed) {
 			logme('received with bad json format2: ' + data);
-			//return;
+			return;
 		} else {
+			
+			if (!('assisted_performer' in parsed)) {
+				logme('no assisted performer object found in parse: ' + data);
+				return;
+			}
+			
 			switch (parsed['assisted_performer']) {
 				case 'canvas':
-					params = parsed['params'];
+					params = parsed['parameters'];
 					type = 'canvas';
 					logme('received: ' + data);
 					//TODO: when received message with new parameters, should reassign on all existing connections
 				break;
 				case 'control':
 					type = 'control';
-					if ('params' in parsed) {
-						if (('param' in parsed['params']) && ('type' in parsed['params'])) {
+					if ('parameters' in parsed) {
+						if (('param' in parsed['parameters']) && ('type' in parsed['parameters'])) {
 							logme('received: ' + data);
-							var thisparam = parsed['params']['param'];
-							var thistype = parsed['params']['type'];
+							var thisparam = parsed['parameters']['param'];
+							var thistype = parsed['parameters']['type'];
 							if (thisparam in params) {
 								//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
 								switch(thistype) {
@@ -465,14 +472,14 @@ server.on('connection', function (client) {
 							for (c in connections) {
 								//console.log('pong connection: ' + connections[c]['ip'] + ' ' + active_conn[thisid]['socket'].ra);
 								if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
-									if (connections[c]['params']) {
+									if ('params' in connections[c]) {
 										//console.log(connections[c]['params']);
 										prr[connections[c]['params']] = params[connections[c]['params']];
 									}
 								}
 							}
 							
-							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'params': prr}));
+							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
 						}
 					}
 				break;
@@ -497,8 +504,10 @@ server.on('connection', function (client) {
 				found = true;
 			}
 		}
+		
 		if (!found) {
 			active_conn[thisid]['socket'].send(JSON.stringify({'refresh': 'mebeautiful'}));
+			// will only be properly interpreted by controller pages to reload themselves automatically
 		}
 
     });

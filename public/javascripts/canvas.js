@@ -17,9 +17,9 @@ var halfw;
 var halfh;
 
 var params = {
-	'rms': { 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default': 0.5, 'value': 0.5 },
-	'num': { 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default': 80.0, 'value': 80.0 },
-	'red': { 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default': 122.0, 'value': 122.0 }
+	'rms': { 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+	'num': { 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+	'red': { 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 }
 };
 
 function drawCanvas() {
@@ -161,7 +161,7 @@ function connectWebSockets() {
 
 	this_ws.onopen = function() {
 		console.log("opened socket");
-		this_ws.send(JSON.stringify({'assisted_performer': 'canvas', 'params': params}));
+		this_ws.send(JSON.stringify({'assisted_performer': 'canvas', 'parameters': params}));
 	};
 
 	this_ws.onmessage = function(evt) {

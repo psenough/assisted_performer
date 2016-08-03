@@ -226,7 +226,7 @@ function sendvote(param, type) {
 
 function sendvote_websockets(param, type) {
 	if (this_ws_open) {
-		this_ws.send(JSON.stringify({'assisted_performer': 'control', 'params': {'param': param, 'type': type}}));
+		this_ws.send(JSON.stringify({'assisted_performer': 'control', 'parameters': {'param': param, 'type': type}}));
 		return true;
 	} else {
 		return false;
@@ -438,7 +438,7 @@ function connect_websockets() {
 		if (parsed) {
 
 			// check if we are getting a pong back, if we are, calculate ping time and display it
-			if (('pong' in parsed) && ('params' in parsed)) {
+			if (('pong' in parsed) && ('parameters' in parsed)) {
 				var pingin = (new Date()).getTime();
 				lastpingtime = (pingin-pingout);
 				if (display_post_lag) {
@@ -447,7 +447,7 @@ function connect_websockets() {
 				}
 
 				if (({}).constructor !== server_params) {
-					server_params = parsed['params'];
+					server_params = parsed['parameters'];
 					
 					var outp = document.getElementById('outp');
 					if (outp) {
