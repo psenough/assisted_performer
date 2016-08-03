@@ -1,6 +1,6 @@
 
 //
-// dependencies
+// express dependencies
 //
 
 var net = require('net');
@@ -13,37 +13,6 @@ var http = require('http');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var app = express();
-//var easymidi = require('easymidi');
-//var outputmidi = null;
-
-
-//
-// simulate gamestate changes with arrow keys
-//
-
-stdin = process.stdin;
-stdin.on('data', function (data) {
-    if (data == '\u0003') { process.exit(); }
-	if (data == '\u001B\u005B\u0043') {
-		process.stdout.write('right');
-	}
-    if (data == '\u001B\u005B\u0044') {
-		process.stdout.write('left');
-	}
-	if (data == '0') { 
-		gamedata = 0;
-		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
-	} // reset game state
-	
-	//if (data == 'o') openMidi('RottenApple (1)');
-	//if (data == 's') sendMidi();
-	//if (data == 'c') closeMidi();
-	
-    process.stdout.write('Captured Key : ' + data + "\n");
-});
-stdin.setEncoding('utf8');
-stdin.setRawMode(true);
-stdin.resume();
 
 
 
@@ -66,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //
-// init global vars
+// init global vars used by express
 //
 
 var connections = [];
@@ -79,61 +48,52 @@ var gamedata = '0||||';
 
 
 
-function removeTakenParamFromClosingIP(thisip) {
-	console.log('ip: ' + thisip);
-	for (c in connections) {
-		console.log('connection: ' + connections[c]['ip'] + ' ' + thisip);
-		if (connections[c]['ip'] == thisip) {
-			if (connections[c]['params']) {
-				console.log(connections[c]['params']);
-				for (p in connections[c]['params']) {
-					console.log('removing ' + p + ' ' + connections[c]['params'][p]);
-					if (connections[c]['params'][p] in params) {
-						delete params[connections[c]['params'][p]]['taken'];
-					}
-				}
-				break;
-			}
-		}
-	}
-}
-
 //
 // express request handling
 //
 
+// serve controller page
 app.get('/', catchall);
+app.get('/controller', catchall);
+app.get('/slider', catchall);
 function catchall(req, res) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	var param = null;
 
 	// get timestamp
 	var d = new Date();
 	var n = d.getTime();
 	var thistime = d.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-	// check if ip is already in connections	
+	// check if IP is already listed and with a properly assigned parameter
 	var found = false;
 	for (var i=0; i<connections.length; i++) {
+		console.log('connections list: ' + i + ' :: ' + connections[i]['ip']);
+		// ip needs to be the same
 		if (ip == connections[i]['ip']) {
-			team = connections[i]['team'];
-			connections[i]['lasttime'] = n;
-			found = true;
-			param = connections[i]['param'];
+			// param assigned needs to exist in list of valid params
+			var parapara = false;
+			for (p in params) {
+				if ('params' in connections[i]) {
+					//console.log('params in ' + connections[i]['ip'] + ' ' + connections[i]['params']);
+					for (p2 in connections[i]['params']) {
+						//console.log('comparing ' + connections[i]['params'][p2] + ' with ' + p);
+						if (connections[i]['params'][p2] == p) {
+							found = true;
+							connections[i]['lasttime'] = n;
+							parapara = true;
+						}
+					}
+				}
+			}
+			if (!parapara) connections.splice(i, 1);
+			break;
 		}
 	}
-
 	
-	// if we are dealing with a new ip, give it an unused param
-	if (!found) 
+	// if we are dealing with a new IP, give it an unused param
+	if (!found)
 	{
-		for (p in params) {			
-			if (!('taken' in params[p])) {
-				param = p;
-				params[p]['taken'] = true;
-				break;
-			}	
-		}
+		var param = getUntakenParam();
 		
 		// add the info to our connections records
 		// params is an array because we might want to pass multiple parameters to a controller at some point
@@ -144,12 +104,14 @@ function catchall(req, res) {
 	res.render('assisted_performer_slider', {title: 'Assisted Performer Slider'});
 }
 
+// serve canvas page
 app.get('/canvas', canvas);
 function canvas(req, res) {
 	res.render('canvas', {title: 'Assisted Performer Canvas'});
 	// not adding our canvas to the connections list
 }
 
+// serve favicon
 app.get('/favicon.ico', function(req, res){
 	var options = {
 		root: __dirname + '/public/',
@@ -159,7 +121,7 @@ app.get('/favicon.ico', function(req, res){
 			'x-sent': true
 		}
 	};
-	var fileName = 'images/avengers/favicon.ico';
+	var fileName = 'images/favicon.ico';
 	res.sendFile(fileName, options, function (err) {
 		if (err) {
 		  console.log(err);
@@ -171,7 +133,7 @@ app.get('/favicon.ico', function(req, res){
 	res.attachment(fileName);
 });
 
-
+// receive control values to affect parameter
 app.post('/control', function(req, res) {
 	// get timestamp
 	var d = new Date();
@@ -211,49 +173,6 @@ app.post('/control', function(req, res) {
 	res.send('rcvd|'+gamedata);
 });
 
-/*
-app.post('/vote', function(req, res) {
-	// get timestamp
-	var d = new Date();
-	var n = d.getTime();
-
-	//console.log('this vote is in ' + req.body.vote + ' ' + votes.length);
-	var thisvote = req.body.vote;
-	var thispvote = req.body.pvote;
-	//console.log('pvote: ' + thispvote);
-	var thistime = d.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-	var thiszone = req.body.zone;
-	var thisteam = 0;
-	//console.log(req);
-	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	for (var i=0; i<connections.length; i++) {
-		if (ip == connections[i]['ip']) {
-			connections[i]['lasttime'] = n;
-			//thisteam = connections[i]['team'];
-			break;
-		}
-	}
-
-	//console.log('before: '+votes.length);
-	if ((thispvote !== undefined) && (thispvote == 'off')) {
-		// remove prior reference to this permanent vote
-		for (var i=0; i<votes.length; i++) {
-			if ((ip == votes[i].ip) && (votes[i].pvote == 'on')) {
-				//console.log('splicing your momma');
-				votes.splice(i,1);
-				break;
-			}
-		}
-	} else {
-		// business as usual, add new vote to
-		votes.push({ vote: thisvote, pvote: thispvote, time: thistime, team: thisteam, zone: thiszone, ip: ip});
-	}
-
-	//saveVoteLog(ip+','+thistime+','+thisteam+','+thiszone+','+thisvote+','+thispvote);
-	//winston.log('info', ip+',vote,'+thisteam+','+thiszone+','+thisvote+','+thispvote);
-	res.send('rcvd|'+gamedata);
-});
-*/
 app.post('/ping', function(req, res) {
 	// get timestamp
 	var d = new Date();
@@ -289,16 +208,98 @@ app.post('/ping', function(req, res) {
 	res.send('rcvd');
 });
 
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      logme('Port ' + port + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      logme('Port ' + port + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+	logme('Listening on port ' + server.address().port);
+}
+
 app.use(catchall);
 
 app.set('port', process.env.port);
 app.listen(app.get('port'));
+
+app.on('error', onError);
+app.on('listening', onListening);
+
+
+
+//
+// global functions 
+//
+
+function getTimestamp() {
+	return (new Date()).getTime();
+}
+
+function removeTakenParamFromClosingIP(thisip) {
+	//console.log('ip: ' + thisip);
+	for (c in connections) {
+		//console.log('connection: ' + connections[c]['ip'] + ' ' + thisip);
+		if (connections[c]['ip'] == thisip) {
+			if ('params' in connections[c]) {
+				//console.log(connections[c]['params']);
+				for (p in connections[c]['params']) {
+					console.log('removing ' + connections[c]['params'][p] + ' from taken list');
+					if (connections[c]['params'][p] in params) {
+						delete params[connections[c]['params'][p]]['taken'];
+					}
+				}
+				break;
+			}
+		}
+	}
+}
+
+function getUntakenParam() {
+	var param = null;
+	for (p in params) {
+		var istaken = false;
+		//loop1:
+		for (c in connections) {
+			if ('params' in connections[c]) {
+				//console.log(connections[c]['params']);
+				for (p2 in connections[c]['params']) {
+					//console.log('prata: ' + connections[c]['params'][p2] + ' ' + p);
+					if (connections[c]['params'][p2] == p) {
+						istaken = true;
+						//break loop1;
+					}
+				}
+			}
+		}
+		if (!istaken) return p;
+	}
+	return param;
+}
 
 
 
 //
 // logging
 //
+
+function logme(thistext) {
+	console.log(thistext);
+}
 
 function saveVoteLog(message) {
 	saveLog('vote.log',message);
@@ -325,43 +326,6 @@ function saveLog(filename, message) {
 	  if (err) throw err;
 	  //console.log('The "data to append" was appended to file!');
 	});
-}
-
-
-
-app.on('error', onError);
-app.on('listening', onListening);
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error('Port ' + port + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error('Port ' + port + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  debug('Listening on port ' + server.address().port);
 }
 
 
@@ -410,30 +374,30 @@ function closeMidi() {
 */
 
 
-// Start the Websocket server
-//var WebSocketServer = require('ws').Server;
-//var server = new WebSocketServer({port: 3001});
+
+//
+// websockets
+//
+
 var ws = require('websocket.io');
 var server = ws.listen(3001);
 
 var active_conn = [];
 var id = 0;
-
 var params = {};
 
-var list_of_requests = [];
-// Callback function for when the websocket connects
 server.on('connection', function (client) {
     client.id = id++;
+	client.ra = client.req.connection.remoteAddress;
+
 	//console.log(client.req.connection.remoteAddress);
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
-    logme('active conns: ' + active_conn.length);
-	client.ra = client.req.connection.remoteAddress;
+    logme('new ws connection from: ' + client.ra);
+	logme('total ws active conns: ' + active_conn.length);
 
-    // Callback for when we receive a message from this client
     client.on('message', function (data) {
-        logme('received: ' + data);
+        //logme('received: ' + data);
 		//logme('received something');
 
 		var lmsg = data;
@@ -458,12 +422,14 @@ server.on('connection', function (client) {
 				case 'canvas':
 					params = parsed['params'];
 					type = 'canvas';
+					logme('received: ' + data);
 					//TODO: when received message with new parameters, should reassign on all existing connections
 				break;
 				case 'control':
 					type = 'control';
 					if ('params' in parsed) {
 						if (('param' in parsed['params']) && ('type' in parsed['params'])) {
+							logme('received: ' + data);
 							var thisparam = parsed['params']['param'];
 							var thistype = parsed['params']['type'];
 							if (thisparam in params) {
@@ -524,28 +490,35 @@ server.on('connection', function (client) {
 			active_conn[thisid]['client_type'] = type;
 		}
 		
-		//TODO: if ip is not in the connections, send message to refresh page automatically
+		// if IP is not listed on connections, send message to refresh page automatically
+		var found = false;
+		for (c in connections) {
+			if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
+				found = true;
+			}
+		}
+		if (!found) {
+			active_conn[thisid]['socket'].send(JSON.stringify({'refresh': 'mebeautiful'}));
+		}
 
     });
 
-    // Callback for when when the websocket closes the connection
     client.on('close', function () {
         logme("websocket closed, removing it");
         var thisid = getID(client.id);
         if (thisid != -1) {
 			console.log('removing...' + client.ra);
-			if (client.ra) removeTakenParamFromClosingIP(client.ra);
+			//if (client.ra) removeTakenParamFromClosingIP(client.ra);
 			active_conn.splice(thisid, 1);
 		}
     });
 
-    // Callback for when when the websocket raises an error
     client.on('error', function () {
         logme("websocket error, removing it");
         var thisid = getID(client.id);
         if (thisid != -1) {
 			console.log('removing...' + client.ra);			
-			if (client.ra) removeTakenParamFromClosingIP(client.ra);
+			//if (client.ra) removeTakenParamFromClosingIP(client.ra);
 			active_conn.splice(thisid, 1);
 		}
     });
@@ -572,12 +545,36 @@ function getID(thisid) {
     return -1;
 }
 
-function logme(thistext) {
-	console.log(thistext);
-}
 
-function getTimestamp() {
-	return (new Date()).getTime();
-}
+
+//
+// simulate gamestate changes with arrow keys
+//
+
+stdin = process.stdin;
+stdin.on('data', function (data) {
+    if (data == '\u0003') { process.exit(); }
+	if (data == '\u001B\u005B\u0043') {
+		process.stdout.write('right');
+	}
+    if (data == '\u001B\u005B\u0044') {
+		process.stdout.write('left');
+	}
+	if (data == '0') { 
+		gamedata = 0;
+		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
+	} // reset game state
+	
+	//if (data == 'o') openMidi('RottenApple (1)');
+	//if (data == 's') sendMidi();
+	//if (data == 'c') closeMidi();
+	
+    process.stdout.write('Captured Key : ' + data + "\n");
+});
+stdin.setEncoding('utf8');
+stdin.setRawMode(true);
+stdin.resume();
+
+
 
 module.exports = app;

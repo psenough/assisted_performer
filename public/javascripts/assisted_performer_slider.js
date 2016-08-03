@@ -35,7 +35,7 @@ var inp_start_y = 0;
 var inp_start_x = 0;
 var inp_dragging = false;
 
-function calculate_buttons_position() {
+function calculate_buttons_position( rebuild ) {
 	var ratio = window.innerWidth / window.innerHeight; // 1080 x 1920
 	var gfxratio = 640/1136;//375/627;//1080/1920;
 	var usedheight = 0;
@@ -51,7 +51,7 @@ function calculate_buttons_position() {
 	}
 
 	var background = document.getElementById('background');
-	if (background) {
+	if (background || !rebuild) {
 		background.setAttribute('class','background');
 		
 		background.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
@@ -65,7 +65,7 @@ function calculate_buttons_position() {
 		background.setAttribute('class','background');
 		document.body.appendChild(background);
 	}
-	
+
 	function inp_places() {
 		if (inp_dragging) return;
 		inp_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.15,10);
@@ -76,7 +76,7 @@ function calculate_buttons_position() {
 		inp.style.width = inp_half_height*2 + 'px';
 		inp.style.height = inp_half_height*2 + 'px';
 	}
-	
+
 	function update_value(px, py) {
 		// check bounds
 		var pad_bot = usedheight - usedheight*.2;
@@ -123,8 +123,9 @@ function calculate_buttons_position() {
 			break;
 		}
 	}
+	
 	var inp = document.getElementById('inp');
-	if (inp) {
+	if (inp || !rebuild) {
 		inp_places();
 	} else {
 		inp = document.createElement('div');
@@ -145,22 +146,19 @@ function calculate_buttons_position() {
 				// get position
 				var px = e.clientX;
 				var py = e.clientY;
-
 				update_value(px,py);
 			}
 		});
-			inp.addEventListener("mouseup", function(e) {
+		inp.addEventListener("mouseup", function(e) {
 			// get position
 			var px = e.clientX;
 			var py = e.clientY;
-
 			update_value(px,py);
 			inp_dragging = false;
 		});
 		inp.addEventListener('touchstart', function(e){
 			e.preventDefault();
 			inp_dragging = true;
-			// do nothing
 		});
 		inp.addEventListener('touchmove', function(e){
 			e.preventDefault();
@@ -179,7 +177,7 @@ function calculate_buttons_position() {
 	}
 
 	var outp = document.getElementById('outp');
-	if (outp) {
+	if (outp || !rebuild) {
 		// do nothing
 	} else {
 		outp = document.createElement('output');
@@ -189,7 +187,7 @@ function calculate_buttons_position() {
 
 	if (display_post_lag) {
 		var lag = document.getElementById('lag');
-		if (lag) {
+		if (lag || !rebuild) {
 			// do nothing
 		} else {
 			lag = document.createElement('div');
@@ -204,11 +202,11 @@ window.onload = function(){
 	connect_websockets();
 	request_ping();
 	setInterval(recheck_ping, max_timeout);
-	calculate_buttons_position();
+	calculate_buttons_position( true );
 };
 
 window.onresize = function(){
-	calculate_buttons_position();
+	calculate_buttons_position( true );
 }
 
 function sendvote(param, type) {
@@ -338,7 +336,7 @@ function request_ping_post() {
 				if ('Assisted-Performer' in headers) {
 					//console.log(headers['Assisted-Performer']);
 					server_params = JSON.parse(headers['Assisted-Performer']);
-					calculate_buttons_position();
+					calculate_buttons_position( false );
 				}
 			}
 		}
@@ -369,7 +367,7 @@ function parseResponseHeaders(headerStr) {
   return headers;
 }
 
-document.addEventListener("keydown", keyDownTextField, false);
+/*document.addEventListener("keydown", keyDownTextField, false);
 
 function keyDownTextField(e) {
 var keyCode = e.keyCode;
@@ -406,7 +404,7 @@ console.log(keyCode);
 		break;
 	}
 }
-
+*/
 
 
 var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
@@ -438,6 +436,8 @@ function connect_websockets() {
 		}
 		
 		if (parsed) {
+
+			// check if we are getting a pong back, if we are, calculate ping time and display it
 			if (('pong' in parsed) && ('params' in parsed)) {
 				var pingin = (new Date()).getTime();
 				lastpingtime = (pingin-pingout);
@@ -448,12 +448,22 @@ function connect_websockets() {
 
 				if (({}).constructor !== server_params) {
 					server_params = parsed['params'];
+					
+					var outp = document.getElementById('outp');
+					if (outp) {
+						if (outp.innerHTML == '') {
+							for (key in server_params) outp.innerHTML += key + ' ' + server_params[key]['value'];
+						}
+					}
 				}
 				//console.log(server_params);
 				//calculate_buttons_position();
 			}
+			
+			if ('refresh' in parsed) {
+				if (parsed['refresh'] == 'mebeautiful') location = location;
+			}
 		
-			//TODO: check if we are getting a pong back, if we are, calculate ping time and display it
 		} else {
 			console.log('error parsing');
 		}
