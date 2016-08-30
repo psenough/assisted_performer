@@ -36,14 +36,14 @@ function drawCanvas() {
 	ctx.fillRect(0,0,w,h);
 	
 	function drawThis() {
-		
+
 		var d2 = new Date();
 		var n2 = d2.getTime(); 
-		
+
 		var sin1 = Math.sin((n2-n)/200)+1.0;
 		var cos1 = Math.cos((n2-n)/800)+1.0;
 		var cos2 = Math.cos((n2-n)/2800);
-		
+
 		rms = params['rms']['value'];
 		num = parseInt(params['num']['value'],10);
 		var red = parseInt(params['red']['value'],10);

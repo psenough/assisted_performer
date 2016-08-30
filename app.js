@@ -421,7 +421,11 @@ server.on('connection', function (client) {
 		} else {
 			
 			if (!('assisted_performer' in parsed)) {
-				logme('no assisted performer object found in parse: ' + data);
+				//logme('no assisted performer object found in parse: ' + data);
+				
+				// might be an opentsps object
+				checkTSPS(parsed);
+				
 				return;
 			}
 			
@@ -554,6 +558,50 @@ function getID(thisid) {
     return -1;
 }
 
+var tsps_timeout = 2000;
+var tsps_ids = [];
+
+function checkTSPS(tsps) {
+
+	// reference: http://www.tsps.cc/docs/tsps-json-protocol
+	
+	// check if this object is indeed a TSPS object and update our array
+	if (tsps) {
+		if ('type' in tsps) {
+			if ((tsps['type'] == 'personUpdated') || (tsps['type'] == 'personEntered')) {
+				tsps['timestamp'] = getTimestamp();
+				//console.log(tsps);
+				
+				var found = false;
+				for (var i = 0; i < tsps_ids.length; i++) {
+					//console.log(tsps_ids[i]['id'] + ' ' + tsps['id']);
+					if (tsps_ids[i]['id'] == tsps['id']) {
+						tsps_ids[i] = clone(tsps);
+						found = true;
+						//console.log('found id '+ tsps['id']);
+					}
+				}
+				if (!found) tsps_ids[tsps_ids.length] = clone(tsps);
+				
+				//console.log( tsps['centroid']['x'] + ' ' + tsps['centroid']['y'] < 0.25);
+			}
+		}
+	}
+	//console.log('count: ' + tsps_ids.length);
+	
+	// remove tracking of ids after update timeout
+	for (var i = 0; i < tsps_ids.length; i++) {
+		//console.log(tsps_ids);
+		if ((getTimestamp() - tsps_ids[i]['timestamp']) > tsps_timeout) {
+			tsps_ids.splice(i, 1);
+			i--;
+		}
+	}
+	
+	// TODO: updated values of assigned parameters to oldest active id
+	
+}
+
 
 
 //
@@ -583,6 +631,40 @@ stdin.on('data', function (data) {
 stdin.setEncoding('utf8');
 stdin.setRawMode(true);
 stdin.resume();
+
+function clone(obj) {
+    var copy;
+
+    // Handle the 3 simple types, and null or undefined
+    if (null == obj || "object" != typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = clone(obj[i]);
+        }
+        return copy;
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+        }
+        return copy;
+    }
+
+    throw new Error("Unable to copy obj! Its type isn't supported.");
+}
 
 
 
