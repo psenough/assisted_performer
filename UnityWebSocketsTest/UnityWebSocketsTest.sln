@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{D0522C8A-6D0A-4A24-0EBB-E5EE951E3D40}") = "UnityWebSocketsTest", "Assembly-CSharp.csproj", "{15D56BF5-8610-69A2-EA56-B870CC0E3805}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15D56BF5-8610-69A2-EA56-B870CC0E3805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15D56BF5-8610-69A2-EA56-B870CC0E3805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15D56BF5-8610-69A2-EA56-B870CC0E3805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15D56BF5-8610-69A2-EA56-B870CC0E3805}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

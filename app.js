@@ -1,5 +1,33 @@
 
 //
+// init midi
+//
+
+var midi = require('midi');
+
+var audio_config = {'midi_port': 1, 'params': {
+		'audio_0': { 'channel': 0, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_1': { 'channel': 1, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_2': { 'channel': 2, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
+	}
+}
+
+var output = new midi.output();
+var midi_port_count = output.getPortCount();
+
+for (var i=0; i<midi_port_count; i++) {
+	console.log(i + ' :: ' + output.getPortName(i));
+}
+
+if ('midi_port' in audio_config) {
+	if (audio_config['midi_port'] <= midi_port_count) {
+		output.openPort(audio_config['midi_port']);
+	}
+}
+
+
+
+//
 // express dependencies
 //
 
@@ -330,51 +358,6 @@ function saveLog(filename, message) {
 
 
 
-/*
-var midi = require('midi');
-
-// Set up a new output.
-var output = new midi.output();
-
-for (var i=0; i<output.getPortCount(); i++) {
-	// Get the name of a specified output port.
-	console.log(output.getPortName(i));
-}
-
-output.openPort(1);
-
-// Send a MIDI message.
-output.sendMessage([176,22,1]);
-
-// Close the port when done.
-output.closePort();
-*/
-
-/*
-function openMidi(thisname) {
-	outputmidi = new easymidi.Output(thisname);
-}
-
-function sendMidi() {
-	if (outputmidi != null) {
-		for (var i=0; i<127; i++) {
-			console.log(i);
-			outputmidi.send('cc', {
-			  controller: 37,
-			  value: i,
-			  channel: 0
-			});
-		}
-	}
-}
-
-function closeMidi() {
-	output.close();
-}
-*/
-
-
-
 //
 // websockets
 //
@@ -620,17 +603,18 @@ stdin.on('data', function (data) {
 	if (data == '0') { 
 		gamedata = 0;
 		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
-	} // reset game state
-	
-	//if (data == 'o') openMidi('RottenApple (1)');
-	//if (data == 's') sendMidi();
-	//if (data == 'c') closeMidi();
-	
+	}
+	if (data == '1') {
+		output.sendMessage([176,33,10]);
+		console.log('sent midi test message');
+	}
     process.stdout.write('Captured Key : ' + data + "\n");
 });
 stdin.setEncoding('utf8');
 stdin.setRawMode(true);
 stdin.resume();
+
+
 
 function clone(obj) {
     var copy;
