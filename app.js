@@ -2,7 +2,7 @@
 //
 // init midi
 //
-
+/*
 var midi = require('midi');
 
 var audio_config = {'midi_port': 1, 'params': {
@@ -24,7 +24,7 @@ if ('midi_port' in audio_config) {
 		output.openPort(audio_config['midi_port']);
 	}
 }
-
+*/
 
 
 //
