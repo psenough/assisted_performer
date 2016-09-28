@@ -50,7 +50,7 @@ var app = express();
 
 var httpServer = http.createServer(app);
 
-httpServer.listen(8080); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+httpServer.listen(80); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -299,6 +299,7 @@ function removeTakenParamFromClosingIP(thisip) {
 
 function getUntakenParam() {
 	var param = null;
+	var params_available = [];
 	for (p in params) {
 		var istaken = false;
 		//loop1:
@@ -314,8 +315,10 @@ function getUntakenParam() {
 				}
 			}
 		}
-		if (!istaken) return p;
+		if (!istaken) params_available.push(p);
 	}
+	console.log(params_available);
+	if (params_available.length > 1) param = params_available[parseInt(Math.random()*params_available.length,10)];
 	return param;
 }
 
@@ -444,8 +447,8 @@ server.on('connection', function (client) {
 									break;
 								}
 								
-								// update param on canvas via websockets
-								sendWebSocketUpdateToCanvas(thisparam);
+								// update param on canvas via websockets, not needed here, is being streamed constantly
+								//sendWebSocketUpdateToCanvas(thisparam);
 							}
 						}
 					}
@@ -520,6 +523,19 @@ server.on('connection', function (client) {
     });
 });
 
+function reassignParameters() {
+	// clear all params
+	for (var i=0; i<connections.length; i++) {
+		if ('params' in connections[i]) connections[i]['params'] = undefined;
+	}
+	
+	// reassign new ones to everyone connected
+	for (var i=0; i<connections.length; i++) {
+		connections[i]['params'] = getUntakenParam();
+		console.log('ip: ' + connections[i]['ip'] + ' now controlling param ' + connections[i]['params'] + ', total connections: ' + connections.length);
+	}
+}
+
 function sendWebSocketUpdateToCanvas(thisparam) {
 	if (thisparam in params) {
 		for (var i = 0; i < active_conn.length; i++) {
@@ -531,6 +547,23 @@ function sendWebSocketUpdateToCanvas(thisparam) {
 		}
 	}
 }
+
+var streaming_milliseconds = 100;
+
+setInterval(function() {
+	var update = {};
+	for (thisparam in params) {
+		//console.log(thisparam);
+		update[thisparam] = params[thisparam].value;
+	}
+	//console.log(update);
+	for (var i = 0; i < active_conn.length; i++) {
+		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
+			active_conn[i]['socket'].send(JSON.stringify(update));
+		}
+	}
+
+}, streaming_milliseconds);
 
 function getID(thisid) {
     for (var i = 0; i < active_conn.length; i++) {
@@ -607,6 +640,9 @@ stdin.on('data', function (data) {
 	if (data == '1') {
 		output.sendMessage([176,33,10]);
 		console.log('sent midi test message');
+	}
+	if (data == 'r') {
+		reassignParameters();
 	}
     process.stdout.write('Captured Key : ' + data + "\n");
 });

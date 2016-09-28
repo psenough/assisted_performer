@@ -13,6 +13,13 @@
 	-webkit-backface-visibility: hidden;
 }
 
+@font-face {
+	font-family: 'Roboto';
+	src: url('Roboto-Black.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
 *:focus { outline:none; }
 
 html, body {
@@ -36,7 +43,7 @@ html, body {
 	background-position: center top;
 	text-align: center;
 	z-index: 2;
-	background-color: green;
+	background-image: url('../images/UIbase.png')
 }
 
 .bg_0,
@@ -196,9 +203,10 @@ input[type=range]:-moz-focusring{
 }
 
 #outp {
-	color: white;
+	font-family: 'Roboto';
+	color: #F1898E; 
 }
 
 #inp {
-	background-image: url('../images/add_on.png');
+	background-image: url('../images/fader_349.png');
 }
