@@ -420,7 +420,8 @@ server.on('connection', function (client) {
 					params = parsed['parameters'];
 					type = 'canvas';
 					logme('received: ' + data);
-					//TODO: when received message with new parameters, should reassign on all existing connections
+					// received message with new parameters, reassigning all existing controller connections
+					reassignParameters()
 				break;
 				case 'control':
 					type = 'control';
