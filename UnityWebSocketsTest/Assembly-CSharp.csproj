@@ -55,10 +55,7 @@
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>
  <Reference Include="websocket-sharp">
- <HintPath>C:/Users/filipecruz/Documents/UnityWebSocketsTest/Assets/Websockets/websocket-sharp.dll</HintPath>
- </Reference>
- <Reference Include="websocket-sharp">
- <HintPath>C:/Users/filipecruz/Documents/UnityWebSocketsTest/Assets/WebSockets/websocket-sharp.dll</HintPath>
+ <HintPath>C:/Users/filipecruz/Documents/assisted_performer/UnityWebSocketsTest/Assets/WebSockets/websocket-sharp.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

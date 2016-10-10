@@ -18,6 +18,7 @@ public class AssistedPerformerParameters
 [Serializable]
 public class AssistedPerformerValues
 {
+    public string friendly_name;
     public float min;
     public float max;
     public float step;
@@ -58,6 +59,8 @@ public class AssistedPerformer : MonoBehaviour {
 			{
 				Debug.Log ("Received: "+reply);
 				//w.SendString("Hi there"+i++);
+                
+
 			}
 			if (w.error != null)
 			{
