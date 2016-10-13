@@ -2,7 +2,7 @@
 //
 // init midi
 //
-/*
+
 var midi = require('midi');
 
 var audio_config = {'midi_port': 1, 'params': {
@@ -24,7 +24,7 @@ if ('midi_port' in audio_config) {
 		output.openPort(audio_config['midi_port']);
 	}
 }
-*/
+
 
 
 //
@@ -48,10 +48,10 @@ var util = require('util')
 //
 // init express
 //
-
+var port = 8090;
 var httpServer = http.createServer(app);
-
-httpServer.listen(8090); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+httpServer.on('error', onError);
+httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -245,7 +245,7 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      logme('Port ' + port + ' requires elevated privileges');
+      logme('Can not access port ' + port + ', either its already in use or requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
