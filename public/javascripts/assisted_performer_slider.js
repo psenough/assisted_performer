@@ -3,7 +3,7 @@ var zonebase = 120;
 var client_state = 0;
 var game_state = 0;
 
-var display_post_lag = true;
+var display_post_lag = false;
 
 navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
@@ -34,29 +34,29 @@ var inp_half_height = 0;
 var inp_start_y = 0;
 var inp_start_x = 0;
 var inp_dragging = false;
-
+var usedheight = 0;
+var usedwidth = 0;
+	
 function calculate_buttons_position( rebuild ) {
 	var ratio = window.innerWidth / window.innerHeight; // 1080 x 1920
 	var gfxratio = 640/1136;//375/627;//1080/1920;
-	var usedheight = 0;
-	var usedwidth = 0;
+
 	if (ratio > gfxratio) {
 		//console.log('height touching the sides');
-		var usedheight = window.innerHeight;
-		var usedwidth = parseInt(usedheight * gfxratio, 10);
+		usedheight = window.innerHeight;
+		usedwidth = parseInt(usedheight * gfxratio, 10);
 	} else {
 		//console.log('width touching the sides');
-		var usedwidth = window.innerWidth;
-		var usedheight = parseInt(usedwidth / gfxratio, 10);
+		usedwidth = window.innerWidth;
+		usedheight = parseInt(usedwidth / gfxratio, 10);
 	}
-
+	
+	//console.log(usedheight + ' ' + usedwidth);
+		
 	var background = document.getElementById('background');
 	if (background || !rebuild) {
 		background.setAttribute('class','background');
-		
 		background.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
-		//background.style.top = parseInt(0,10) + 'px';
-
 		background.style.width = parseInt(usedwidth,10) + 'px';
 		background.style.height = parseInt(usedheight,10) + 'px';		
 	} else {
@@ -67,6 +67,7 @@ function calculate_buttons_position( rebuild ) {
 	}
 
 	function inp_places() {
+		console.log('placing');
 		if (inp_dragging) return;
 		inp_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.15,10);
 		inp.style.left = inp_start_x + 'px';
@@ -79,14 +80,15 @@ function calculate_buttons_position( rebuild ) {
 
 	function update_value(px, py) {
 		// check bounds
-		var pad_bot = usedheight - usedheight*.2;
-		var pad_top = usedheight*.25;
+		var pad_bot = usedheight - usedheight*.26;
+		var pad_top = usedheight*.23;
 		if (py > pad_bot) py = pad_bot;
 		if (py < pad_top) py = pad_top;
+		console.log('pad bounds: ' + usedwidth + ' ' + usedheight + ' ' + pad_top + ' ' + pad_bot);
 
 		// drag the div to the correct place
 		inp.style.top = (py - inp_half_height) + 'px';
-
+		
 		//{"pong":"pong","params":{"rms":{"min":0,"max":1,"step":0.05,"default":0.5,"value":0.5}}}
 		// silly way to access key string of the only param
 		for (key in server_params) {
@@ -110,7 +112,7 @@ function calculate_buttons_position( rebuild ) {
 			
 			// updated output box
 			var outp = document.getElementById('outp');
-			if (outp) outp.innerHTML = key + ' ' + value3;
+			if (outp) outp.innerHTML = server_params[key].friendly_name + ' ' + value3;
 			
 			// update nodejs
 			if ( server_params[key]['value'] != value3) {
@@ -448,11 +450,13 @@ function connect_websockets() {
 
 				if (({}).constructor !== server_params) {
 					server_params = parsed['parameters'];
-					
 					var outp = document.getElementById('outp');
 					if (outp) {
 						if (outp.innerHTML == '') {
-							for (key in server_params) outp.innerHTML += key + ' ' + server_params[key]['value'];
+							for (key in server_params) {
+								//console.log(server_params[key]);
+								outp.innerHTML += server_params[key]['friendly_name'] + ' ' + parseFloat(server_params[key]['value']).toFixed(2);
+							}
 						}
 					}
 				}
