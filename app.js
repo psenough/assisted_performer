@@ -41,6 +41,7 @@ var http = require('http');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var app = express();
+var util = require('util')
 
 
 
@@ -50,7 +51,7 @@ var app = express();
 
 var httpServer = http.createServer(app);
 
-httpServer.listen(80); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+httpServer.listen(8090); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -125,7 +126,7 @@ function catchall(req, res) {
 		
 		// add the info to our connections records
 		// params is an array because we might want to pass multiple parameters to a controller at some point
-		connections.push({ip: ip, params: [param], lasttime: n});
+		connections.push({ip: ip, params: [param], lasttime: n, canvas: false});
 		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
@@ -318,7 +319,7 @@ function getUntakenParam() {
 		if (!istaken) params_available.push(p);
 	}
 	console.log(params_available);
-	if (params_available.length > 1) param = params_available[parseInt(Math.random()*params_available.length,10)];
+	if (params_available.length >= 1) param = params_available[parseInt(Math.random()*params_available.length,10)];
 	return param;
 }
 
@@ -493,6 +494,7 @@ server.on('connection', function (client) {
 		for (c in connections) {
 			if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
 				found = true;
+				if (type == 'canvas') connections[c]['canvas'] = true;
 			}
 		}
 		
@@ -525,13 +527,15 @@ server.on('connection', function (client) {
 });
 
 function reassignParameters() {
+	console.log('reassigning');
 	// clear all params
 	for (var i=0; i<connections.length; i++) {
 		if ('params' in connections[i]) connections[i]['params'] = undefined;
 	}
-	
+	console.log(util.inspect(connections));
 	// reassign new ones to everyone connected
 	for (var i=0; i<connections.length; i++) {
+		if (connections[i]['canvas']) continue;
 		connections[i]['params'] = getUntakenParam();
 		console.log('ip: ' + connections[i]['ip'] + ' now controlling param ' + connections[i]['params'] + ', total connections: ' + connections.length);
 	}
