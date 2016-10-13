@@ -5,10 +5,12 @@
 
 var midi = require('midi');
 
-var audio_config = {'midi_port': 1, 'params': {
-		'audio_0': { 'channel': 0, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_1': { 'channel': 1, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_2': { 'channel': 2, 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
+var audio_config = {
+	'midi_port': 1, // change this id to the listed midi port that you want to use
+	'params': {
+		'audio_0': { 'channel': 0, 'friendly_name': 'Audio 0', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_1': { 'channel': 1, 'friendly_name': 'Audio 1', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_2': { 'channel': 2, 'friendly_name': 'Audio 2', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
 	}
 }
 
@@ -25,6 +27,12 @@ if ('midi_port' in audio_config) {
 	}
 }
 
+function addAudioParams() {
+	// add the audio parameters to the global list of controllable parameters
+	if (audio_config) {
+		if ('params' in audio_config) addToParams(audio_config['params']);
+	}
+}
 
 
 //
@@ -372,6 +380,15 @@ var server = ws.listen(3001);
 var active_conn = [];
 var id = 0;
 var params = {};
+addAudioParams();
+//console.log(util.inspect(params));
+
+function addToParams(theseparams) {
+	for (p in theseparams) {
+		//TODO: check if param already exists and notify on console that it's getting replaced
+		params[p] = theseparams[p];
+	}
+}
 
 server.on('connection', function (client) {
     client.id = id++;
@@ -418,11 +435,13 @@ server.on('connection', function (client) {
 			
 			switch (parsed['assisted_performer']) {
 				case 'canvas':
-					params = parsed['parameters'];
+					params = {};
+					addAudioParams();
+					addToParams(parsed['parameters']);
 					type = 'canvas';
 					logme('received: ' + data);
 					// received message with new parameters, reassigning all existing controller connections
-					reassignParameters()
+					reassignParameters();
 				break;
 				case 'control':
 					type = 'control';
@@ -528,11 +547,13 @@ server.on('connection', function (client) {
 
 function reassignParameters() {
 	console.log('reassigning');
-	// clear all params
+	//console.log(util.inspect(params));
+
+	// clear assigned params from all connections
 	for (var i=0; i<connections.length; i++) {
 		if ('params' in connections[i]) connections[i]['params'] = undefined;
 	}
-	console.log(util.inspect(connections));
+	//console.log(util.inspect(connections));
 	// reassign new ones to everyone connected
 	for (var i=0; i<connections.length; i++) {
 		if (connections[i]['canvas']) continue;
