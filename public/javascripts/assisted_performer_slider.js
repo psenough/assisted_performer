@@ -447,21 +447,26 @@ function connect_websockets() {
 					var lag = document.getElementById('lag');
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
-
-				if (({}).constructor !== server_params) {
-					server_params = parsed['parameters'];
-					var outp = document.getElementById('outp');
-					if (outp) {
-						if (outp.innerHTML == '') {
-							for (key in server_params) {
-								//console.log(server_params[key]);
-								outp.innerHTML += server_params[key]['friendly_name'] + ' ' + parseFloat(server_params[key]['value']).toFixed(2);
-							}
-						}
+				
+				server_params = parsed['parameters'];
+				var outp = document.getElementById('outp');
+				if (outp) {
+					for (key in server_params) {
+						//console.log(server_params[key]);
+						outp.innerHTML = server_params[key]['friendly_name'] + ' ' + parseFloat(server_params[key]['value']).toFixed(2);
 					}
 				}
-				//console.log(server_params);
-				//calculate_buttons_position();
+				if (!inp_dragging) {
+					var inp = document.getElementById('inp');
+					if (inp) {
+						var pad_bot = usedheight - usedheight*.26;
+						var pad_top = usedheight*.23;
+						var pad_diff = (pad_bot - pad_top);
+						var val_diff = (server_params[key]['max'] - server_params[key]['min']);
+						var posy = pad_top - ((server_params[key]['value'] - server_params[key]['max']) / val_diff) * pad_diff;
+						inp.style.top = parseInt(posy - inp_half_height,10) + 'px';
+					}
+				}
 			}
 			
 			if ('refresh' in parsed) {

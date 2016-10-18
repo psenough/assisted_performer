@@ -35,6 +35,7 @@ function addAudioParams() {
 }
 
 
+
 //
 // express dependencies
 //
@@ -56,6 +57,7 @@ var util = require('util')
 //
 // init express
 //
+
 var port = 8090;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
@@ -588,7 +590,6 @@ setInterval(function() {
 			active_conn[i]['socket'].send(JSON.stringify(update));
 		}
 	}
-
 }, streaming_milliseconds);
 
 function getID(thisid) {
@@ -599,6 +600,12 @@ function getID(thisid) {
     }
     return -1;
 }
+
+
+
+//
+// computer vision (TSPS)
+//
 
 var tsps_timeout = 2000;
 var tsps_ids = [];
@@ -670,6 +677,10 @@ stdin.on('data', function (data) {
 	if (data == 'r') {
 		reassignParameters();
 	}
+	if (data == 'f') {
+		floatback = !floatback;
+		console.log('floatback: ' + floatback);
+	}
     process.stdout.write('Captured Key : ' + data + "\n");
 });
 stdin.setEncoding('utf8');
@@ -677,6 +688,42 @@ stdin.setRawMode(true);
 stdin.resume();
 
 
+
+//
+// float back values to default
+//
+
+var floatback = false;
+var floatback_rate = 500; // miliseconds between each step update
+
+setInterval(function() {
+	if (floatback) {
+		var update = {};
+		for (thisparam in params) {
+			// if higher, lower it, floor to default value if it goes over
+			if (params[thisparam]['value'] > params[thisparam]['default_value']) {
+				params[thisparam]['value'] -= params[thisparam]['step'];
+				if (params[thisparam]['value'] < params[thisparam]['default_value']) params[thisparam]['value'] = params[thisparam]['default_value'];
+				console.log('updating ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
+			}
+			// if lower, increase it, floor to default value if it goes over
+			if (params[thisparam]['value'] < params[thisparam]['default_value']) {
+				params[thisparam]['value'] += params[thisparam]['step'];
+				if (params[thisparam]['value'] > params[thisparam]['default_value']) params[thisparam]['value'] = params[thisparam]['default_value'];
+				console.log('updating ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
+			}
+		}
+	}
+}, floatback_rate);
+
+//TODO: we could do floatbacks with lerps, would be smoother, and use another variable to define it's float rate?
+//TODO: reminder that the step value was originally used for increase and decrease buttons with post messaging (before websockets enabled slider)
+
+
+
+//
+// generic functions
+//
 
 function clone(obj) {
     var copy;
