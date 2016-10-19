@@ -5,12 +5,13 @@
 
 var midi = require('midi');
 
+// these are only the default config and default values, updated values are stored on the params object
 var audio_config = {
 	'midi_port': 1, // change this id to the listed midi port that you want to use
 	'params': {
-		'audio_0': { 'channel': 0, 'friendly_name': 'Audio 0', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_1': { 'channel': 1, 'friendly_name': 'Audio 1', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_2': { 'channel': 2, 'friendly_name': 'Audio 2', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
+		//'audio_0': { 'controller': 0, 'friendly_name': 'Audio 0', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		//'audio_1': { 'controller': 1, 'friendly_name': 'Audio 1', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_2': { 'controller': 2, 'friendly_name': 'Audio 2', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
 	}
 }
 
@@ -33,6 +34,25 @@ function addAudioParams() {
 		if ('params' in audio_config) addToParams(audio_config['params']);
 	}
 }
+
+var audio_update_rate = 20;
+
+setInterval(function() {
+	if (audio_config) {
+		if ('params' in audio_config) {
+			for (thisparam in params) {	
+				for (audioparam in audio_config['params']) {
+					if (thisparam == audioparam) {
+						// 176 is the code for control change, all messages are sent on channel 0 it seems
+						console.log(audio_config['params'][thisparam]['controller']);
+						output.sendMessage([176,audio_config['params'][thisparam]['controller'],parseInt(params[thisparam]['value'],10)]);
+						continue;
+					}
+				}
+			}
+		}
+	}
+}, audio_update_rate);
 
 
 
@@ -671,7 +691,7 @@ stdin.on('data', function (data) {
 		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
 	}
 	if (data == '1') {
-		output.sendMessage([176,33,10]);
+		output.sendMessage([176,1,0]);
 		console.log('sent midi test message');
 	}
 	if (data == 'r') {
