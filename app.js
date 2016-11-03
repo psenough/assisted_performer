@@ -44,7 +44,7 @@ setInterval(function() {
 				for (audioparam in audio_config['params']) {
 					if (thisparam == audioparam) {
 						// 176 is the code for control change, all messages are sent on channel 0 it seems
-						console.log(audio_config['params'][thisparam]['controller']);
+						//console.log(audio_config['params'][thisparam]['controller']);
 						output.sendMessage([176,audio_config['params'][thisparam]['controller'],parseInt(params[thisparam]['value'],10)]);
 						continue;
 					}
@@ -292,9 +292,8 @@ function onListening() {
 }
 
 app.use(catchall);
-
-app.set('port', process.env.port);
-app.listen(app.get('port'));
+//app.set('port', port);
+//app.listen(app.get('port'));
 
 app.on('error', onError);
 app.on('listening', onListening);

@@ -22,24 +22,27 @@ var params = {
 	'red': { 'friendly_name': 'Red', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 }
 };
 
+var EFFECT_DISCO_SQUARES = 0;
+var EFFECT_SOMETHING_ELSE = 1;
+var effect = EFFECT_SOMETHING_ELSE;
+
 function drawCanvas() {
 
 	resize();
 	loadLine('','');
 
-	var num = 80;
+	var num = params['num']['value'];
 	var tradius = w;
-	var rms = 0.5;
+	var rms = params['rms']['value'];
 	
 	// default values
 	ctx.fillStyle = "rgba(122,12,78,1.0)";
 	ctx.fillRect(0,0,w,h);
 	
-	function drawThis() {
-
+	function disco_squares() {
 		var d2 = new Date();
 		var n2 = d2.getTime(); 
-
+		
 		var sin1 = Math.sin((n2-n)/200)+1.0;
 		var cos1 = Math.cos((n2-n)/800)+1.0;
 		var cos2 = Math.cos((n2-n)/2800);
@@ -85,7 +88,48 @@ function drawCanvas() {
 			ctx.stroke();
 		}
 		ctx.restore();
-				
+	}
+	
+	function something_else() {
+		ctx.clearRect(0,0,w,h);
+		
+		rms = params['rms']['value'];
+		num = parseInt(params['num']['value'],10);
+		var red = parseInt(params['red']['value'],10);
+		
+		var calc = [];
+		for(var i=0; i<num; i++) {
+			calc[i] = [];
+			calc[i]['x'] = rand(w);
+			calc[i]['y'] = rand(h);
+			calc[i]['rot'] = rand(180);
+		}
+		
+		var sizex = w/num;
+		var sizexhalf = parseInt((w/num)*0.5,10);
+		var sizey = parseInt(10*(w/h),10);
+		
+		ctx.strokeStyle = "rgba("+red+",10,10,0.5)";
+
+		//ctx.save();
+		ctx.beginPath();
+		ctx.moveTo(calc[0]['x'], calc[0]['y']);
+		for(var i=1; i<num; i++) {
+			ctx.lineTo(calc[i]['x'], calc[i]['y']);
+		}
+		ctx.closePath();
+		ctx.stroke();
+	}
+	
+	function drawThis() {
+		switch (effect) {
+			case EFFECT_DISCO_SQUARES:
+				disco_squares();
+			break;
+			case EFFECT_SOMETHING_ELSE:
+				something_else();
+			break;
+		}				
 	}
 	
 	requestAnimationFrame( animate );
@@ -166,7 +210,7 @@ function connectWebSockets() {
 
 	this_ws.onmessage = function(evt) {
 
-		console.log(evt.data);
+		//console.log(evt.data);
 
 		var parsed = JSON.parse(evt.data);
 
