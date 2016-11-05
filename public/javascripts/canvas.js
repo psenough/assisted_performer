@@ -5,9 +5,11 @@ rand = function(n){
 
 window.onload = function(){init();};
 
+var cv;
+
 function init() {
 	connectWebSockets();
-	drawCanvas();
+	cv = new drawCanvas();
 }
 
 var w;
@@ -22,114 +24,269 @@ var params = {
 	'red': { 'friendly_name': 'Red', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 }
 };
 
-var EFFECT_DISCO_SQUARES = 0;
-var EFFECT_SOMETHING_ELSE = 1;
-var effect = EFFECT_SOMETHING_ELSE;
-
-function drawCanvas() {
+let drawCanvas = function() {
 
 	resize();
-	loadLine('','');
+//	loadLine('','');
 
-	var num = params['num']['value'];
-	var tradius = w;
-	var rms = params['rms']['value'];
-	
 	// default values
-	ctx.fillStyle = "rgba(122,12,78,1.0)";
+	ctx.fillStyle = "rgba(0,0,0,1.0)";
 	ctx.fillRect(0,0,w,h);
 	
-	function disco_squares() {
-		var d2 = new Date();
-		var n2 = d2.getTime(); 
-		
-		var sin1 = Math.sin((n2-n)/200)+1.0;
-		var cos1 = Math.cos((n2-n)/800)+1.0;
-		var cos2 = Math.cos((n2-n)/2800);
-
-		rms = params['rms']['value'];
-		num = parseInt(params['num']['value'],10);
-		var red = parseInt(params['red']['value'],10);
-		
-		var calc = [];
-		for(var i=0; i<num; i++) {
-			calc[i] = [];
-			//calc[i]['this'] = parseInt(cos1*200)%tradius,10);
-			calc[i]['this'] = parseInt((cos1*tradius + sin1*200*((num-i)*i + cos2*rms*5))%w,10);
-		}
-		
-		var sizex = w/num;
-		var sizexhalf = parseInt((w/num)*0.5,10);
-		var sizey = parseInt(10*(w/h),10);
-		
-		ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);//10*rms;
-		var r1 = parseInt(red*cos1*0.5+50,10);
-		if (r1 > 255) r1 = 255;
-		if (r1 < 0) r1 = 0;
-		ctx.fillStyle = "rgba("+r1+","+parseInt(25*sin1*rms*0.75,10)+",105,1.0)";
-		ctx.strokeStyle = "rgba(0,0,0,1.0)";
-		if (rms > 0.4) ctx.strokeStyle = ctx.fillStyle;
-
-		ctx.save();
-		
-		//console.log(sizex);
-		//ctx.translate(w*.5,h*.5);
-		//ctx.rotate((n2-n)*0.01);
-		for(var i=0; i<num; i++) {
-			ctx.beginPath();
-			var posx = parseInt(i*sizex,10);
-			var posy = calc[i]['this'];
-			ctx.moveTo(posx-sizexhalf, posy-sizey);
-			ctx.lineTo(posx-sizexhalf, posy+sizey);
-			ctx.lineTo(posx+sizexhalf, posy+sizey);
-			ctx.lineTo(posx+sizexhalf, posy-sizey);
-			ctx.closePath();
-			ctx.fill();
-			ctx.stroke();
-		}
-		ctx.restore();
-	}
 	
-	function something_else() {
-		ctx.clearRect(0,0,w,h);
-		
-		rms = params['rms']['value'];
-		num = parseInt(params['num']['value'],10);
-		var red = parseInt(params['red']['value'],10);
-		
-		var calc = [];
-		for(var i=0; i<num; i++) {
-			calc[i] = [];
-			calc[i]['x'] = rand(w);
-			calc[i]['y'] = rand(h);
-			calc[i]['rot'] = rand(180);
-		}
-		
-		var sizex = w/num;
-		var sizexhalf = parseInt((w/num)*0.5,10);
-		var sizey = parseInt(10*(w/h),10);
-		
-		ctx.strokeStyle = "rgba("+red+",10,10,0.5)";
+	var num = params['num']['value'];
+	var rms = params['rms']['value'];
+	var red = params['red']['value'];
+	
+	var seedrand = rand(360);
+	
+	var d2 = new Date();
+	var n2 = d2.getTime(); 	
+	var sin1 = Math.sin((n2-n)/200)+1.0;
+	var sin3 = Math.sin((n2-n)/2800)+1.0;
+	var cos1 = Math.cos((n2-n)/800)+1.0;
+	var cos2 = Math.cos((n2-n)/2800);
+	var cos3 = Math.cos((n2-n)/1600);
+	var cos4 = Math.cos((n2-n)/5711);
+	var sin2 = Math.sin(sin1*0.05+cos2)+1.0;
+	
+	var tradius = w;
 
-		//ctx.save();
-		ctx.beginPath();
-		ctx.moveTo(calc[0]['x'], calc[0]['y']);
-		for(var i=1; i<num; i++) {
-			ctx.lineTo(calc[i]['x'], calc[i]['y']);
+	
+	this.effects = {
+		'UPDATE_TIMERS': {
+			'on': true,
+			'call': function() {
+				d2 = new Date();
+				n2 = d2.getTime(); 
+	
+				sin1 = Math.sin((n2-n)/200)+1.0;
+				sin3 = Math.sin((n2-n)/2800)+1.0;
+				cos1 = Math.cos((n2-n)/800)+1.0;
+				cos2 = Math.cos((n2-n)/2800);
+				cos3 = Math.cos((n2-n)/1600);
+				cos4 = Math.cos((n2-n)/5711);
+				sin2 = Math.sin(sin1*0.05+cos2)+1.0;
+				
+				rms = params['rms']['value'];
+				num = parseInt(params['num']['value'],10);
+				red = parseInt(params['red']['value'],10);
+			}
+		},
+		'EFFECT_BACKGROUND': {
+			'on': true,
+			'call': function() {
+						ctx.clearRect(0,0,w,h);
+					}
+		},
+		'EFFECT_DISCO_SQUARES': {
+			'on': false,
+			'call': function() {
+						var calc = [];
+						for(var i=0; i<num; i++) {
+							calc[i] = [];
+							//calc[i]['this'] = parseInt(cos1*200)%tradius,10);
+							calc[i]['this'] = parseInt((cos1*tradius + sin1*200*((num-i)*i + cos2*rms*5))%w,10);
+						}
+						
+						var sizex = w/num;
+						var sizexhalf = parseInt((w/num)*0.5,10);
+						var sizey = parseInt(10*(w/h),10);
+						
+						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);//10*rms;
+						var r1 = parseInt(red*cos1*0.5+50,10);
+						if (r1 > 255) r1 = 255;
+						if (r1 < 0) r1 = 0;
+						ctx.fillStyle = "rgba("+r1+","+parseInt(25*sin1*rms*0.75,10)+",105,1.0)";
+						ctx.strokeStyle = "rgba(0,0,0,1.0)";
+						if (rms > 0.4) ctx.strokeStyle = ctx.fillStyle;
+
+						ctx.save();
+						
+						//console.log(sizex);
+						//ctx.translate(w*.5,h*.5);
+						//ctx.rotate((n2-n)*0.01);
+						for(var i=0; i<num; i++) {
+							ctx.beginPath();
+							var posx = parseInt(i*sizex,10);
+							var posy = calc[i]['this'];
+							ctx.moveTo(posx-sizexhalf, posy-sizey);
+							ctx.lineTo(posx-sizexhalf, posy+sizey);
+							ctx.lineTo(posx+sizexhalf, posy+sizey);
+							ctx.lineTo(posx+sizexhalf, posy-sizey);
+							ctx.closePath();
+							ctx.fill();
+							ctx.stroke();
+						}
+						ctx.restore();
+					}
+					
+					
+		},
+		'EFFECT_SOMETHING_ELSE': {
+			'on': false,
+			'call': function() {
+						
+						var calc = [];
+						for(var i=0; i<num; i++) {
+							calc[i] = [];
+							calc[i]['x'] = rand(w);
+							calc[i]['y'] = rand(h);
+							calc[i]['rot'] = rand(180);
+						}
+						
+						var sizex = w/num;
+						var sizexhalf = parseInt((w/num)*0.5,10);
+						var sizey = parseInt(10*(w/h),10);
+						
+						ctx.strokeStyle = "rgba("+red+",10,10,0.5)";
+
+						//ctx.save();
+						ctx.beginPath();
+						ctx.moveTo(calc[0]['x'], calc[0]['y']);
+						for(var i=1; i<num; i++) {
+							ctx.lineTo(calc[i]['x'], calc[i]['y']);
+						}
+						ctx.closePath();
+						ctx.stroke();
+					}
+		},
+		'EFFECT_CENTER_ARCS': {
+			'on': false,
+			'call': function() {
+
+						var calc = [];
+						for(var i=0; i<num; i++) {
+							
+							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
+							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
+							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/num)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((num-i/num)*100,10)+"%,15%)";
+						
+							ctx.save();
+							ctx.translate(w*0.5,h*0.5);
+							ctx.beginPath();
+							ctx.arc(0, 0, (200+40*cos1+i*7+50*(i%3)+i*0.25*(cos2+2))%(h*0.5+sin1*4)*2.2, 0, 2 * Math.PI);
+							ctx.stroke();
+							ctx.restore();
+						}
+						
+					}
+		},
+		'EFFECT_MDT9K00': {
+			'on': false,
+			'call': function() {
+						ctx.lineWidth = 1;
+						ctx.strokeStyle = "rgba(200,100,200,0.5)";
+						ctx.save();
+						ctx.translate(w*.5,h*.5);
+						ctx.rotate((n2-n)*0.0001);
+						var parts = 5;
+						for (var k=0; k < parts; k++) {
+							for(var i=0; i<num*0.15; i++) {
+								var sizex = i*(4+cos2*20);
+								var sizey = i*(4+cos2*30);
+								//ctx.save();
+								ctx.beginPath();
+								ctx.moveTo(sizex+sin3*100, sizey+sin3*100);
+								for (var j=0; j<3; j++) {
+									ctx.lineTo(sizex+j*60*cos2+i*50-k*sin3, sizey-j*20*cos2+i*50 + 20*j+i);
+								}
+								ctx.closePath();
+								ctx.stroke();
+							}
+							ctx.rotate(Math.PI*(2/parts));
+						}
+						ctx.restore();	
+					}
+		},
+		'EFFECT_MDT9K01': {
+			'on': false,
+			'call': function() {
+
+						var parts=5;
+						var flip = Math.sin(sin1*cos1*cos3);
+						
+						ctx.lineWidth = 2;
+						ctx.strokeStyle = "rgba(255,0,255,0.4)";
+						ctx.save();
+						ctx.translate(w*(1.0+cos3*0.5)*.5,h*.5);
+						ctx.rotate((n2-n)*0.01);
+						for (var k=0; k < parts; k++) {
+							for(var i=0; i<num; i++) {
+								var sizex = i*(4+cos2*20);
+								var sizey = i*(4+cos2*30);
+								ctx.beginPath();
+								ctx.moveTo(sizex+sin3*120, sizey+cos4*100);
+								ctx.lineTo(sizex, sizey);
+								ctx.closePath();
+								ctx.stroke();
+							}
+							ctx.rotate(Math.PI*(2/parts));
+						}
+						ctx.restore();
+						
+						ctx.save();
+						ctx.translate(w*(1.0-cos3*0.5)*.5,h*.5);
+						ctx.rotate(-(n2-n)*0.01);
+						for (var k=0; k < parts; k++) {
+							for(var i=0; i<num; i++) {
+								var sizex = i*(4+cos2*20);
+								var sizey = i*(4+cos2*30);
+								//ctx.save();
+								ctx.beginPath();
+								ctx.moveTo(sizex+sin3*120, sizey+cos4*100);
+								ctx.lineTo(sizex, sizey);
+								ctx.closePath();
+								ctx.stroke();
+							}
+							ctx.rotate(Math.PI*(2/parts));
+						}
+						ctx.restore();	
+					}
+		},
+		'EFFECT_MDT9K02': {
+			'on': false,
+			'call': function() {
+						var d = new Date();
+						var timer = d.getTime();
+						
+						var angle = (Math.PI*2)/num;
+						var size = 150;
+						var opening, phase1, phase2;
+						var maxj = 50;
+						
+						phase1 = timer/25000;
+						phase2 = timer/2500;
+						
+						for (var j=maxj*0.5; j<maxj; j++) {
+							var posX = w*(0.5) + Math.sin(phase2*0.25)*j*10;
+							var posY = h*(0.5) - Math.cos(phase2*0.25)*j*10;
+						
+							var thisb = 200 - parseInt(Math.sin(phase2*0.5 + j)*35, 10);
+							color = "rgba("+thisb+","+thisb+","+thisb+","+(0.02*((maxj-j)/maxj)+rms*0.15)+")";
+							ctx.fillStyle = color;
+							var i = parseInt(((Math.sin(phase1) - Math.sin(phase2))+1.0)*0.5*num*0.33,10);
+							opening = Math.sin(i*angle)*10 + j*20;
+							ctx.save();
+							ctx.translate( posX+Math.sin(i*angle+phase1)*opening, posY+Math.cos(i*angle+phase1)*opening );
+							ctx.rotate(i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3);
+							ctx.beginPath();
+							ctx.moveTo(-size*.5*j,-size*.5*j);
+							ctx.lineTo(0,size);
+							ctx.lineTo(size*.5*j,-size*.5*j);
+							ctx.fill();
+							ctx.closePath();
+							ctx.restore();
+						}
+					}
 		}
-		ctx.closePath();
-		ctx.stroke();
 	}
 	
 	function drawThis() {
-		switch (effect) {
-			case EFFECT_DISCO_SQUARES:
-				disco_squares();
-			break;
-			case EFFECT_SOMETHING_ELSE:
-				something_else();
-			break;
-		}				
+		for(var fx in cv.effects) {
+			//console.log(effects[fx]['call']);
+			if (cv.effects[fx]['on'] === true) cv.effects[fx]['call']();
+		}
 	}
 	
 	requestAnimationFrame( animate );
@@ -164,7 +321,7 @@ function resize() {
 	h = window.innerHeight;
 	
 	var canvas = document.getElementById("canvas");
-	console.log(canvas);
+	//console.log(canvas);
 	if (!canvas) {
 		canvas = document.createElement('canvas');
 		canvas.setAttribute('id','canvas');
@@ -220,7 +377,7 @@ function connectWebSockets() {
 			}
 		}
 
-		console.log(parsed);
+		//console.log(parsed);
 	};
 
 	this_ws.onclose = function() {
@@ -318,4 +475,42 @@ function gotSources(sourceInfos) {
         }
     }
     audioSelect.onchange = changeInput;*/
+}
+
+document.addEventListener("keydown", keydown, false);
+
+function keydown(e) {
+var keyCode = e.keyCode;
+console.log(keyCode);
+	switch(keyCode) {
+		case 39: // right arrow
+			effect++;
+			if (effect >= 5) effect = 0;
+		break;
+		case 37: // lefr arrow
+			effect--;
+			if (effect < 0) effect = 5;
+		break;
+		case 48: // 0
+			cv.effects['EFFECT_BACKGROUND']['on'] = !cv.effects['EFFECT_BACKGROUND']['on'];
+		break;
+		case 49: // 1
+			cv.effects['EFFECT_DISCO_SQUARES']['on'] = !cv.effects['EFFECT_DISCO_SQUARES']['on'];
+		break;
+		case 50: // 2
+			cv.effects['EFFECT_SOMETHING_ELSE']['on'] = !cv.effects['EFFECT_SOMETHING_ELSE']['on'];
+		break;
+		case 51: // 3
+			cv.effects['EFFECT_CENTER_ARCS']['on'] = !cv.effects['EFFECT_CENTER_ARCS']['on'];
+		break;
+		case 52: // 4
+			cv.effects['EFFECT_MDT9K00']['on'] = !cv.effects['EFFECT_MDT9K00']['on'];
+		break;
+		case 53: // 5
+			cv.effects['EFFECT_MDT9K01']['on'] = !cv.effects['EFFECT_MDT9K01']['on'];
+		break;
+		case 54: // 6
+			cv.effects['EFFECT_MDT9K02']['on'] = !cv.effects['EFFECT_MDT9K02']['on'];
+		break;
+	}
 }
