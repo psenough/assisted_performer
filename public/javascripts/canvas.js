@@ -8,7 +8,11 @@ window.onload = function(){init();};
 var cv;
 
 function init() {
-	connectWebSockets();
+	try {
+		connectWebSockets();
+	} catch(e) {
+		console.log(e);
+	}
 	cv = new drawCanvas();
 }
 
@@ -19,21 +23,16 @@ var halfw;
 var halfh;
 
 var params = {
+	'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 	'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
 	'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
-	'red': { 'friendly_name': 'Red', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 }
+	'red': { 'friendly_name': 'Red', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 },
+	'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
 };
 
 let drawCanvas = function() {
-
 	resize();
-//	loadLine('','');
 
-	// default values
-	ctx.fillStyle = "rgba(0,0,0,1.0)";
-	ctx.fillRect(0,0,w,h);
-	
-	
 	var num = params['num']['value'];
 	var rms = params['rms']['value'];
 	var red = params['red']['value'];
@@ -67,96 +66,62 @@ let drawCanvas = function() {
 				cos3 = Math.cos((n2-n)/1600);
 				cos4 = Math.cos((n2-n)/5711);
 				sin2 = Math.sin(sin1*0.05+cos2)+1.0;
+				cos5 = Math.cos((n2-n)/2000);
 				
 				rms = params['rms']['value'];
 				num = parseInt(params['num']['value'],10);
 				red = parseInt(params['red']['value'],10);
+				
+				tradius = w*20;
 			}
 		},
 		'EFFECT_BACKGROUND': {
 			'on': true,
 			'call': function() {
-						ctx.clearRect(0,0,w,h);
+						ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(8+cos5*3,10) +"%,"+ parseInt(10+cos1*2+sin1,10) +"%)";
+						ctx.fillRect(0,0,w,h);
+						//ctx.clearRect(0,0,w,h);
 					}
 		},
-		'EFFECT_DISCO_SQUARES': {
+		'EFFECT_RED_STARS': {
 			'on': false,
 			'call': function() {
-						var calc = [];
-						for(var i=0; i<num; i++) {
-							calc[i] = [];
-							//calc[i]['this'] = parseInt(cos1*200)%tradius,10);
-							calc[i]['this'] = parseInt((cos1*tradius + sin1*200*((num-i)*i + cos2*rms*5))%w,10);
-						}
-						
 						var sizex = w/num;
 						var sizexhalf = parseInt((w/num)*0.5,10);
 						var sizey = parseInt(10*(w/h),10);
 						
 						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);//10*rms;
-						var r1 = parseInt(red*cos1*0.5+50,10);
+						var r1 = parseInt(red,10);
 						if (r1 > 255) r1 = 255;
 						if (r1 < 0) r1 = 0;
-						ctx.fillStyle = "rgba("+r1+","+parseInt(25*sin1*rms*0.75,10)+",105,1.0)";
-						ctx.strokeStyle = "rgba(0,0,0,1.0)";
-						if (rms > 0.4) ctx.strokeStyle = ctx.fillStyle;
-
-						ctx.save();
+						ctx.fillStyle = "rgba("+r1+",0,0,1.0)";
 						
-						//console.log(sizex);
-						//ctx.translate(w*.5,h*.5);
-						//ctx.rotate((n2-n)*0.01);
 						for(var i=0; i<num; i++) {
-							ctx.beginPath();
+
+							var ydrift = i*cos2 + sin3*((num-i)*i)*20 + (i+10)*sin1/(cos3+500);
+							
 							var posx = parseInt(i*sizex,10);
-							var posy = calc[i]['this'];
-							ctx.moveTo(posx-sizexhalf, posy-sizey);
-							ctx.lineTo(posx-sizexhalf, posy+sizey);
-							ctx.lineTo(posx+sizexhalf, posy+sizey);
-							ctx.lineTo(posx+sizexhalf, posy-sizey);
-							ctx.closePath();
-							ctx.fill();
-							ctx.stroke();
+							var posy = parseInt((w*0.25+ydrift)%w,10);
+							roundRect(ctx, posx, posy, sizexhalf, sizey, 5, true, false);
+							
+							//var posx = parseInt(i*sizex,10);
+							posy = parseInt((w*0.5+ydrift)%w,10);
+							roundRect(ctx, posx, posy, sizexhalf, sizey, 3+20*sin2, true, false);
+							
+							posy = parseInt((w*0.75+ydrift)%w,10);
+							roundRect(ctx, posx, posy, sizexhalf, sizey, 10*sin1, true, false);
+							
+							posy = parseInt((w+ydrift)%w,10);
+							roundRect(ctx, posx, posy, sizexhalf, sizey, 10*cos3, true, false);
+							
 						}
-						ctx.restore();
-					}
-					
-					
-		},
-		'EFFECT_SOMETHING_ELSE': {
-			'on': false,
-			'call': function() {
-						
-						var calc = [];
-						for(var i=0; i<num; i++) {
-							calc[i] = [];
-							calc[i]['x'] = rand(w);
-							calc[i]['y'] = rand(h);
-							calc[i]['rot'] = rand(180);
-						}
-						
-						var sizex = w/num;
-						var sizexhalf = parseInt((w/num)*0.5,10);
-						var sizey = parseInt(10*(w/h),10);
-						
-						ctx.strokeStyle = "rgba("+red+",10,10,0.5)";
-
-						//ctx.save();
-						ctx.beginPath();
-						ctx.moveTo(calc[0]['x'], calc[0]['y']);
-						for(var i=1; i<num; i++) {
-							ctx.lineTo(calc[i]['x'], calc[i]['y']);
-						}
-						ctx.closePath();
-						ctx.stroke();
-					}
+					}					
 		},
 		'EFFECT_CENTER_ARCS': {
 			'on': false,
 			'call': function() {
-
 						var calc = [];
-						for(var i=0; i<num; i++) {
+						for(var i=0; i<num*0.75; i++) {
 							
 							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
 							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
@@ -172,7 +137,7 @@ let drawCanvas = function() {
 						
 					}
 		},
-		'EFFECT_MDT9K00': {
+		'EFFECT_PINK_SPYRAL': {
 			'on': false,
 			'call': function() {
 						ctx.lineWidth = 1;
@@ -199,20 +164,52 @@ let drawCanvas = function() {
 						ctx.restore();	
 					}
 		},
-		'EFFECT_MDT9K01': {
+		'EFFECT_RANDOM_LINES': {
 			'on': false,
 			'call': function() {
+						
+						var calc = [];
+						for(var i=0; i<num; i++) {
+							calc[i] = [];
+							calc[i]['x'] = rand(w);
+							calc[i]['y'] = rand(h);
+							calc[i]['rot'] = rand(180);
+						}
+						
+						var sizex = w/num;
+						var sizexhalf = parseInt((w/num)*0.5,10);
+						var sizey = parseInt(10*(w/h),10);
+						
+						ctx.lineCap = 'round';
+						ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
+						ctx.strokeStyle = "rgba(0,0,0,0.25)";
+						
 
-						var parts=5;
+						//ctx.save();
+						ctx.beginPath();
+						ctx.moveTo(calc[0]['x'], calc[0]['y']);
+						for(var i=1; i<num; i++) {
+							ctx.lineTo(calc[i]['x'], calc[i]['y']);
+						}
+						ctx.closePath();
+						ctx.stroke();
+					}
+		},
+		'EFFECT_GOLDEN_ROTORS': {
+			'on': true,
+			'call': function() {
+
+						var parts = 3;
 						var flip = Math.sin(sin1*cos1*cos3);
+						var rotors_speed = params['rotors_speed']['value'];
 						
 						ctx.lineWidth = 2;
-						ctx.strokeStyle = "rgba(255,0,255,0.4)";
+						ctx.strokeStyle = "rgba(200,200,5,0.4)";
 						ctx.save();
 						ctx.translate(w*(1.0+cos3*0.5)*.5,h*.5);
-						ctx.rotate((n2-n)*0.01);
+						ctx.rotate((n2-n)*0.01*rotors_speed);
 						for (var k=0; k < parts; k++) {
-							for(var i=0; i<num; i++) {
+							for(var i=0; i<num*0.5; i++) {
 								var sizex = i*(4+cos2*20);
 								var sizey = i*(4+cos2*30);
 								ctx.beginPath();
@@ -227,9 +224,9 @@ let drawCanvas = function() {
 						
 						ctx.save();
 						ctx.translate(w*(1.0-cos3*0.5)*.5,h*.5);
-						ctx.rotate(-(n2-n)*0.01);
+						ctx.rotate(-(n2-n)*0.01*rotors_speed);
 						for (var k=0; k < parts; k++) {
-							for(var i=0; i<num; i++) {
+							for(var i=0; i<num*0.5; i++) {
 								var sizex = i*(4+cos2*20);
 								var sizey = i*(4+cos2*30);
 								//ctx.save();
@@ -487,7 +484,7 @@ console.log(keyCode);
 			effect++;
 			if (effect >= 5) effect = 0;
 		break;
-		case 37: // lefr arrow
+		case 37: // left arrow
 			effect--;
 			if (effect < 0) effect = 5;
 		break;
@@ -495,22 +492,75 @@ console.log(keyCode);
 			cv.effects['EFFECT_BACKGROUND']['on'] = !cv.effects['EFFECT_BACKGROUND']['on'];
 		break;
 		case 49: // 1
-			cv.effects['EFFECT_DISCO_SQUARES']['on'] = !cv.effects['EFFECT_DISCO_SQUARES']['on'];
+			cv.effects['EFFECT_RED_STARS']['on'] = !cv.effects['EFFECT_RED_STARS']['on'];
 		break;
 		case 50: // 2
-			cv.effects['EFFECT_SOMETHING_ELSE']['on'] = !cv.effects['EFFECT_SOMETHING_ELSE']['on'];
-		break;
-		case 51: // 3
 			cv.effects['EFFECT_CENTER_ARCS']['on'] = !cv.effects['EFFECT_CENTER_ARCS']['on'];
 		break;
+		case 51: // 3
+			cv.effects['EFFECT_PINK_SPYRAL']['on'] = !cv.effects['EFFECT_PINK_SPYRAL']['on'];
+		break;
 		case 52: // 4
-			cv.effects['EFFECT_MDT9K00']['on'] = !cv.effects['EFFECT_MDT9K00']['on'];
+			cv.effects['EFFECT_RANDOM_LINES']['on'] = !cv.effects['EFFECT_RANDOM_LINES']['on'];
 		break;
 		case 53: // 5
-			cv.effects['EFFECT_MDT9K01']['on'] = !cv.effects['EFFECT_MDT9K01']['on'];
+			cv.effects['EFFECT_GOLDEN_ROTORS']['on'] = !cv.effects['EFFECT_GOLDEN_ROTORS']['on'];
 		break;
 		case 54: // 6
 			cv.effects['EFFECT_MDT9K02']['on'] = !cv.effects['EFFECT_MDT9K02']['on'];
 		break;
 	}
+}
+
+/**
+ * Draws a rounded rectangle using the current state of the canvas.
+ * If you omit the last three params, it will draw a rectangle
+ * outline with a 5 pixel border radius
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate
+ * @param {Number} width The width of the rectangle
+ * @param {Number} height The height of the rectangle
+ * @param {Number} [radius = 5] The corner radius; It can also be an object 
+ *                 to specify different radii for corners
+ * @param {Number} [radius.tl = 0] Top left
+ * @param {Number} [radius.tr = 0] Top right
+ * @param {Number} [radius.br = 0] Bottom right
+ * @param {Number} [radius.bl = 0] Bottom left
+ * @param {Boolean} [fill = false] Whether to fill the rectangle.
+ * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+ */
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == 'undefined') {
+    stroke = true;
+  }
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.stroke();
+  }
+
 }
