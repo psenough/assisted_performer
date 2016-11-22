@@ -26,16 +26,34 @@ var params = {
 	'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 	'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
 	'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
-	'red': { 'friendly_name': 'Red', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 },
+	'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 },
 	'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
+	'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+	'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
 };
 
+function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height) {
+	ctx.translate( centerX, centerY );
+	ctx.rotate(rotAngle);
+	ctx.scale( scaleX, scaleY );
+	ctx.translate( posX, posY );
+	ctx.rotate(angle);
+	ctx.beginPath();
+	ctx.moveTo(-size,-size);
+	ctx.lineTo(0,height*2);
+	ctx.lineTo(size,-size);
+	ctx.fill();
+	//ctx.closePath();
+}
+	
 let drawCanvas = function() {
 	resize();
 
 	var num = params['num']['value'];
 	var rms = params['rms']['value'];
 	var red = params['red']['value'];
+	var white_count = params['white_count']['value'];
+	var white_size = params['white_size']['value'];
 	
 	var seedrand = rand(360);
 	
@@ -71,6 +89,8 @@ let drawCanvas = function() {
 				rms = params['rms']['value'];
 				num = parseInt(params['num']['value'],10);
 				red = parseInt(params['red']['value'],10);
+				white_count = parseInt(params['white_count']['value'],10);
+				white_size = parseInt(params['white_size']['value'],10);
 				
 				tradius = w*20;
 			}
@@ -78,9 +98,55 @@ let drawCanvas = function() {
 		'EFFECT_BACKGROUND': {
 			'on': true,
 			'call': function() {
-						ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(8+cos5*3,10) +"%,"+ parseInt(10+cos1*2+sin1,10) +"%)";
-						ctx.fillRect(0,0,w,h);
+						var hsl = ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(18+cos5*3,10) +"%,"+ parseInt(18+cos1*2+sin1,10) +"%)";
+						
+						//ctx.fillRect(0,0,w,h);
 						//ctx.clearRect(0,0,w,h);
+						
+						var rx = w/Math.sqrt(2);
+						var ry = h/Math.sqrt(2);
+						var cx = w/2;
+						var cy = h/2;
+						
+						var scaleX;
+						var scaleY;
+						var invScaleX;
+						var invScaleY;
+						var grad;
+						
+						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
+						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
+						//just a solid fill with the outermost gradient color.
+						rx = (rx == 0) ? 0.25 : rx;
+						rr = (ry == 0) ? 0.25 : ry;
+						
+						//we create a circular gradient, but after transforming it properly (by shrinking in either the x or y direction),
+						//we will have an alliptical gradient.
+						if (rx >= ry) {
+							scaleX = 1;
+							invScaleX = 1;
+							scaleY = ry/rx;
+							invScaleY = rx/ry;
+							grad = ctx.createRadialGradient(cx, cy*invScaleY, 0, cx, cy*invScaleY, rx);
+						}
+						else {
+							scaleY = 1;
+							invScaleY = 1;
+							scaleX = rx/ry;
+							invScaleX = ry/rx;
+							grad = ctx.createRadialGradient(cx*invScaleX, cy, 0, cx*invScaleX, cy, ry);
+						}
+						
+						ctx.fillStyle = grad;
+						
+						//add desired colors
+						grad.addColorStop(0,"#000");
+						grad.addColorStop(1,hsl);
+						
+						ctx.save();
+						ctx.setTransform(scaleX,0,0,scaleY,0,0);
+						ctx.fillRect(0,0,w*invScaleX,h*invScaleY);
+						ctx.restore();
 					}
 		},
 		'EFFECT_RED_STARS': {
@@ -96,7 +162,7 @@ let drawCanvas = function() {
 						if (r1 < 0) r1 = 0;
 						ctx.fillStyle = "rgba("+r1+",0,0,1.0)";
 						
-						for(var i=0; i<num; i++) {
+						for(var i=1; i<num; i++) {
 
 							var ydrift = i*cos2 + sin3*((num-i)*i)*20 + (i+10)*sin1/(cos3+500);
 							
@@ -114,6 +180,8 @@ let drawCanvas = function() {
 							posy = parseInt((w+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 10*cos3, true, false);
 							
+							
+							
 						}
 					}					
 		},
@@ -121,16 +189,17 @@ let drawCanvas = function() {
 			'on': false,
 			'call': function() {
 						var calc = [];
-						for(var i=0; i<num*0.75; i++) {
+						var anum = num*0.5;
+						for(var i=0; i<anum; i++) {
 							
-							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
+							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 -2);
 							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
-							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/num)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((num-i/num)*100,10)+"%,15%)";
+							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/anum)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((anum-i/anum)*100,10)+"%,15%)";
 						
 							ctx.save();
 							ctx.translate(w*0.5,h*0.5);
 							ctx.beginPath();
-							ctx.arc(0, 0, (200+40*cos1+i*7+50*(i%3)+i*0.25*(cos2+2))%(h*0.5+sin1*4)*2.2, 0, 2 * Math.PI);
+							ctx.arc(0, 0, (800+140*cos1+i*7+50*(i%3)+i*0.25*(cos2+2))%(h*0.5+sin1*4)*2.2, 0, 2 * Math.PI);
 							ctx.stroke();
 							ctx.restore();
 						}
@@ -196,7 +265,7 @@ let drawCanvas = function() {
 					}
 		},
 		'EFFECT_GOLDEN_ROTORS': {
-			'on': true,
+			'on': false,
 			'call': function() {
 
 						var parts = 3;
@@ -241,20 +310,216 @@ let drawCanvas = function() {
 						ctx.restore();	
 					}
 		},
-		'EFFECT_MDT9K02': {
-			'on': false,
+		'EFFECT_WHITE': {
+			'on': true,
 			'call': function() {
 						var d = new Date();
 						var timer = d.getTime();
 						
-						var angle = (Math.PI*2)/num;
-						var size = 150;
+						var angle = 0.0; //(Math.PI*2)/num;
+						var size = white_size;
 						var opening, phase1, phase2;
-						var maxj = 50;
+						var maxj = white_count;
 						
 						phase1 = timer/25000;
 						phase2 = timer/2500;
 						
+						var seedindex = rand(3928896423);
+						var clip = false;
+						var centerX = w*0.5;
+						var centerY = h*0.5;
+						var oangle = Math.asin( centerX / Math.sqrt(centerX*centerX+centerY*centerY) ) * 2;
+						
+						var diagonal = 105 + sin3;
+		
+						for (var j=0; j<maxj; j++) {
+						
+							var thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
+							color = "rgba(255,255,255,"+(0.12*((maxj-j)/maxj))+")";
+							ctx.fillStyle = color;
+							var i = seedindex;
+							opening = j*30 + sin3*20 + sin1*10 ;
+							
+							ctx.save();
+							
+							// clip top-left
+							if (clip) {
+								//ctx.fillStyle = "rgba(0,0,0,1.0)";
+								ctx.beginPath();
+								ctx.moveTo(0,0);
+								ctx.lineTo(centerX,0);
+								ctx.lineTo(centerX,centerY);
+								//ctx.lineTo(0,0);
+								//ctx.fill();
+								ctx.clip();
+								ctx.closePath();
+							}
+						
+							drawShape( 	centerX, centerY, 0,
+										1.0, 1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							ctx.save();
+							
+							// clip top-right
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,0);
+								ctx.lineTo(w,0);
+								ctx.lineTo(centerX,centerY);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, 0,
+										-1.0, 1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							
+							ctx.save();
+							
+							// clip right-top
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,centerY);
+								ctx.lineTo(w,0);
+								ctx.lineTo(w,centerY);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, oangle,
+										1.0, 1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							ctx.save();
+							
+							// clip right-bottom
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,centerY);
+								ctx.lineTo(w,centerY);
+								ctx.lineTo(w,h);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, -oangle,
+										1.0, -1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							ctx.save();
+							// clip bottom-left
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(0,h);
+								ctx.lineTo(centerX,centerY);
+								ctx.lineTo(centerX,h);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, 0,
+										1.0, -1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							ctx.save();
+							// clip bottom-right
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,centerY);
+								ctx.lineTo(w,h);
+								ctx.lineTo(centerX,h);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, 0,
+										-1.0, -1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							
+							ctx.save();
+							
+							// clip right-bottom
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,centerY);
+								ctx.lineTo(0,h);
+								ctx.lineTo(0,centerY);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, oangle,
+										-1.0, -1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+							
+							
+							ctx.save();
+							
+							// clip right-top
+							if (clip) {
+								ctx.beginPath();
+								ctx.moveTo(centerX,centerY);
+								ctx.lineTo(0,centerY);
+								ctx.lineTo(0,0);
+								ctx.clip();
+							}
+										
+							drawShape( 	centerX, centerY, -oangle,
+										-1.0, 1.0,
+										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
+										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
+										size*.5*j,
+										size);
+							
+							ctx.restore();
+						
+						
+						
+						
+						/*
 						for (var j=maxj*0.5; j<maxj; j++) {
 							var posX = w*(0.5) + Math.sin(phase2*0.25)*j*10;
 							var posY = h*(0.5) - Math.cos(phase2*0.25)*j*10;
@@ -274,8 +539,9 @@ let drawCanvas = function() {
 							ctx.fill();
 							ctx.closePath();
 							ctx.restore();
-						}
+						}*/
 					}
+			}
 		}
 	}
 	
@@ -507,7 +773,7 @@ console.log(keyCode);
 			cv.effects['EFFECT_GOLDEN_ROTORS']['on'] = !cv.effects['EFFECT_GOLDEN_ROTORS']['on'];
 		break;
 		case 54: // 6
-			cv.effects['EFFECT_MDT9K02']['on'] = !cv.effects['EFFECT_MDT9K02']['on'];
+			cv.effects['EFFECT_WHITE']['on'] = !cv.effects['EFFECT_WHITE']['on'];
 		break;
 	}
 }
