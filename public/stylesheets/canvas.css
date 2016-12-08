@@ -20,13 +20,27 @@ html, body {
 }
 
 .hidden {
-	display: hidden;
+	display: none;
 }
 
 canvas, img {
+	position: absolute;
+	top: 0px;
     image-rendering: optimizeQuality;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor;
+}
+
+#ip {
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	color: white;
+	text-align: center;
+	margin: auto;
+	font-size: 3em;
+	z-index: 200;
+	background-color: rgba(0,0,0,0.5);
 }

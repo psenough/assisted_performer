@@ -9,9 +9,9 @@ var midi = require('midi');
 var audio_config = {
 	'midi_port': 1, // change this id to the listed midi port that you want to use
 	'params': {
-		//'audio_0': { 'controller': 0, 'friendly_name': 'Audio 0', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		//'audio_1': { 'controller': 1, 'friendly_name': 'Audio 1', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_2': { 'controller': 2, 'friendly_name': 'Audio 2', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
+		'audio_0': { 'controller': 0, 'friendly_name': 'Grain Space', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 127.0, 'value': 127.0 },
+		'audio_1': { 'controller': 1, 'friendly_name': 'Grain Start', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 50.0, 'value': 50.0 },
+		'audio_2': { 'controller': 2, 'friendly_name': 'Grain Length', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 65.0, 'value': 65.0 }
 	}
 }
 

@@ -23,9 +23,9 @@ var halfw;
 var halfh;
 
 var params = {
-	'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-	'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
-	'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+	//'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+	//'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+	//'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
 	'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 0.1, 'default_value': 122.0, 'value': 122.0 },
 	'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
 	'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
@@ -49,11 +49,11 @@ function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle
 let drawCanvas = function() {
 	resize();
 
-	var num = params['num']['value'];
-	var rms = params['rms']['value'];
-	var red = params['red']['value'];
-	var white_count = params['white_count']['value'];
-	var white_size = params['white_size']['value'];
+	/*var num = params['num']['value']||0;
+	var rms = params['rms']['value']||0;
+	var red = params['red']['value']||0;
+	var white_count = params['white_count']['value']||0;
+	var white_size = params['white_size']['value']||0;*/
 	
 	var seedrand = rand(360);
 	
@@ -86,17 +86,17 @@ let drawCanvas = function() {
 				sin2 = Math.sin(sin1*0.05+cos2)+1.0;
 				cos5 = Math.cos((n2-n)/2000);
 				
-				rms = params['rms']['value'];
+				/*rms = params['rms']['value'];
 				num = parseInt(params['num']['value'],10);
 				red = parseInt(params['red']['value'],10);
 				white_count = parseInt(params['white_count']['value'],10);
-				white_size = parseInt(params['white_size']['value'],10);
+				white_size = parseInt(params['white_size']['value'],10);*/
 				
 				tradius = w*20;
 			}
 		},
 		'EFFECT_BACKGROUND': {
-			'on': true,
+			'on': false,
 			'call': function() {
 						var hsl = ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(18+cos5*3,10) +"%,"+ parseInt(18+cos1*2+sin1,10) +"%)";
 						
@@ -150,13 +150,16 @@ let drawCanvas = function() {
 					}
 		},
 		'EFFECT_RED_STARS': {
-			'on': false,
+			'on': true,
 			'call': function() {
+						let num = ('num' in params)?params['num']['value']:80;
+						let rms = ('rms' in params)?params['rms']['value']:0.5;
+						let red = ('red' in params)?params['red']['value']:122;
 						var sizex = w/num;
 						var sizexhalf = parseInt((w/num)*0.5,10);
 						var sizey = parseInt(10*(w/h),10);
 						
-						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);//10*rms;
+						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);
 						var r1 = parseInt(red,10);
 						if (r1 > 255) r1 = 255;
 						if (r1 < 0) r1 = 0;
@@ -265,12 +268,13 @@ let drawCanvas = function() {
 					}
 		},
 		'EFFECT_GOLDEN_ROTORS': {
-			'on': false,
+			'on': true,
 			'call': function() {
 
 						var parts = 3;
 						var flip = Math.sin(sin1*cos1*cos3);
-						var rotors_speed = params['rotors_speed']['value'];
+						let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
+						let num = ('num' in params)?params['num']['value']:80;
 						
 						ctx.lineWidth = 2;
 						ctx.strokeStyle = "rgba(200,200,5,0.4)";
@@ -313,13 +317,15 @@ let drawCanvas = function() {
 		'EFFECT_WHITE': {
 			'on': true,
 			'call': function() {
+						let size = ('white_size' in params)?params['white_size']['value']:20;
+						let maxj = ('white_count' in params)?params['white_count']['value']:20;;
+
 						var d = new Date();
 						var timer = d.getTime();
 						
 						var angle = 0.0; //(Math.PI*2)/num;
-						var size = white_size;
+
 						var opening, phase1, phase2;
-						var maxj = white_count;
 						
 						phase1 = timer/25000;
 						phase2 = timer/2500;
@@ -599,6 +605,14 @@ function resize() {
 	ctx.height = h;
 	halfw = w*.5;
 	halfh = h*.5;
+	
+	var ip = document.getElementById("ip"); 
+	if (!ip) {
+		ip = document.createElement('div');
+		ip.setAttribute('id','ip');
+		document.body.appendChild(ip);
+		ip.innerHTML = 'http://192.168.1.66';
+	}
 }
 
 function loadLine(thisclass, thistext) {
@@ -774,6 +788,14 @@ console.log(keyCode);
 		break;
 		case 54: // 6
 			cv.effects['EFFECT_WHITE']['on'] = !cv.effects['EFFECT_WHITE']['on'];
+		break;
+		case 72: // h
+			//TODO: hide text with ip adress
+			var ip = document.getElementById("ip"); 
+			if (ip) {
+				if ((ip.className) == '') ip.className = 'hidden';
+				 else ip.className = '';
+			}
 		break;
 	}
 }
