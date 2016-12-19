@@ -170,6 +170,13 @@ function canvas(req, res) {
 	// not adding our canvas to the connections list
 }
 
+// serve master page
+app.get('/master', master);
+function master(req, res) {
+	res.render('master', {title: 'Assisted Performer Master'});
+	// not adding master to the connections list
+}
+
 // serve favicon
 app.get('/favicon.ico', function(req, res){
 	var options = {
@@ -513,6 +520,12 @@ server.on('connection', function (client) {
 							
 							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
 						}
+					}
+				break;
+				case 'master':
+					var thisid = getID(client.id);
+					if (thisid in active_conn) {
+						active_conn[thisid]['socket'].send(JSON.stringify({'parameters': params}));
 					}
 				break;
 				default:

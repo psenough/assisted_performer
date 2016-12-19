@@ -611,7 +611,7 @@ function resize() {
 		ip = document.createElement('div');
 		ip.setAttribute('id','ip');
 		document.body.appendChild(ip);
-		ip.innerHTML = 'http://192.168.1.66';
+		ip.innerHTML = 'http://192.168.1.28:8090';
 	}
 }
 

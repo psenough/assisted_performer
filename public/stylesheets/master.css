@@ -1,0 +1,29 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	-webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+	user-select: none;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	-webkit-tap-highlight-color: transparent;
+	background-color: #fff;
+	/*-webkit-transform: translateZ(0);*/
+	-webkit-backface-visibility: hidden;
+}
+
+*:focus { outline:none; }
+
+html, body {
+	overflow:hidden;
+}
+
+.hidden {
+	display: none;
+}
+
+.table { display: table; }
+.row { display: table-row; }
+.cell { display: table-cell; }
+
