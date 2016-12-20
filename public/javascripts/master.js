@@ -82,7 +82,7 @@ function connectWebSockets() {
 		}
 		if (!using && ('parameters' in parsed)) {
 			
-			// delete row element of a no longer existing parameters
+			// delete row element of a no longer existing parameter checking the received list
 			for (p in params) {
 				// check if it's still on the list
 				var check = false;
@@ -98,12 +98,8 @@ function connectWebSockets() {
 				}
 			}
 			
+			// update local params with the ones that just got received
 			params = parsed['parameters'];
-			
-			//console.log(params);
-			
-			// lets try to avoid unelegant cleanups
-			//document.body.innerHTML = '';
 			
 			var table = document.getElementById('table');
 			if (!table) {
