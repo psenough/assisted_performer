@@ -166,6 +166,20 @@ function connectWebSockets() {
 					input.addEventListener('change', function(evt) {
 						using = false;
 					}, false);
+					
+					var col4 = document.createElement('cell');
+					col4.setAttribute('class','cell');
+					row.appendChild(col4);
+					
+					var wander = document.createElement('input');
+					wander.key = key;
+					wander.setAttribute('id',key+'_wander');
+					wander.setAttribute('type','checkbox');
+					wander.setAttribute('title','wander');
+					col4.appendChild(wander);
+					//wander.addEventListener('change', function(evt) {
+					//	console.log('clicked me ' + this.key);
+					//}, false);
 
 					var col3 = document.createElement('cell');
 					col3.setAttribute('class','cell');
@@ -176,12 +190,41 @@ function connectWebSockets() {
 					output.setAttribute('for',key);
 					output.innerHTML = params[key]['value'];
 					col3.appendChild(output);
+					
 				}
 			}
 			
-			//TODO: add individual wander checkbox
-			//TODO: add wander all button
-			//TODO: add refresh button (get new params)
+			// add wander all button
+			var wander_all = document.getElementById('wander_all');
+			if (!wander_all) {
+				wander_all = document.createElement('input');
+				wander_all.setAttribute('id','wander_all');
+				wander_all.setAttribute('type','button');
+				wander_all.setAttribute('value','wander all');
+				document.body.appendChild(wander_all);
+				wander_all.addEventListener('click', function(evt) {
+					for (var p in params) {
+						var dom = document.getElementById(p+'_wander');
+						if (dom) dom.setAttribute('checked','checked');
+					}
+				}, false);
+			}
+			
+			// wander none button
+			var wander_none = document.getElementById('wander_none');
+			if (!wander_none) {
+				wander_none = document.createElement('input');
+				wander_none.setAttribute('id','wander_none');
+				wander_none.setAttribute('type','button');
+				wander_none.setAttribute('value','wander none');
+				document.body.appendChild(wander_none);
+				wander_none.addEventListener('click', function(evt) {
+					for (var p in params) {
+						var dom = document.getElementById(p+'_wander');
+						if (dom) dom.removeAttribute('checked');
+					}
+				}, false);
+			}
 		}
 	};
 
@@ -211,6 +254,26 @@ function recheck_ping() {
 	var n2 = d2.getTime();
 	if ((n2-pingout) > max_timeout) {
 		//console.log('sending master ping' + (n2-pingout) + ' ' + max_timeout);
+		
+		// do the wander for the params that are checked
+		for (var p in params) {
+			var wander = document.getElementById(p+'_wander');
+			if ((wander) && (wander.checked != false)) {
+				// check how wide the steps are
+				var diff = Math.floor((params[p]['max'] - params[p]['min']) / (params[p]['step']*4));
+				console.log(diff);
+				// make sure they are odd
+				if (diff % 2 == 0) diff++;
+				var hdiff = Math.floor(diff/2);
+				// wander faster for larger number of steps
+				var rsig = rand(diff)-hdiff;
+				params[p]['value'] = parseFloat(params[p]['value']) + rsig*params[p]['step'];
+				if (params[p]['value'] > params[p]['max']) params[p]['value'] = params[p]['max'];
+				if (params[p]['value'] < params[p]['min']) params[p]['value'] = params[p]['min'];
+			}
+		}
+		
+		// send the ping request
 		request_ping_websockets();
 	}
 }
