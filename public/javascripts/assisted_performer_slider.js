@@ -276,6 +276,8 @@ var max_timeout = 1000;
 var d = new Date();
 var n = d.getTime();
 
+//TODO: this recheck_ping works but should probably be checked with pingout instead of n, have to debug it properly
+
 function recheck_ping() {
 	var d2 = new Date();
 	var n2 = d2.getTime();

@@ -1,4 +1,7 @@
 
+//TODO: easy way to change system to give same parameter to multiple sources and apply the average
+//TODO: handle multiple canvases connected
+
 //
 // init midi
 //
@@ -523,9 +526,27 @@ server.on('connection', function (client) {
 					}
 				break;
 				case 'master':
+					//console.log('received master');
 					var thisid = getID(client.id);
 					if (thisid in active_conn) {
-						active_conn[thisid]['socket'].send(JSON.stringify({'parameters': params}));
+						
+						// if we were sent back master params, update our local values
+						if ('params' in parsed) {
+							for (p in parsed['params']) {
+								if (p in params) {
+									params[p]['value'] = parsed['params'][p]['value'];
+								}
+							}
+						}
+						
+						// prepare output for sending
+						var output = {'parameters': params};
+						
+						// if we got a ping, make sure we also reply with a pong, we're not savages!
+						if ('ping' in parsed) output['pong'] = 'pong';
+						
+						// send the packet
+						active_conn[thisid]['socket'].send(JSON.stringify(output));
 					}
 				break;
 				default:
