@@ -53,9 +53,9 @@ function changePart(next_part) {
 		console.log(active_part);
 		// change params to the ones used by active part
 		params = configs[active_part]['params'];
-		this_ws = null; // when we clear the ws connection it will attempt to reconnect it and resend the parameters
 		
-		console.log(params);
+		// report the new parameters to the server		
+		if ((this_ws != null) && (this_ws.readyState == 1)) this_ws.sendParameters();
 		
 		// clear all active effects
 		for (fx in cv.effects) 
@@ -701,6 +701,10 @@ function connectWebSockets() {
 
 	this_ws.onopen = function() {
 		console.log("opened socket");
+		this_ws.sendParameters();
+	};
+	
+	this_ws.sendParameters = function() {
 		this_ws.send(JSON.stringify({'assisted_performer': 'canvas', 'parameters': params}));
 	};
 
