@@ -6,6 +6,32 @@ rand = function(n){
 window.onload = function(){init();};
 
 var cv;
+var w;
+var h;
+var ctx;
+var halfw;
+var halfh;
+var params = {};
+var active_part = 1;
+
+var configs = {
+	0: {
+		'params': {			
+			'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+			'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
+			'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+			'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
+		},
+		'on': ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE']
+	},
+	1: {
+		'params': {
+			'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+			'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 }
+		},
+		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL']
+	}
+};
 
 function init() {
 	try {
@@ -14,14 +40,46 @@ function init() {
 		console.log(e);
 	}
 	cv = new drawCanvas();
+	changePart(active_part);
 }
 
-var w;
-var h;
-var ctx;
-var halfw;
-var halfh;
+function changePart(next_part) {
+	console.log(active_part + ' ' + next_part);
+	console.log(configs);
+	if (next_part in configs) {
+		// set active part
+		active_part = next_part;
+		
+		console.log(active_part);
+		// change params to the ones used by active part
+		params = configs[active_part]['params'];
+		this_ws = null; // when we clear the ws connection it will attempt to reconnect it and resend the parameters
+		
+		console.log(params);
+		
+		// clear all active effects
+		for (fx in cv.effects) 
+		{
+			cv.effects[fx]['on'] = false;
+		}
+		
+		console.log(configs[active_part]['on'].length);
+		// activate the ones listed on this part only
+		if ('on' in configs[active_part]) {
+			for (var j=0; j<configs[active_part]['on'].length; j++) {
+				for (fx in cv.effects) {
+					if (fx == configs[active_part]['on'][j]) {
+						cv.effects[fx]['on'] = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
 
+	
+/*	
 var params = {
 	//'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 	//'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
@@ -30,7 +88,7 @@ var params = {
 	'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
 	'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
 	'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
-};
+};*/
 
 //TODO: multiple params, multiple parts
 
@@ -194,6 +252,7 @@ let drawCanvas = function() {
 			'on': false,
 			'call': function() {
 						var calc = [];
+						let num = ('num' in params)?params['num']['value']:80;
 						var anum = num*0.5;
 						for(var i=0; i<anum; i++) {
 							
@@ -214,6 +273,7 @@ let drawCanvas = function() {
 		'EFFECT_PINK_SPYRAL': {
 			'on': false,
 			'call': function() {
+						let num = ('num' in params)?params['num']['value']:80;
 						ctx.lineWidth = 1;
 						ctx.strokeStyle = "rgba(200,100,200,0.5)";
 						ctx.save();
