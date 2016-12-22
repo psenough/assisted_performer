@@ -12,24 +12,17 @@ var ctx;
 var halfw;
 var halfh;
 var params = {};
-var active_part = 1;
+var active_part = 0;
 
 var configs = {
 	0: {
-		'params': {			
-			'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-			'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
-			'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-			'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
-		},
 		'on': ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE']
 	},
 	1: {
-		'params': {
-			'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-			'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 }
-		},
-		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL','EFFECT_TRAIL_UP']
+		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_WALKERS','EFFECT_PINK_SPYRAL','EFFECT_SINE_LINES','EFFECT_CROSSBARS']
+	},
+	2: {
+		'on': ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_RED_STARS','EFFECT_SINE_LINES']
 	}
 };
 
@@ -51,11 +44,8 @@ function changePart(next_part) {
 		active_part = next_part;
 		
 		console.log('activating part: ' + active_part);
-		// change params to the ones used by active part
-		params = configs[active_part]['params'];
-		
-		// report the new parameters to the server		
-		if ((this_ws != null) && (this_ws.readyState == 1)) this_ws.sendParameters();
+		// clear all params
+		params = {};
 		
 		// clear all active effects
 		for (fx in cv.effects) 
@@ -68,28 +58,40 @@ function changePart(next_part) {
 			for (var j=0; j<configs[active_part]['on'].length; j++) {
 				for (fx in cv.effects) {
 					if (fx == configs[active_part]['on'][j]) {
+						// toggle the effect on
 						cv.effects[fx]['on'] = true;
+						
+						// add the params from this effect to our global params list
+						addToParams(cv.effects[fx]['params']);
+						
+						// skip the rest of the effects, we already found the one we were looking for
 						break;
 					}
 				}
 			}
 		}
+		
+		// report the new parameters to the server		
+		sendParameters();
+		
 	}
 }
 
-	
-/*	
-var params = {
-	//'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-	//'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
-	//'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
-	'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-	'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 },
-	'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-	'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
-};*/
-
-//TODO: multiple params, multiple parts
+function addToParams(this_fx_params) {
+	// add the params from this effect to our global params list
+	for (p in this_fx_params) {
+		// only if they are not listed already
+		var pexists = false;
+		for (ep in params) {
+			if (ep == p) {
+				pexists = true;
+				break;
+			}
+		}
+		// doesnt exist yet, lets add
+		if (pexists == false) params[p] = this_fx_params[p];
+	}
+}
 
 function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height) {
 	ctx.translate( centerX, centerY );
@@ -107,17 +109,12 @@ function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle
 	
 let drawCanvas = function() {
 	resize();
-
-	/*var num = params['num']['value']||0;
-	var rms = params['rms']['value']||0;
-	var red = params['red']['value']||0;
-	var white_count = params['white_count']['value']||0;
-	var white_size = params['white_size']['value']||0;*/
 	
 	var seedrand = rand(360);
 	
 	var d2 = new Date();
 	var n2 = d2.getTime(); 	
+	var timer = n2-n;
 	var sin1 = Math.sin((n2-n)/200)+1.0;
 	var sin3 = Math.sin((n2-n)/2800)+1.0;
 	var cos1 = Math.cos((n2-n)/800)+1.0;
@@ -126,36 +123,30 @@ let drawCanvas = function() {
 	var cos4 = Math.cos((n2-n)/5711);
 	var sin2 = Math.sin(sin1*0.05+cos2)+1.0;
 	
-	var tradius = w;
-
-	
 	this.effects = {
 		'UPDATE_TIMERS': {
 			'on': true,
+			'params': {},
 			'call': function() {
 				d2 = new Date();
 				n2 = d2.getTime(); 
+				timer = n2-n;
 	
-				sin1 = Math.sin((n2-n)/200)+1.0;
-				sin3 = Math.sin((n2-n)/2800)+1.0;
-				cos1 = Math.cos((n2-n)/800)+1.0;
-				cos2 = Math.cos((n2-n)/2800);
-				cos3 = Math.cos((n2-n)/1600);
-				cos4 = Math.cos((n2-n)/5711);
+				sin1 = Math.sin((timer)/200)+1.0;
+				sin3 = Math.sin((timer)/2800)+1.0;
+				cos1 = Math.cos((timer)/800)+1.0;
+				cos2 = Math.cos((timer)/2800);
+				cos3 = Math.cos((timer)/1600);
+				cos4 = Math.cos((timer)/5711);
 				sin2 = Math.sin(sin1*0.05+cos2)+1.0;
-				cos5 = Math.cos((n2-n)/2000);
-				
-				/*rms = params['rms']['value'];
-				num = parseInt(params['num']['value'],10);
-				red = parseInt(params['red']['value'],10);
-				white_count = parseInt(params['white_count']['value'],10);
-				white_size = parseInt(params['white_size']['value'],10);*/
-				
-				tradius = w*20;
+				cos5 = Math.cos((timer)/2000);
 			}
 		},
 		'EFFECT_BACKGROUND': {
 			'on': false,
+			'params': {
+				'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+			},
 			'call': function() {
 						var hsl = ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(18+cos5*3,10) +"%,"+ parseInt(18+cos1*2+sin1,10) +"%)";
 						
@@ -210,6 +201,11 @@ let drawCanvas = function() {
 		},
 		'EFFECT_RED_STARS': {
 			'on': true,
+			'params': {
+				'num': { 'friendly_name': 'Number Stars', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+				'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+				'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 }
+			},
 			'call': function() {
 						let num = ('num' in params)?params['num']['value']:80;
 						let rms = ('rms' in params)?params['rms']['value']:0.5;
@@ -225,7 +221,6 @@ let drawCanvas = function() {
 						ctx.fillStyle = "rgba("+r1+",0,0,1.0)";
 						
 						for(var i=1; i<num; i++) {
-
 							var ydrift = i*cos2 + sin3*((num-i)*i)*20 + (i+10)*sin1/(cos3+500);
 							
 							var posx = parseInt(i*sizex,10);
@@ -241,14 +236,69 @@ let drawCanvas = function() {
 							
 							posy = parseInt((w+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 10*cos3, true, false);
-							
-							
-							
 						}
 					}					
 		},
+		'EFFECT_WALKERS': {
+			'on': true,
+			'params': {
+				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+			},
+			'call': function() {
+	
+						var wcolumns = 0|(w*.0175);
+						var wlines = 0|(h*.015);
+
+						var colwidth = w/wcolumns;
+						var linspace = h/wlines;
+						
+						let orange_trans = ('otrans' in params)?params['otrans']['value']:0.5;
+						let cyan_trans = ('ctrans' in params)?params['ctrans']['value']:0.5;
+						
+						color2 = "rgba(255,200,100,"+orange_trans+")";
+						color3 = "rgba(88,254,250,"+cyan_trans+")";
+						
+						ctx.lineCap = 'round';
+						//ctx.globalCompositeOperation = 'xor';
+						//ctx.shadowOffsetX = 5;
+						//ctx.shadowOffsetY = 6;
+						//ctx.shadowColor = "rgba(0,0,0,.1)";
+							
+						var lW2 = Math.sin(timer/1000)*10+18;
+						
+						for(var i=0;i<=wcolumns;i++) {
+							for(var j=0;j<=wlines;j++) {
+								var floatingx = colwidth*i;
+								var floatingy = linspace*j;
+								var halfsize = colwidth*.5;
+								if (rand(2) == 0) {
+										ctx.strokeStyle = color3;
+										ctx.lineWidth = lW2;
+										ctx.beginPath();
+										ctx.moveTo(floatingx-halfsize, floatingy-halfsize);	
+										ctx.lineTo(floatingx+halfsize, floatingy+halfsize);
+										ctx.stroke();
+								} else {
+										ctx.strokeStyle = color2;
+										ctx.lineWidth = lW2;
+										ctx.beginPath();
+										ctx.moveTo(floatingx+halfsize, floatingy-halfsize);	
+										ctx.lineTo(floatingx-halfsize, floatingy+halfsize);
+										ctx.stroke();
+								}
+							}
+						}
+						//updateWalkers();
+						
+					}
+		},
 		'EFFECT_CENTER_ARCS': {
 			'on': false,
+			'params': {
+				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+			},
 			'call': function() {
 						var calc = [];
 						let num = ('num' in params)?params['num']['value']:80;
@@ -271,8 +321,11 @@ let drawCanvas = function() {
 		},
 		'EFFECT_PINK_SPYRAL': {
 			'on': false,
+			'params': {
+				'num_spyral': { 'friendly_name': 'Number Spyrals', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+			},
 			'call': function() {
-						let num = ('num' in params)?params['num']['value']:80;
+						let num = ('num_spyral' in params)?params['num_spyral']['value']:80;
 						ctx.lineWidth = 1;
 						ctx.strokeStyle = "rgba(200,100,200,0.5)";
 						ctx.save();
@@ -299,8 +352,11 @@ let drawCanvas = function() {
 		},
 		'EFFECT_RANDOM_LINES': {
 			'on': false,
+			'params': {
+				'num_lines': { 'friendly_name': 'Number Lines', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+			},
 			'call': function() {
-						let num = ('num' in params)?params['num']['value']:80;
+						let num = ('num_lines' in params)?params['num_lines']['value']:80;
 						var calc = [];
 						for(var i=0; i<num; i++) {
 							calc[i] = [];
@@ -329,13 +385,17 @@ let drawCanvas = function() {
 					}
 		},
 		'EFFECT_GOLDEN_ROTORS': {
-			'on': true,
+			'on': false,
+			'params': {
+				'num_rotors': { 'friendly_name': 'Number Rotor Lines', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+				'rotors_speed': { 'friendly_name': 'Rotors Speed', 'min': 0.0, 'max': 5.0, 'step': 0.05, 'default_value': 0.6, 'value': 0.6 }
+			},
 			'call': function() {
 
 						var parts = 3;
 						var flip = Math.sin(sin1*cos1*cos3);
 						let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
-						let num = ('num' in params)?params['num']['value']:80;
+						let num = ('num_rotors' in params)?params['num_rotors']['value']:80;
 						
 						ctx.lineWidth = 2;
 						ctx.strokeStyle = "rgba(200,200,5,0.4)";
@@ -376,14 +436,15 @@ let drawCanvas = function() {
 					}
 		},
 		'EFFECT_WHITE': {
-			'on': true,
+			'on': false,
+			'params': {
+				'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
+			},
 			'call': function() {
 						let size = ('white_size' in params)?params['white_size']['value']:20;
 						let maxj = ('white_count' in params)?params['white_count']['value']:20;;
 
-						var d = new Date();
-						var timer = d.getTime();
-						
 						var angle = 0.0; //(Math.PI*2)/num;
 
 						var opening, phase1, phase2;
@@ -583,69 +644,91 @@ let drawCanvas = function() {
 							
 							ctx.restore();
 						
-						
-						
-						
-						/*
-						for (var j=maxj*0.5; j<maxj; j++) {
-							var posX = w*(0.5) + Math.sin(phase2*0.25)*j*10;
-							var posY = h*(0.5) - Math.cos(phase2*0.25)*j*10;
-						
-							var thisb = 200 - parseInt(Math.sin(phase2*0.5 + j)*35, 10);
-							color = "rgba("+thisb+","+thisb+","+thisb+","+(0.02*((maxj-j)/maxj)+rms*0.15)+")";
-							ctx.fillStyle = color;
-							var i = parseInt(((Math.sin(phase1) - Math.sin(phase2))+1.0)*0.5*num*0.33,10);
-							opening = Math.sin(i*angle)*10 + j*20;
-							ctx.save();
-							ctx.translate( posX+Math.sin(i*angle+phase1)*opening, posY+Math.cos(i*angle+phase1)*opening );
-							ctx.rotate(i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3);
-							ctx.beginPath();
-							ctx.moveTo(-size*.5*j,-size*.5*j);
-							ctx.lineTo(0,size);
-							ctx.lineTo(size*.5*j,-size*.5*j);
-							ctx.fill();
-							ctx.closePath();
-							ctx.restore();
-						}*/
 					}
 			}
 		},
-		'EFFECT_TRAIL_UP': {
-			'on': true,
+		'EFFECT_SINE_LINES': {
+			'on': false,
+			'params': {
+				'num_tlines': { 'friendly_name': 'Number Trail Lines', 'min': 2.0, 'max': 100.0, 'step': 2.0, 'default_value': 40.0, 'value': 40.0 },
+				'num_tsegments': { 'friendly_name': 'Number Segments', 'min': 2.0, 'max': 100.0, 'step': 2.0, 'default_value': 40.0, 'value': 40.0 },
+				'sine_line_width': { 'friendly_name': 'Sinus Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
+				'rtrans': { 'friendly_name': 'Sinus Red Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+
+			},
 			'call': function() {
 
-						ctx.lineWidth = 10;
-						var num_heads = 40;
-						var num_lines = 40;
-						//var flip = Math.sin(sin1*cos1*cos3);
-						//let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
-						//let num = ('num' in params)?params['num']['value']:80;
-						for (var i=0; i<num_heads; i++) {
+						let num_tlines = ('num_tlines' in params)?params['num_tlines']['value']:40;
+						let num_tsegments = ('num_tsegments' in params)?params['num_tsegments']['value']:40;
+						let sine_line_width = ('sine_line_width' in params)?params['sine_line_width']['value']:5;
+						let rtrans = ('rtrans' in params)?params['rtrans']['value']:5;
+						
+						ctx.lineWidth = sine_line_width;
+
+						for (var i=0; i<num_tlines; i++) {
 							ctx.save();
-							//console.log(i + ' ' + num_heads);
+							
 							ctx.translate(w*.5 + Math.sin(i + cos3)*w*.5, - Math.sin(i + cos2 + sin2*cos1)*20 + Math.sin(i*sin2)*50);
 							
-							ctx.strokeStyle = "rgba(120,0,0,1.0)";
+							ctx.strokeStyle = "rgba(120,0,0,"+rtrans+")";
 							ctx.beginPath();
 							ctx.moveTo(0,0);
-							for (var j=1; j<num_lines; j++) {
-								ctx.lineTo(Math.sin(j + cos2*30 + sin1*20)*10, j*(h/(num_lines)));
+							for (var j=1; j<num_tsegments; j++) {
+								ctx.lineTo(Math.sin(j + cos2*30 + sin1*20)*10, j*(h/(num_tsegments)));
 							}
 							ctx.stroke();
-							//ctx.closePath();
-							
-							/*ctx.fillStyle = "rgba(120,120,0,0.5)";
-							ctx.moveTo(0,0);
-							ctx.beginPath();
-							ctx.arc(0, 0, 20, 0, 2 * Math.PI);
-							ctx.fill();
-							ctx.closePath();
-							*/
 							ctx.restore();
 						}
 						
 					}
+		},
+		'EFFECT_CROSSBARS': {
+			'on': false,
+			'params': {},
+			'call': function() {
+
+						var columns = 2;
+						var lines = 10;
+						var colwidth = w/columns;
+						var linspace = h/lines;
+						var timer = n2-n;
+						var note = rand(255);
+						
+						//ctx.lineCap = 'round';
+						
+						ctx.save();
+						ctx.translate(0,0);
+
+						ctx.lineWidth = colwidth + Math.sin(timer/1000)*colwidth;
+						for(var i=0;i<columns+1;i++) {
+							var grad1 = rand(255-note);
+							color2 = "rgba("+grad1+","+grad1+","+grad1+",.15)";
+							ctx.strokeStyle = color2;
+							var floatingx = colwidth*i;
+							ctx.beginPath();
+							ctx.moveTo(floatingx, 0);	
+							ctx.lineTo(floatingx, h);
+							ctx.stroke();
+							ctx.closePath();							
+						}
+
+						ctx.lineWidth = linspace + Math.sin(timer/1000+500)*linspace;				
+						for(var j=0;j<lines+1;j++) {
+							var grad1 = rand(255-note);
+							color2 = "rgba("+grad1+","+grad1+","+grad1+",.15)";
+							ctx.strokeStyle = color2;
+							var floatingy = linspace*j;
+							ctx.beginPath();
+							ctx.moveTo(0, floatingy);	
+							ctx.lineTo(w, floatingy);
+							ctx.stroke();
+							ctx.closePath();							
+						}
+						ctx.restore();
+						
+					}
 		}
+		
 	}
 	
 	function drawThis() {
@@ -662,8 +745,11 @@ let drawCanvas = function() {
 	var repeater = n;
 	var rperiod = 6000;
 	var index = 0;
+	
+	//this.stop = false;
 
 	function animate() {
+		//if (this.stop)
 		requestAnimationFrame( animate );
 		drawThis();
 		
@@ -703,13 +789,13 @@ function resize() {
 	halfw = w*.5;
 	halfh = h*.5;
 	
-	var ip = document.getElementById("ip"); 
+	/*var ip = document.getElementById("ip"); 
 	if (!ip) {
 		ip = document.createElement('div');
 		ip.setAttribute('id','ip');
 		document.body.appendChild(ip);
 		ip.innerHTML = 'http://192.168.1.28:8090';
-	}
+	}*/
 }
 
 function loadLine(thisclass, thistext) {
@@ -862,33 +948,54 @@ var keyCode = e.keyCode;
 console.log(keyCode);
 	switch(keyCode) {
 		case 39: // right arrow
-			effect++;
-			if (effect >= 5) effect = 0;
+			active_part++;
+			if (active_part >= arraySize(configs)) active_part = 0;
+			changePart(active_part);
 		break;
 		case 37: // left arrow
-			effect--;
-			if (effect < 0) effect = 5;
+			active_part--;
+			if (active_part < 0) active_part = arraySize(configs)-1;
+			changePart(active_part);
 		break;
 		case 48: // 0
-			cv.effects['EFFECT_BACKGROUND']['on'] = !cv.effects['EFFECT_BACKGROUND']['on'];
+			toggleOnOff('EFFECT_BACKGROUND');
+			sendParameters();
 		break;
 		case 49: // 1
-			cv.effects['EFFECT_RED_STARS']['on'] = !cv.effects['EFFECT_RED_STARS']['on'];
+			toggleOnOff('EFFECT_RED_STARS');
+			sendParameters();
 		break;
 		case 50: // 2
-			cv.effects['EFFECT_CENTER_ARCS']['on'] = !cv.effects['EFFECT_CENTER_ARCS']['on'];
+			toggleOnOff('EFFECT_CENTER_ARCS');
+			sendParameters();
 		break;
 		case 51: // 3
-			cv.effects['EFFECT_PINK_SPYRAL']['on'] = !cv.effects['EFFECT_PINK_SPYRAL']['on'];
+			toggleOnOff('EFFECT_PINK_SPYRAL');
+			sendParameters();
 		break;
 		case 52: // 4
-			cv.effects['EFFECT_RANDOM_LINES']['on'] = !cv.effects['EFFECT_RANDOM_LINES']['on'];
+			toggleOnOff('EFFECT_RANDOM_LINES');
+			sendParameters();
 		break;
 		case 53: // 5
-			cv.effects['EFFECT_GOLDEN_ROTORS']['on'] = !cv.effects['EFFECT_GOLDEN_ROTORS']['on'];
+			toggleOnOff('EFFECT_GOLDEN_ROTORS');
+			sendParameters();
 		break;
 		case 54: // 6
-			cv.effects['EFFECT_WHITE']['on'] = !cv.effects['EFFECT_WHITE']['on'];
+			toggleOnOff('EFFECT_WHITE');
+			sendParameters();
+		break;
+		case 55: // 7
+			toggleOnOff('EFFECT_SINE_LINES');
+			sendParameters();
+		break;
+		case 56: // 8
+			toggleOnOff('EFFECT_CROSSBARS');
+			sendParameters();
+		break;
+		case 57: // 9
+			toggleOnOff('EFFECT_WALKERS');
+			sendParameters();
 		break;
 		case 72: // h
 			//TODO: hide text with ip adress
@@ -899,6 +1006,15 @@ console.log(keyCode);
 			}
 		break;
 	}
+}
+
+function toggleOnOff(fx) {
+	cv.effects[fx]['on'] = !cv.effects[fx]['on'];
+	if (cv.effects[fx]['on']) addToParams(cv.effects[fx]['params']);
+}
+
+function sendParameters() {
+	if ((this_ws != null) && (this_ws.readyState == 1)) this_ws.sendParameters();
 }
 
 /**
@@ -953,3 +1069,11 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
   }
 
 }
+
+arraySize = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
