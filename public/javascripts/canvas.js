@@ -29,7 +29,7 @@ var configs = {
 			'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 			'num': { 'friendly_name': 'Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 }
 		},
-		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL']
+		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL','EFFECT_TRAIL_UP']
 	}
 };
 
@@ -44,13 +44,13 @@ function init() {
 }
 
 function changePart(next_part) {
-	console.log(active_part + ' ' + next_part);
-	console.log(configs);
+	//console.log(active_part + ' ' + next_part);
+	//console.log(configs);
 	if (next_part in configs) {
 		// set active part
 		active_part = next_part;
 		
-		console.log(active_part);
+		console.log('activating part: ' + active_part);
 		// change params to the ones used by active part
 		params = configs[active_part]['params'];
 		
@@ -63,7 +63,6 @@ function changePart(next_part) {
 			cv.effects[fx]['on'] = false;
 		}
 		
-		console.log(configs[active_part]['on'].length);
 		// activate the ones listed on this part only
 		if ('on' in configs[active_part]) {
 			for (var j=0; j<configs[active_part]['on'].length; j++) {
@@ -301,7 +300,7 @@ let drawCanvas = function() {
 		'EFFECT_RANDOM_LINES': {
 			'on': false,
 			'call': function() {
-						
+						let num = ('num' in params)?params['num']['value']:80;
 						var calc = [];
 						for(var i=0; i<num; i++) {
 							calc[i] = [];
@@ -610,6 +609,42 @@ let drawCanvas = function() {
 						}*/
 					}
 			}
+		},
+		'EFFECT_TRAIL_UP': {
+			'on': true,
+			'call': function() {
+
+						ctx.lineWidth = 10;
+						var num_heads = 40;
+						var num_lines = 40;
+						//var flip = Math.sin(sin1*cos1*cos3);
+						//let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
+						//let num = ('num' in params)?params['num']['value']:80;
+						for (var i=0; i<num_heads; i++) {
+							ctx.save();
+							//console.log(i + ' ' + num_heads);
+							ctx.translate(w*.5 + Math.sin(i + cos3)*w*.5, - Math.sin(i + cos2 + sin2*cos1)*20 + Math.sin(i*sin2)*50);
+							
+							ctx.strokeStyle = "rgba(120,0,0,1.0)";
+							ctx.beginPath();
+							ctx.moveTo(0,0);
+							for (var j=1; j<num_lines; j++) {
+								ctx.lineTo(Math.sin(j + cos2*30 + sin1*20)*10, j*(h/(num_lines)));
+							}
+							ctx.stroke();
+							//ctx.closePath();
+							
+							/*ctx.fillStyle = "rgba(120,120,0,0.5)";
+							ctx.moveTo(0,0);
+							ctx.beginPath();
+							ctx.arc(0, 0, 20, 0, 2 * Math.PI);
+							ctx.fill();
+							ctx.closePath();
+							*/
+							ctx.restore();
+						}
+						
+					}
 		}
 	}
 	
