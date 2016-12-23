@@ -14,17 +14,26 @@ var halfh;
 var params = {};
 var active_part = 0;
 
-var configs = {
-	0: {
-		'on': ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE']
-	},
-	1: {
-		'on': ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_WALKERS','EFFECT_PINK_SPYRAL','EFFECT_SINE_LINES','EFFECT_CROSSBARS']
-	},
-	2: {
-		'on': ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_RED_STARS','EFFECT_SINE_LINES']
-	}
-};
+var cl = [
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_RANDOM_LINES','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_RANDOM_LINES','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_WALKERS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
+['UPDATE_TIMERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
+['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
+['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS'],
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS']
+];
+
+// not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
+var configs = {};
+for (var i=0; i<cl.length; i++) configs[i] = {'on': cl[i] };
 
 function init() {
 	try {
@@ -93,7 +102,8 @@ function addToParams(this_fx_params) {
 	}
 }
 
-function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height) {
+function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height, stroke) {
+	ctx.strokeStyle = stroke;
 	ctx.translate( centerX, centerY );
 	ctx.rotate(rotAngle);
 	ctx.scale( scaleX, scaleY );
@@ -104,7 +114,8 @@ function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle
 	ctx.lineTo(0,height*2);
 	ctx.lineTo(size,-size);
 	ctx.fill();
-	//ctx.closePath();
+	ctx.closePath();
+	ctx.stroke();
 }
 	
 let drawCanvas = function() {
@@ -126,11 +137,14 @@ let drawCanvas = function() {
 	this.effects = {
 		'UPDATE_TIMERS': {
 			'on': true,
-			'params': {},
+			'params': {
+				'slow': { 'friendly_name': 'Slow Time', 'min': 1.0, 'max': 10.0, 'step': 1.0, 'default_value': 1.0, 'value': 1.0 },
+			},
 			'call': function() {
 				d2 = new Date();
 				n2 = d2.getTime(); 
-				timer = n2-n;
+				let slow = ('slow' in params)?params['slow']['value']:1.0;
+				timer = (n2-n)/(slow);
 	
 				sin1 = Math.sin((timer)/200)+1.0;
 				sin3 = Math.sin((timer)/2800)+1.0;
@@ -145,18 +159,29 @@ let drawCanvas = function() {
 		'EFFECT_BACKGROUND': {
 			'on': false,
 			'params': {
-				'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+				'bg_hue': { 'friendly_name': 'Center Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+				'bg_sat': { 'friendly_name': 'Center Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'bg_lum': { 'friendly_name': 'Center Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'bg2_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+				'bg2_sat': { 'friendly_name': 'Background Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 0.0 },
+				'bg2_lum': { 'friendly_name': 'Background Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 0.0 }
 			},
 			'call': function() {
-						var hsl = ctx.fillStyle = "hsl("+params['bg_hue']['value']+","+ parseInt(18+cos5*3,10) +"%,"+ parseInt(18+cos1*2+sin1,10) +"%)";
+				
+						let bg_hue = ('bg_hue' in params)?params['bg_hue']['value']:122.0;
+						let bg_sat = ('bg_sat' in params)?params['bg_sat']['value']:20.0;
+						let bg_lum = ('bg_lum' in params)?params['bg_lum']['value']:20.0;
+						let bg2_hue = ('bg2_hue' in params)?params['bg2_hue']['value']:122.0;
+						let bg2_sat = ('bg2_sat' in params)?params['bg2_sat']['value']:0.0;
+						let bg2_lum = ('bg2_lum' in params)?params['bg2_lum']['value']:0.0;
 						
-						//ctx.fillRect(0,0,w,h);
-						//ctx.clearRect(0,0,w,h);
-						
+						var hsl_center = "hsl("+bg_hue+","+ bg_sat +"%,"+ bg_lum +"%)";
+						var hsl_outside = "hsl("+bg2_hue+","+ bg2_sat +"%,"+ bg2_lum +"%)";
+
 						var rx = w/Math.sqrt(2);
 						var ry = h/Math.sqrt(2);
-						var cx = w/2;
-						var cy = h/2;
+						var cx = w*0.5;
+						var cy = h*0.5;
 						
 						var scaleX;
 						var scaleY;
@@ -178,8 +203,7 @@ let drawCanvas = function() {
 							scaleY = ry/rx;
 							invScaleY = rx/ry;
 							grad = ctx.createRadialGradient(cx, cy*invScaleY, 0, cx, cy*invScaleY, rx);
-						}
-						else {
+						} else {
 							scaleY = 1;
 							invScaleY = 1;
 							scaleX = rx/ry;
@@ -190,8 +214,8 @@ let drawCanvas = function() {
 						ctx.fillStyle = grad;
 						
 						//add desired colors
-						grad.addColorStop(0,"#000");
-						grad.addColorStop(1,hsl);
+						grad.addColorStop(0,hsl_center);
+						grad.addColorStop(1,hsl_outside);
 						
 						ctx.save();
 						ctx.setTransform(scaleX,0,0,scaleY,0,0);
@@ -303,8 +327,7 @@ let drawCanvas = function() {
 						var calc = [];
 						let num = ('num' in params)?params['num']['value']:80;
 						var anum = num*0.5;
-						for(var i=0; i<anum; i++) {
-							
+						for (var i=0; i<anum; i++) {
 							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 -2);
 							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
 							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/anum)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((anum-i/anum)*100,10)+"%,15%)";
@@ -439,11 +462,13 @@ let drawCanvas = function() {
 			'on': false,
 			'params': {
 				'white_count': { 'friendly_name': 'White Count', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-				'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
+				'white_size': { 'friendly_name': 'White Size', 'min': 1.0, 'max': 50.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'black_contour': { 'friendly_name': 'Black Contour', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 }
 			},
 			'call': function() {
 						let size = ('white_size' in params)?params['white_size']['value']:20;
-						let maxj = ('white_count' in params)?params['white_count']['value']:20;;
+						let maxj = ('white_count' in params)?params['white_count']['value']:20;
+						let black_contour = ('black_contour' in params)?params['black_contour']['value']:20;
 
 						var angle = 0.0; //(Math.PI*2)/num;
 
@@ -459,6 +484,7 @@ let drawCanvas = function() {
 						var oangle = Math.asin( centerX / Math.sqrt(centerX*centerX+centerY*centerY) ) * 2;
 						
 						var diagonal = 105 + sin3;
+						var stroke = "rgba(0,0,0,"+black_contour+")";
 		
 						for (var j=0; j<maxj; j++) {
 						
@@ -488,12 +514,11 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
-							
+
 							ctx.save();
 							
 							// clip top-right
@@ -510,13 +535,11 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
-							
-							
+
 							ctx.save();
 							
 							// clip right-top
@@ -533,12 +556,11 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
-							
+
 							ctx.save();
 							
 							// clip right-bottom
@@ -555,11 +577,10 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
 							
 							ctx.save();
 							// clip bottom-left
@@ -576,12 +597,11 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
-							
+
 							ctx.save();
 							// clip bottom-right
 							if (clip) {
@@ -597,12 +617,11 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
-							
-							
+
 							ctx.save();
 							
 							// clip right-bottom
@@ -619,10 +638,10 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
-							
 							
 							ctx.save();
 							
@@ -640,7 +659,8 @@ let drawCanvas = function() {
 										Math.sin(i*angle+phase1)*opening - diagonal, Math.cos(i*angle+phase1)*opening - diagonal,
 										i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3,
 										size*.5*j,
-										size);
+										size,
+										stroke);
 							
 							ctx.restore();
 						
@@ -679,6 +699,64 @@ let drawCanvas = function() {
 							ctx.stroke();
 							ctx.restore();
 						}
+						
+					}
+		},
+		'EFFECT_BLUE_WHITE_SEGMENTS': {
+			'on': false,
+			'params': {
+				'bw_linewidth': { 'friendly_name': 'Blue White Linewidth', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 10.0 },
+				'bw_scratch': { 'friendly_name': 'Scratch Arc', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 },
+				'bw_radius': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 },
+				'bw_btrans': { 'friendly_name': 'Blue Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+				'bw_wtrans': { 'friendly_name': 'White Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+
+			},
+			'call': function() {
+
+						let bw_linewidth = ('bw_linewidth' in params)?params['bw_linewidth']['value']:10;
+						let scratch = ('bw_scratch' in params)?params['bw_scratch']['value']:0;
+						let bw_radius = ('bw_radius' in params)?params['bw_radius']['value']:0.5*Math.PI;
+						let bw_btrans = ('bw_btrans' in params)?params['bw_btrans']['value']:0.5;
+						let bw_wtrans = ('bw_wtrans' in params)?params['bw_wtrans']['value']:0.5;
+						
+						var segment_length = bw_radius;
+						var start_angle = scratch + cos3 + timer/2000;
+						
+						var lineWidth = bw_linewidth;
+					
+						ctx.lineWidth = lineWidth;
+						ctx.lineCap = 'round';	
+						ctx.strokeStyle = "rgba(0,0,220,"+bw_btrans+")";
+						
+						var radius = 22;
+						var narcs = 35;
+
+						ctx.save();
+						ctx.translate(w*0.5,h*0.5);
+						
+						for (var i=0; i<narcs; i++) {
+							var r = radius * i;
+							ctx.beginPath();
+							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
+							ctx.stroke();
+						}
+						
+						ctx.strokeStyle = "rgba(220,220,220,"+bw_wtrans+")";
+						
+						//start_angle += Math.PI;
+						
+						ctx.rotate(Math.PI);
+						
+						for (var i=0; i<narcs; i++) {
+							var r = radius * i;
+							ctx.beginPath();
+							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
+							ctx.stroke();
+						}
+						
+						
+						ctx.restore();
 						
 					}
 		},
@@ -726,6 +804,67 @@ let drawCanvas = function() {
 						}
 						ctx.restore();
 						
+					}
+		},
+		'EFFECT_FOREGROUND': {
+			'on': false,
+			'params': {
+				'fg_hue': { 'friendly_name': 'Foreground Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 150.0, 'value': 150.0 },
+				'fg_sat': { 'friendly_name': 'Foreground Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 80.0, 'value': 20.0 },
+				'fg_lum': { 'friendly_name': 'Foreground Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 50.0, 'value': 30.0 }
+			},
+			'call': function() {
+				
+						let fg_hue = ('fg_hue' in params)?params['fg_hue']['value']:150.0;
+						let fg_sat = ('fg_sat' in params)?params['fg_sat']['value']:20.0;
+						let fg_lum = ('fg_lum' in params)?params['fg_lum']['value']:30.0;
+						
+						var hsl = ctx.fillStyle = "hsl("+fg_hue+","+fg_sat+"%,"+fg_lum+"%)";
+
+						var rx = w/Math.sqrt(2);
+						var ry = h/Math.sqrt(2);
+						var cx = w*0.5;
+						var cy = h*0.5;
+						
+						var scaleX;
+						var scaleY;
+						var invScaleX;
+						var invScaleY;
+						var grad;
+						
+						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
+						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
+						//just a solid fill with the outermost gradient color.
+						rx = (rx == 0) ? 0.25 : rx;
+						rr = (ry == 0) ? 0.25 : ry;
+						
+						//we create a circular gradient, but after transforming it properly (by shrinking in either the x or y direction),
+						//we will have an alliptical gradient.
+						if (rx >= ry) {
+							scaleX = 1;
+							invScaleX = 1;
+							scaleY = ry/rx;
+							invScaleY = rx/ry;
+							grad = ctx.createRadialGradient(cx, cy*invScaleY, 0, cx, cy*invScaleY, rx);
+						}
+						else {
+							scaleY = 1;
+							invScaleY = 1;
+							scaleX = rx/ry;
+							invScaleX = ry/rx;
+							grad = ctx.createRadialGradient(cx*invScaleX, cy, 0, cx*invScaleX, cy, ry);
+						}
+						
+						ctx.fillStyle = grad;
+						
+						//add desired colors
+						grad.addColorStop(0,"rgba(0,0,0,0.0)");
+						grad.addColorStop(1,hsl);
+						
+						ctx.save();
+						ctx.setTransform(scaleX,0,0,scaleY,0,0);
+						ctx.fillRect(0,0,w*invScaleX,h*invScaleY);
+						ctx.restore();
 					}
 		}
 		
@@ -961,6 +1100,10 @@ console.log(keyCode);
 			toggleOnOff('EFFECT_BACKGROUND');
 			sendParameters();
 		break;
+		case 189: // '
+			toggleOnOff('EFFECT_FOREGROUND');
+			sendParameters();
+		break;
 		case 49: // 1
 			toggleOnOff('EFFECT_RED_STARS');
 			sendParameters();
@@ -997,6 +1140,12 @@ console.log(keyCode);
 			toggleOnOff('EFFECT_WALKERS');
 			sendParameters();
 		break;
+		
+		case 81: // q
+			toggleOnOff('EFFECT_BLUE_WHITE_SEGMENTS');
+			sendParameters();
+		break;
+		
 		case 72: // h
 			//TODO: hide text with ip adress
 			var ip = document.getElementById("ip"); 
@@ -1077,3 +1226,13 @@ arraySize = function(obj) {
     }
     return size;
 };
+
+function listActiveOn() {
+	var output = "'on': ['";
+	for (var fx in cv.effects) {
+		if (cv.effects[fx]['on'] == true) output += fx + "','";
+	}
+	output += "']";
+	console.log(output);
+}
+
