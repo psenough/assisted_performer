@@ -1,12 +1,6 @@
 
 let showFPS = true;
 
-rand = function(n){
-	return Math.floor(Math.random()*n);
-};
-
-window.onload = function(){init();};
-
 let cv;
 let w;
 let h;
@@ -19,7 +13,6 @@ let active_part = 0;
 //TODO: when layers with the keys, remove parameters from effect being toggled off
 // text overlays sequence easy triggering
 // line width on white triangles is not defined
-// display fps counter
 // be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
 
 let cl = [
@@ -28,21 +21,22 @@ let cl = [
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_RANDOM_LINES','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_RANDOM_LINES','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_RANDOM_LINES','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_FOREGROUND'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
-['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_WALKERS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_RANDOM_LINES','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
 ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND']
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_FOREGROUND']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
 let configs = {};
 for (let i=0; i<cl.length; i++) configs[i] = {'on': cl[i] };
+
+window.onload = function(){ init(); };
 
 function init() {
 	try {
@@ -66,8 +60,7 @@ function changePart(next_part) {
 		params = {};
 		
 		// clear all active effects
-		for (fx in cv.effects) 
-		{
+		for (fx in cv.effects) {
 			cv.effects[fx]['on'] = false;
 		}
 		
@@ -91,7 +84,6 @@ function changePart(next_part) {
 		
 		// report the new parameters to the server		
 		sendParameters();
-		
 	}
 }
 
@@ -111,6 +103,7 @@ function addToParams(this_fx_params) {
 	}
 }
 
+// used on EFFECT_WHITE
 function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height, stroke) {
 	ctx.strokeStyle = stroke;
 	ctx.translate( centerX, centerY );
@@ -292,11 +285,7 @@ let drawCanvas = function() {
 						color3 = "rgba(88,254,250,"+cyan_trans+")";
 						
 						ctx.lineCap = 'round';
-						//ctx.globalCompositeOperation = 'xor';
-						//ctx.shadowOffsetX = 5;
-						//ctx.shadowOffsetY = 6;
-						//ctx.shadowColor = "rgba(0,0,0,.1)";
-							
+
 						let lW2 = Math.sin(timer/1000)*10+18;
 						
 						for(let i=0;i<=wcolumns;i++) {
@@ -321,24 +310,28 @@ let drawCanvas = function() {
 								}
 							}
 						}
-						//updateWalkers();
 						
 					}
 		},
 		'EFFECT_CENTER_ARCS': {
 			'on': false,
 			'params': {
-				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
-				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+				'num_arcs': { 'friendly_name': 'Number Circles', 'min': 10.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 20.0 },
+				'circles_light': { 'friendly_name': 'Circles Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'circles_trans': { 'friendly_name': 'Circles Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 1.0, 'value': 1.0 },
+				'circles_size': { 'friendly_name': 'Circles Line Width', 'min': 1.0, 'max': 40.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
 			},
 			'call': function() {
 						let calc = [];
-						let num = ('num' in params)?params['num']['value']:80;
-						let anum = num*0.5;
+						let anum = ('num_arcs' in params)?params['num_arcs']['value']:20.0;
+						let lightness = ('circles_light' in params)?params['circles_light']['value']:20.0;
+						let alpha = ('circles_trans' in params)?params['circles_trans']['value']:1.0;
+						let base = ('circles_size' in params)?params['circles_size']['value']:5.0;
+
 						for (let i=0; i<anum; i++) {
-							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 -2);
+							ctx.lineWidth = Math.max(base,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 + base);
 							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
-							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/anum)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((anum-i/anum)*100,10)+"%,15%)";
+							ctx.strokeStyle = "hsla("+parseInt(((seedrand*sin2*2+(i/anum)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((anum-i/anum)*100,10)+"%,"+lightness+"%,"+alpha+")";
 						
 							ctx.save();
 							ctx.translate(w*0.5,h*0.5);
@@ -353,24 +346,29 @@ let drawCanvas = function() {
 		'EFFECT_PINK_SPYRAL': {
 			'on': false,
 			'params': {
-				'num_spyral': { 'friendly_name': 'Number Spyrals', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+				'num_spyral': { 'friendly_name': 'Spyral Number Triangles', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 60.0 },
+				'lw_spyral': { 'friendly_name': 'Pink Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 2.0, 'value': 2.0 },
+				'parts_spyral': { 'friendly_name': 'Spyral Parts', 'min': 3.0, 'max': 25.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
+
 			},
 			'call': function() {
 						let num = ('num_spyral' in params)?params['num_spyral']['value']:80;
-						ctx.lineWidth = 1;
+						let lw = ('lw_spyral' in params)?params['lw_spyral']['value']:2;
+						let parts = ('parts_spyral' in params)?params['parts_spyral']['value']:5;
+
+						ctx.lineWidth = lw;
 						ctx.strokeStyle = "rgba(200,100,200,0.5)";
+						ctx.lineJoin = "round";
 						ctx.save();
 						ctx.translate(w*.5,h*.5);
 						ctx.rotate((n2-n)*0.0001);
-						let parts = 5;
-						for (let k=0; k < parts; k++) {
+						for (let k=0; k<parts; k++) {
 							for(let i=0; i<num*0.15; i++) {
 								let sizex = i*(4+cos2*20);
 								let sizey = i*(4+cos2*30);
-								//ctx.save();
 								ctx.beginPath();
 								ctx.moveTo(sizex+sin3*100, sizey+sin3*100);
-								for (let j=0; j<3; j++) {
+								for (let j=0; j<2; j++) {
 									ctx.lineTo(sizex+j*60*cos2+i*50-k*sin3, sizey-j*20*cos2+i*50 + 20*j+i);
 								}
 								ctx.closePath();
@@ -404,9 +402,7 @@ let drawCanvas = function() {
 						
 						ctx.lineCap = 'round';
 						ctx.strokeStyle = "rgba(0,0,0,0.25)";
-						
 
-						//ctx.save();
 						ctx.beginPath();
 						ctx.moveTo(calc[0]['x'], calc[0]['y']);
 						for(i=1; i<num; i++) {
@@ -486,6 +482,7 @@ let drawCanvas = function() {
 						
 						phase1 = timer/25000;
 						phase2 = timer/2500;
+						ctx.lineJoin = "round";
 						
 						let seedindex = rand(3928896423);
 						let clip = false;
@@ -939,6 +936,7 @@ let drawCanvas = function() {
 					dom.innerHTML = average;
 				}
 				counter = 0;
+				fpsArray = [];
 			} else {
 				if (fps !== Infinity) {
 					fpsArray.push(fps);
@@ -1270,6 +1268,10 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 
 }
 
+rand = function(n){
+	return Math.floor(Math.random()*n);
+};
+
 arraySize = function(obj) {
     let size = 0, key;
     for (key in obj) {
@@ -1279,7 +1281,7 @@ arraySize = function(obj) {
 };
 
 function listActiveOn() {
-	let output = "'";
+	let output = "['";
 	for (let fx in cv.effects) {
 		if (cv.effects[fx]['on'] == true) output += fx + "','";
 	}
