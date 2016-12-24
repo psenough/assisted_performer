@@ -44,3 +44,19 @@ canvas, img {
 	z-index: 200;
 	background-color: rgba(0,0,0,0.5);
 }
+
+#fps {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	font-size: 20px;
+	color: white;
+	text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+	z-index: 200;
+	background-color: transparent;
+}
+

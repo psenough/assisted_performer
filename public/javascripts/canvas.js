@@ -1,20 +1,28 @@
 
+let showFPS = true;
+
 rand = function(n){
 	return Math.floor(Math.random()*n);
 };
 
 window.onload = function(){init();};
 
-var cv;
-var w;
-var h;
-var ctx;
-var halfw;
-var halfh;
-var params = {};
-var active_part = 0;
+let cv;
+let w;
+let h;
+let ctx;
+let halfw;
+let halfh;
+let params = {};
+let active_part = 0;
 
-var cl = [
+//TODO: when layers with the keys, remove parameters from effect being toggled off
+// text overlays sequence easy triggering
+// line width on white triangles is not defined
+// display fps counter
+// be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
+
+let cl = [
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
@@ -28,12 +36,13 @@ var cl = [
 ['UPDATE_TIMERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
 ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS']
+['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
-var configs = {};
-for (var i=0; i<cl.length; i++) configs[i] = {'on': cl[i] };
+let configs = {};
+for (let i=0; i<cl.length; i++) configs[i] = {'on': cl[i] };
 
 function init() {
 	try {
@@ -64,7 +73,7 @@ function changePart(next_part) {
 		
 		// activate the ones listed on this part only
 		if ('on' in configs[active_part]) {
-			for (var j=0; j<configs[active_part]['on'].length; j++) {
+			for (let j=0; j<configs[active_part]['on'].length; j++) {
 				for (fx in cv.effects) {
 					if (fx == configs[active_part]['on'][j]) {
 						// toggle the effect on
@@ -90,7 +99,7 @@ function addToParams(this_fx_params) {
 	// add the params from this effect to our global params list
 	for (p in this_fx_params) {
 		// only if they are not listed already
-		var pexists = false;
+		let pexists = false;
 		for (ep in params) {
 			if (ep == p) {
 				pexists = true;
@@ -121,18 +130,17 @@ function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle
 let drawCanvas = function() {
 	resize();
 	
-	var seedrand = rand(360);
-	
-	var d2 = new Date();
-	var n2 = d2.getTime(); 	
-	var timer = n2-n;
-	var sin1 = Math.sin((n2-n)/200)+1.0;
-	var sin3 = Math.sin((n2-n)/2800)+1.0;
-	var cos1 = Math.cos((n2-n)/800)+1.0;
-	var cos2 = Math.cos((n2-n)/2800);
-	var cos3 = Math.cos((n2-n)/1600);
-	var cos4 = Math.cos((n2-n)/5711);
-	var sin2 = Math.sin(sin1*0.05+cos2)+1.0;
+	let seedrand = rand(360);
+	let d = d2 = new Date();
+	let n = n2 = d.getTime();
+	let timer = n2-n;
+	let sin1 = Math.sin((n2-n)/200)+1.0;
+	let sin3 = Math.sin((n2-n)/2800)+1.0;
+	let cos1 = Math.cos((n2-n)/800)+1.0;
+	let cos2 = Math.cos((n2-n)/2800);
+	let cos3 = Math.cos((n2-n)/1600);
+	let cos4 = Math.cos((n2-n)/5711);
+	let sin2 = Math.sin(sin1*0.05+cos2)+1.0;
 	
 	this.effects = {
 		'UPDATE_TIMERS': {
@@ -175,19 +183,19 @@ let drawCanvas = function() {
 						let bg2_sat = ('bg2_sat' in params)?params['bg2_sat']['value']:0.0;
 						let bg2_lum = ('bg2_lum' in params)?params['bg2_lum']['value']:0.0;
 						
-						var hsl_center = "hsl("+bg_hue+","+ bg_sat +"%,"+ bg_lum +"%)";
-						var hsl_outside = "hsl("+bg2_hue+","+ bg2_sat +"%,"+ bg2_lum +"%)";
+						let hsl_center = "hsl("+bg_hue+","+ bg_sat +"%,"+ bg_lum +"%)";
+						let hsl_outside = "hsl("+bg2_hue+","+ bg2_sat +"%,"+ bg2_lum +"%)";
 
-						var rx = w/Math.sqrt(2);
-						var ry = h/Math.sqrt(2);
-						var cx = w*0.5;
-						var cy = h*0.5;
+						let rx = w/Math.sqrt(2);
+						let ry = h/Math.sqrt(2);
+						let cx = w*0.5;
+						let cy = h*0.5;
 						
-						var scaleX;
-						var scaleY;
-						var invScaleX;
-						var invScaleY;
-						var grad;
+						let scaleX;
+						let scaleY;
+						let invScaleX;
+						let invScaleY;
+						let grad;
 						
 						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
 						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
@@ -234,24 +242,24 @@ let drawCanvas = function() {
 						let num = ('num' in params)?params['num']['value']:80;
 						let rms = ('rms' in params)?params['rms']['value']:0.5;
 						let red = ('red' in params)?params['red']['value']:122;
-						var sizex = w/num;
-						var sizexhalf = parseInt((w/num)*0.5,10);
-						var sizey = parseInt(10*(w/h),10);
+						let sizex = w/num;
+						let sizexhalf = parseInt((w/num)*0.5,10);
+						let sizey = parseInt(10*(w/h),10);
 						
 						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);
-						var r1 = parseInt(red,10);
+						let r1 = parseInt(red,10);
 						if (r1 > 255) r1 = 255;
 						if (r1 < 0) r1 = 0;
 						ctx.fillStyle = "rgba("+r1+",0,0,1.0)";
 						
-						for(var i=1; i<num; i++) {
-							var ydrift = i*cos2 + sin3*((num-i)*i)*20 + (i+10)*sin1/(cos3+500);
+						for(let i=1; i<num; i++) {
+							let ydrift = i*cos2 + sin3*((num-i)*i)*20 + (i+10)*sin1/(cos3+500);
 							
-							var posx = parseInt(i*sizex,10);
-							var posy = parseInt((w*0.25+ydrift)%w,10);
+							let posx = parseInt(i*sizex,10);
+							let posy = parseInt((w*0.25+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 5, true, false);
 							
-							//var posx = parseInt(i*sizex,10);
+							//let posx = parseInt(i*sizex,10);
 							posy = parseInt((w*0.5+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 3+20*sin2, true, false);
 							
@@ -271,11 +279,11 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 	
-						var wcolumns = 0|(w*.0175);
-						var wlines = 0|(h*.015);
+						let wcolumns = 0|(w*.0175);
+						let wlines = 0|(h*.015);
 
-						var colwidth = w/wcolumns;
-						var linspace = h/wlines;
+						let colwidth = w/wcolumns;
+						let linspace = h/wlines;
 						
 						let orange_trans = ('otrans' in params)?params['otrans']['value']:0.5;
 						let cyan_trans = ('ctrans' in params)?params['ctrans']['value']:0.5;
@@ -289,13 +297,13 @@ let drawCanvas = function() {
 						//ctx.shadowOffsetY = 6;
 						//ctx.shadowColor = "rgba(0,0,0,.1)";
 							
-						var lW2 = Math.sin(timer/1000)*10+18;
+						let lW2 = Math.sin(timer/1000)*10+18;
 						
-						for(var i=0;i<=wcolumns;i++) {
-							for(var j=0;j<=wlines;j++) {
-								var floatingx = colwidth*i;
-								var floatingy = linspace*j;
-								var halfsize = colwidth*.5;
+						for(let i=0;i<=wcolumns;i++) {
+							for(let j=0;j<=wlines;j++) {
+								let floatingx = colwidth*i;
+								let floatingy = linspace*j;
+								let halfsize = colwidth*.5;
 								if (rand(2) == 0) {
 										ctx.strokeStyle = color3;
 										ctx.lineWidth = lW2;
@@ -324,10 +332,10 @@ let drawCanvas = function() {
 				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
 			},
 			'call': function() {
-						var calc = [];
+						let calc = [];
 						let num = ('num' in params)?params['num']['value']:80;
-						var anum = num*0.5;
-						for (var i=0; i<anum; i++) {
+						let anum = num*0.5;
+						for (let i=0; i<anum; i++) {
 							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 -2);
 							//ctx.strokeStyle = "rgba("+red+","+parseInt(((num-i)/num)*255,10)+",10,0.1)";
 							ctx.strokeStyle = "hsl("+parseInt(((seedrand*sin2*2+(i/anum)*360*cos1*0.25+sin2*i+n2*0.5)%360)*0.5 + 80*sin2,10)+","+parseInt((anum-i/anum)*100,10)+"%,15%)";
@@ -354,15 +362,15 @@ let drawCanvas = function() {
 						ctx.save();
 						ctx.translate(w*.5,h*.5);
 						ctx.rotate((n2-n)*0.0001);
-						var parts = 5;
-						for (var k=0; k < parts; k++) {
-							for(var i=0; i<num*0.15; i++) {
-								var sizex = i*(4+cos2*20);
-								var sizey = i*(4+cos2*30);
+						let parts = 5;
+						for (let k=0; k < parts; k++) {
+							for(let i=0; i<num*0.15; i++) {
+								let sizex = i*(4+cos2*20);
+								let sizey = i*(4+cos2*30);
 								//ctx.save();
 								ctx.beginPath();
 								ctx.moveTo(sizex+sin3*100, sizey+sin3*100);
-								for (var j=0; j<3; j++) {
+								for (let j=0; j<3; j++) {
 									ctx.lineTo(sizex+j*60*cos2+i*50-k*sin3, sizey-j*20*cos2+i*50 + 20*j+i);
 								}
 								ctx.closePath();
@@ -380,27 +388,29 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 						let num = ('num_lines' in params)?params['num_lines']['value']:80;
-						var calc = [];
-						for(var i=0; i<num; i++) {
+						let calc = [];
+						let i=0;
+						
+						for(i=0; i<num; i++) {
 							calc[i] = [];
 							calc[i]['x'] = rand(w);
 							calc[i]['y'] = rand(h);
 							calc[i]['rot'] = rand(180);
 						}
 						
-						var sizex = w/num;
-						var sizexhalf = parseInt((w/num)*0.5,10);
-						var sizey = parseInt(10*(w/h),10);
+						let sizex = w/num;
+						let sizexhalf = parseInt((w/num)*0.5,10);
+						let sizey = parseInt(10*(w/h),10);
 						
 						ctx.lineCap = 'round';
-						ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
 						ctx.strokeStyle = "rgba(0,0,0,0.25)";
 						
 
 						//ctx.save();
 						ctx.beginPath();
 						ctx.moveTo(calc[0]['x'], calc[0]['y']);
-						for(var i=1; i<num; i++) {
+						for(i=1; i<num; i++) {
+							ctx.lineWidth = Math.max(1,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2);
 							ctx.lineTo(calc[i]['x'], calc[i]['y']);
 						}
 						ctx.closePath();
@@ -415,8 +425,8 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 
-						var parts = 3;
-						var flip = Math.sin(sin1*cos1*cos3);
+						let parts = 3;
+						let flip = Math.sin(sin1*cos1*cos3);
 						let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
 						let num = ('num_rotors' in params)?params['num_rotors']['value']:80;
 						
@@ -425,10 +435,10 @@ let drawCanvas = function() {
 						ctx.save();
 						ctx.translate(w*(1.0+cos3*0.5)*.5,h*.5);
 						ctx.rotate((n2-n)*0.01*rotors_speed);
-						for (var k=0; k < parts; k++) {
-							for(var i=0; i<num*0.5; i++) {
-								var sizex = i*(4+cos2*20);
-								var sizey = i*(4+cos2*30);
+						for (let k=0; k < parts; k++) {
+							for(let i=0; i<num*0.5; i++) {
+								let sizex = i*(4+cos2*20);
+								let sizey = i*(4+cos2*30);
 								ctx.beginPath();
 								ctx.moveTo(sizex+sin3*120, sizey+cos4*100);
 								ctx.lineTo(sizex, sizey);
@@ -442,10 +452,10 @@ let drawCanvas = function() {
 						ctx.save();
 						ctx.translate(w*(1.0-cos3*0.5)*.5,h*.5);
 						ctx.rotate(-(n2-n)*0.01*rotors_speed);
-						for (var k=0; k < parts; k++) {
-							for(var i=0; i<num*0.5; i++) {
-								var sizex = i*(4+cos2*20);
-								var sizey = i*(4+cos2*30);
+						for (let k=0; k < parts; k++) {
+							for(let i=0; i<num*0.5; i++) {
+								let sizex = i*(4+cos2*20);
+								let sizey = i*(4+cos2*30);
 								//ctx.save();
 								ctx.beginPath();
 								ctx.moveTo(sizex+sin3*120, sizey+cos4*100);
@@ -470,28 +480,28 @@ let drawCanvas = function() {
 						let maxj = ('white_count' in params)?params['white_count']['value']:20;
 						let black_contour = ('black_contour' in params)?params['black_contour']['value']:20;
 
-						var angle = 0.0; //(Math.PI*2)/num;
+						let angle = 0.0; //(Math.PI*2)/num;
 
-						var opening, phase1, phase2;
+						let opening, phase1, phase2;
 						
 						phase1 = timer/25000;
 						phase2 = timer/2500;
 						
-						var seedindex = rand(3928896423);
-						var clip = false;
-						var centerX = w*0.5;
-						var centerY = h*0.5;
-						var oangle = Math.asin( centerX / Math.sqrt(centerX*centerX+centerY*centerY) ) * 2;
+						let seedindex = rand(3928896423);
+						let clip = false;
+						let centerX = w*0.5;
+						let centerY = h*0.5;
+						let oangle = Math.asin( centerX / Math.sqrt(centerX*centerX+centerY*centerY) ) * 2;
 						
-						var diagonal = 105 + sin3;
-						var stroke = "rgba(0,0,0,"+black_contour+")";
+						let diagonal = 105 + sin3;
+						let stroke = "rgba(0,0,0,"+black_contour+")";
 		
-						for (var j=0; j<maxj; j++) {
+						for (let j=0; j<maxj; j++) {
 						
-							var thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
+							let thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
 							color = "rgba(255,255,255,"+(0.12*((maxj-j)/maxj))+")";
 							ctx.fillStyle = color;
-							var i = seedindex;
+							let i = seedindex;
 							opening = j*30 + sin3*20 + sin1*10 ;
 							
 							ctx.save();
@@ -685,7 +695,7 @@ let drawCanvas = function() {
 						
 						ctx.lineWidth = sine_line_width;
 
-						for (var i=0; i<num_tlines; i++) {
+						for (let i=0; i<num_tlines; i++) {
 							ctx.save();
 							
 							ctx.translate(w*.5 + Math.sin(i + cos3)*w*.5, - Math.sin(i + cos2 + sin2*cos1)*20 + Math.sin(i*sin2)*50);
@@ -693,7 +703,7 @@ let drawCanvas = function() {
 							ctx.strokeStyle = "rgba(120,0,0,"+rtrans+")";
 							ctx.beginPath();
 							ctx.moveTo(0,0);
-							for (var j=1; j<num_tsegments; j++) {
+							for (let j=1; j<num_tsegments; j++) {
 								ctx.lineTo(Math.sin(j + cos2*30 + sin1*20)*10, j*(h/(num_tsegments)));
 							}
 							ctx.stroke();
@@ -720,23 +730,23 @@ let drawCanvas = function() {
 						let bw_btrans = ('bw_btrans' in params)?params['bw_btrans']['value']:0.5;
 						let bw_wtrans = ('bw_wtrans' in params)?params['bw_wtrans']['value']:0.5;
 						
-						var segment_length = bw_radius;
-						var start_angle = scratch + cos3 + timer/2000;
+						let segment_length = bw_radius;
+						let start_angle = scratch + cos3 + timer/2000;
 						
-						var lineWidth = bw_linewidth;
+						let lineWidth = bw_linewidth;
 					
 						ctx.lineWidth = lineWidth;
 						ctx.lineCap = 'round';	
 						ctx.strokeStyle = "rgba(0,0,220,"+bw_btrans+")";
 						
-						var radius = 22;
-						var narcs = 35;
+						let radius = 22;
+						let narcs = 35;
 
 						ctx.save();
 						ctx.translate(w*0.5,h*0.5);
 						
-						for (var i=0; i<narcs; i++) {
-							var r = radius * i;
+						for (let i=0; i<narcs; i++) {
+							let r = radius * i;
 							ctx.beginPath();
 							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
 							ctx.stroke();
@@ -748,8 +758,8 @@ let drawCanvas = function() {
 						
 						ctx.rotate(Math.PI);
 						
-						for (var i=0; i<narcs; i++) {
-							var r = radius * i;
+						for (let i=0; i<narcs; i++) {
+							let r = radius * i;
 							ctx.beginPath();
 							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
 							ctx.stroke();
@@ -765,12 +775,12 @@ let drawCanvas = function() {
 			'params': {},
 			'call': function() {
 
-						var columns = 2;
-						var lines = 10;
-						var colwidth = w/columns;
-						var linspace = h/lines;
-						var timer = n2-n;
-						var note = rand(255);
+						let columns = 2;
+						let lines = 10;
+						let colwidth = w/columns;
+						let linspace = h/lines;
+						let timer = n2-n;
+						let note = rand(255);
 						
 						//ctx.lineCap = 'round';
 						
@@ -778,11 +788,11 @@ let drawCanvas = function() {
 						ctx.translate(0,0);
 
 						ctx.lineWidth = colwidth + Math.sin(timer/1000)*colwidth;
-						for(var i=0;i<columns+1;i++) {
-							var grad1 = rand(255-note);
+						for(let i=0;i<columns+1;i++) {
+							let grad1 = rand(255-note);
 							color2 = "rgba("+grad1+","+grad1+","+grad1+",.15)";
 							ctx.strokeStyle = color2;
-							var floatingx = colwidth*i;
+							let floatingx = colwidth*i;
 							ctx.beginPath();
 							ctx.moveTo(floatingx, 0);	
 							ctx.lineTo(floatingx, h);
@@ -791,11 +801,11 @@ let drawCanvas = function() {
 						}
 
 						ctx.lineWidth = linspace + Math.sin(timer/1000+500)*linspace;				
-						for(var j=0;j<lines+1;j++) {
-							var grad1 = rand(255-note);
+						for(let j=0;j<lines+1;j++) {
+							let grad1 = rand(255-note);
 							color2 = "rgba("+grad1+","+grad1+","+grad1+",.15)";
 							ctx.strokeStyle = color2;
-							var floatingy = linspace*j;
+							let floatingy = linspace*j;
 							ctx.beginPath();
 							ctx.moveTo(0, floatingy);	
 							ctx.lineTo(w, floatingy);
@@ -819,18 +829,18 @@ let drawCanvas = function() {
 						let fg_sat = ('fg_sat' in params)?params['fg_sat']['value']:20.0;
 						let fg_lum = ('fg_lum' in params)?params['fg_lum']['value']:30.0;
 						
-						var hsl = ctx.fillStyle = "hsl("+fg_hue+","+fg_sat+"%,"+fg_lum+"%)";
+						let hsl = ctx.fillStyle = "hsl("+fg_hue+","+fg_sat+"%,"+fg_lum+"%)";
 
-						var rx = w/Math.sqrt(2);
-						var ry = h/Math.sqrt(2);
-						var cx = w*0.5;
-						var cy = h*0.5;
+						let rx = w/Math.sqrt(2);
+						let ry = h/Math.sqrt(2);
+						let cx = w*0.5;
+						let cy = h*0.5;
 						
-						var scaleX;
-						var scaleY;
-						var invScaleX;
-						var invScaleY;
-						var grad;
+						let scaleX;
+						let scaleY;
+						let invScaleX;
+						let invScaleY;
+						let grad;
 						
 						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
 						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
@@ -871,7 +881,7 @@ let drawCanvas = function() {
 	}
 	
 	function drawThis() {
-		for(var fx in cv.effects) {
+		for(let fx in cv.effects) {
 			//console.log(effects[fx]['call']);
 			if (cv.effects[fx]['on'] === true) cv.effects[fx]['call']();
 		}
@@ -879,29 +889,63 @@ let drawCanvas = function() {
 	
 	requestAnimationFrame( animate );
 	
-	var d = new Date();
-	var n = d.getTime();
-	var repeater = n;
-	var rperiod = 6000;
-	var index = 0;
+	/*let repeater = n;
+	let rperiod = 6000;
+	let index = 0;*/
 	
+	// hack to stop the animation on code to help debug stuff
 	//this.stop = false;
 
+	// for framerate counting
+	let lastCalledTime;
+	let counter = 0;
+	let fpsArray = [];
+	
+	// main loop
 	function animate() {
 		//if (this.stop)
 		requestAnimationFrame( animate );
 		drawThis();
 		
-		/*var dom = document.getElementById('message');
+		/*let dom = document.getElementById('message');
 		if (dom) {
-			var d2 = new Date();
-			var n2 = d2.getTime(); 
+			let d2 = new Date();
+			let n2 = d2.getTime(); 
 			if (((n2-n) > 6000) && (n2-repeater) > rperiod) {
 				repeater = n2;
 				loadLine('',words[index++]);
 				if (index >= words.length) index = 0;
 			}
 		}*/
+		
+		// fps counter, taken from https://gist.github.com/C0deMaver1ck/d51659371a345a9327bd
+		if (showFPS) {
+			let fps;
+	
+			if (!lastCalledTime) {
+				lastCalledTime = new Date().getTime();
+				fps = 0;
+			}
+		
+			let delta = (new Date().getTime() - lastCalledTime) / 1000;
+			lastCalledTime = new Date().getTime();
+			fps = Math.ceil((1/delta));
+		
+			if (counter >= 60) {
+				let sum = fpsArray.reduce(function(a,b) { return a + b });
+				let average = Math.ceil(sum / fpsArray.length);
+				let dom = document.getElementById("fps"); 
+				if (dom) {
+					dom.innerHTML = average;
+				}
+				counter = 0;
+			} else {
+				if (fps !== Infinity) {
+					fpsArray.push(fps);
+				}
+				counter++;
+			}
+		}
 	}
 }
 
@@ -911,7 +955,7 @@ function resize() {
 	w = window.innerWidth;
 	h = window.innerHeight;
 	
-	var canvas = document.getElementById("canvas");
+	let canvas = document.getElementById("canvas");
 	//console.log(canvas);
 	if (!canvas) {
 		canvas = document.createElement('canvas');
@@ -928,29 +972,40 @@ function resize() {
 	halfw = w*.5;
 	halfh = h*.5;
 	
-	/*var ip = document.getElementById("ip"); 
+	/*let ip = document.getElementById("ip"); 
 	if (!ip) {
 		ip = document.createElement('div');
 		ip.setAttribute('id','ip');
 		document.body.appendChild(ip);
 		ip.innerHTML = 'http://192.168.1.28:8090';
 	}*/
+	
+	if (showFPS) {
+		let fps = document.getElementById("fps"); 
+		if (!fps) {
+			fps = document.createElement('div');
+			fps.setAttribute('id','fps');
+			document.body.appendChild(fps);
+			fps.innerHTML = '0';
+		}
+	}
+	
 }
 
 function loadLine(thisclass, thistext) {
-	//var content = '';
+	//let content = '';
 	//content += '<span class="'+thisclass+'">'+thistext+'</span><br />';
 	//document.getElementById('message').innerHTML = content;
 }
 
-var words = [
+let words = [
 "test12",
 "test"
 ];
 
-var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
-var this_ws = null;
-var this_timeout = false;
+let this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
+let this_ws = null;
+let this_timeout = false;
 
 function connectWebSockets() {
 
@@ -969,17 +1024,13 @@ function connectWebSockets() {
 	};
 
 	this_ws.onmessage = function(evt) {
-
 		//console.log(evt.data);
-
-		var parsed = JSON.parse(evt.data);
-
+		let parsed = JSON.parse(evt.data);
 		for (instance in parsed) {
 			if (instance in params) {
 				params[instance]['value'] = parsed[instance];
 			}
 		}
-
 		//console.log(parsed);
 	};
 
@@ -997,10 +1048,10 @@ function connectWebSockets() {
 };
 
 
-// TODO: get live input https://webaudiodemos.appspot.com/input/index.html
+// TODO: maybe get live input https://webaudiodemos.appspot.com/input/index.html to do some FFT syncing stuff ?!
 
 function initAudio() {
-    /*var irRRequest = new XMLHttpRequest();
+    /*let irRRequest = new XMLHttpRequest();
     irRRequest.open("GET", "sounds/cardiod-rear-levelled.wav", true);
     irRRequest.responseType = "arraybuffer";
     irRRequest.onload = function() {
@@ -1064,14 +1115,14 @@ function initAudio() {
 
 function gotSources(sourceInfos) {
 	console.log(sourceInfos);
-    /*var audioSelect = document.getElementById("audioinput");
+    /*let audioSelect = document.getElementById("audioinput");
     while (audioSelect.firstChild)
         audioSelect.removeChild(audioSelect.firstChild);
 
-    for (var i = 0; i != sourceInfos.length; ++i) {
-        var sourceInfo = sourceInfos[i];
+    for (let i = 0; i != sourceInfos.length; ++i) {
+        let sourceInfo = sourceInfos[i];
         if (sourceInfo.kind === 'audio') {
-            var option = document.createElement("option");
+            let option = document.createElement("option");
             option.value = sourceInfo.id;
             option.text = sourceInfo.label || 'input ' + (audioSelect.length + 1);
             audioSelect.appendChild(option);
@@ -1083,7 +1134,7 @@ function gotSources(sourceInfos) {
 document.addEventListener("keydown", keydown, false);
 
 function keydown(e) {
-var keyCode = e.keyCode;
+let keyCode = e.keyCode;
 console.log(keyCode);
 	switch(keyCode) {
 		case 39: // right arrow
@@ -1148,7 +1199,7 @@ console.log(keyCode);
 		
 		case 72: // h
 			//TODO: hide text with ip adress
-			var ip = document.getElementById("ip"); 
+			let ip = document.getElementById("ip"); 
 			if (ip) {
 				if ((ip.className) == '') ip.className = 'hidden';
 				 else ip.className = '';
@@ -1194,8 +1245,8 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
   if (typeof radius === 'number') {
     radius = {tl: radius, tr: radius, br: radius, bl: radius};
   } else {
-    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
-    for (var side in defaultRadius) {
+    let defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (let side in defaultRadius) {
       radius[side] = radius[side] || defaultRadius[side];
     }
   }
@@ -1220,7 +1271,7 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
 }
 
 arraySize = function(obj) {
-    var size = 0, key;
+    let size = 0, key;
     for (key in obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
@@ -1228,8 +1279,8 @@ arraySize = function(obj) {
 };
 
 function listActiveOn() {
-	var output = "'on': ['";
-	for (var fx in cv.effects) {
+	let output = "'";
+	for (let fx in cv.effects) {
 		if (cv.effects[fx]['on'] == true) output += fx + "','";
 	}
 	output += "']";
