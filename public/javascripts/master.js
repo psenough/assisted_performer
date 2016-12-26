@@ -163,6 +163,17 @@ function connectWebSockets() {
 					output.innerHTML = params[key]['value'];
 					col3.appendChild(output);
 					
+					var col5 = document.createElement('cell');
+					col5.setAttribute('class','cell');
+					row.appendChild(col5);
+					
+					var write = document.createElement('input');
+					write.key = key;
+					write.setAttribute('id',key+'_write');
+					write.setAttribute('type','checkbox');
+					write.setAttribute('title','write');
+					col5.appendChild(write);
+					
 				}
 			}
 			
@@ -193,6 +204,38 @@ function connectWebSockets() {
 				wander_none.addEventListener('click', function(evt) {
 					for (var p in params) {
 						var dom = document.getElementById(p+'_wander');
+						if (dom) dom.removeAttribute('checked');
+					}
+				}, false);
+			}
+			
+			// add write all button
+			var write_all = document.getElementById('write_all');
+			if (!write_all) {
+				write_all = document.createElement('input');
+				write_all.setAttribute('id','write_all');
+				write_all.setAttribute('type','button');
+				write_all.setAttribute('value','write all');
+				document.body.appendChild(write_all);
+				write_all.addEventListener('click', function(evt) {
+					for (var p in params) {
+						var dom = document.getElementById(p+'_write');
+						if (dom) dom.setAttribute('checked','checked');
+					}
+				}, false);
+			}
+			
+			// write none button
+			var write_none = document.getElementById('write_none');
+			if (!write_none) {
+				write_none = document.createElement('input');
+				write_none.setAttribute('id','write_none');
+				write_none.setAttribute('type','button');
+				write_none.setAttribute('value','write none');
+				document.body.appendChild(write_none);
+				write_none.addEventListener('click', function(evt) {
+					for (var p in params) {
+						var dom = document.getElementById(p+'_write');
 						if (dom) dom.removeAttribute('checked');
 					}
 				}, false);
@@ -233,7 +276,7 @@ function recheck_ping() {
 			if ((wander) && (wander.checked != false)) {
 				// check how wide the steps are
 				var diff = Math.floor((params[p]['max'] - params[p]['min']) / (params[p]['step']*4));
-				console.log(diff);
+				//console.log(diff);
 				// make sure they are odd
 				if (diff % 2 == 0) diff++;
 				var hdiff = Math.floor(diff/2);
@@ -254,9 +297,16 @@ function request_ping_websockets() {
 	//console.log('this: ' + this_ws_open);
 	if (this_ws_open) {
 		//TODO: have a checkbox to toggle on and off sending that param info, otherwise we are always overriding everything whenever master is open
-		
-		//console.log('sent: ' + params);
-		this_ws.send(JSON.stringify({'assisted_performer': 'master', 'ping': lastpingtime, 'params': params}));
+		var outp = {};
+		for (key in params) {
+			var write = document.getElementById(key+'_write');
+			if ((write) && (write.checked != false)) {
+				outp[key] = params[key];
+			}
+		}
+		console.log('sent: ');
+		console.log(outp);
+		this_ws.send(JSON.stringify({'assisted_performer': 'master', 'ping': lastpingtime, 'params': outp}));
 		var d2 = new Date();
 		pingout = d2.getTime();
 		return true;
