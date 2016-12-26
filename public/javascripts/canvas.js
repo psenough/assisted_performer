@@ -11,9 +11,8 @@ let params = {};
 let active_part = 0;
 
 //TODO: when layers with the keys, remove parameters from effect being toggled off
-// text overlays sequence easy triggering
-// line width on white triangles is not defined
-// be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
+//TODO: text overlays sequence easy triggering
+//TODO: be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
 
 let cl = [
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
@@ -22,14 +21,14 @@ let cl = [
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_RANDOM_LINES','EFFECT_GOLDEN_ROTORS','EFFECT_WHITE'],
 ['UPDATE_TIMERS','EFFECT_RANDOM_LINES','EFFECT_WHITE'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE'],
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_CENTERED_CIRCLES','EFFECT_RANDOM_LINES','EFFECT_WHITE'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTERED_CIRCLES','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_FOREGROUND'],
 ['UPDATE_TIMERS','EFFECT_RANDOM_LINES','EFFECT_WHITE','EFFECT_CROSSBARS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
 ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_RANDOM_LINES','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
 ['UPDATE_TIMERS','EFFECT_WALKERS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_SINE_LINES','EFFECT_BLUE_WHITE_SEGMENTS'],
-['UPDATE_TIMERS','EFFECT_CENTER_ARCS','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTER_ARCS','EFFECT_PINK_SPYRAL','EFFECT_FOREGROUND']
+['UPDATE_TIMERS','EFFECT_CENTERED_CIRCLES','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_FOREGROUND'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_CENTERED_CIRCLES','EFFECT_PINK_SPYRAL','EFFECT_FOREGROUND']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
@@ -139,14 +138,16 @@ let drawCanvas = function() {
 		'UPDATE_TIMERS': {
 			'on': true,
 			'params': {
-				'slow': { 'friendly_name': 'Slow Time', 'min': 1.0, 'max': 10.0, 'step': 1.0, 'default_value': 1.0, 'value': 1.0 },
+				'slow': { 'friendly_name': 'Slow Time', 'min': 1.0, 'max': 10.0, 'step': 0.05, 'default_value': 1.0, 'value': 1.0 },
 			},
 			'call': function() {
 				d2 = new Date();
 				n2 = d2.getTime(); 
-				let slow = ('slow' in params)?params['slow']['value']:1.0;
+				let slow = parseFloat(params['slow']['value']);
 				timer = (n2-n)/(slow);
+				//TODO: scrub speed without jumping
 	
+				// precalc some basic sin functions for optimized reuse
 				sin1 = Math.sin((timer)/200)+1.0;
 				sin3 = Math.sin((timer)/2800)+1.0;
 				cos1 = Math.cos((timer)/800)+1.0;
@@ -165,16 +166,16 @@ let drawCanvas = function() {
 				'bg_lum': { 'friendly_name': 'Center Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
 				'bg2_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 				'bg2_sat': { 'friendly_name': 'Background Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 0.0 },
-				'bg2_lum': { 'friendly_name': 'Background Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 0.0 }
+				'bg2_lum': { 'friendly_name': 'Background Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 10.0 }
 			},
 			'call': function() {
 				
-						let bg_hue = ('bg_hue' in params)?params['bg_hue']['value']:122.0;
-						let bg_sat = ('bg_sat' in params)?params['bg_sat']['value']:20.0;
-						let bg_lum = ('bg_lum' in params)?params['bg_lum']['value']:20.0;
-						let bg2_hue = ('bg2_hue' in params)?params['bg2_hue']['value']:122.0;
-						let bg2_sat = ('bg2_sat' in params)?params['bg2_sat']['value']:0.0;
-						let bg2_lum = ('bg2_lum' in params)?params['bg2_lum']['value']:0.0;
+						let bg_hue = parseFloat(params['bg_hue']['value']);
+						let bg_sat = parseFloat(params['bg_sat']['value']);
+						let bg_lum = parseFloat(params['bg_lum']['value']);
+						let bg2_hue = parseFloat(params['bg2_hue']['value']);
+						let bg2_sat = parseFloat(params['bg2_sat']['value']);
+						let bg2_lum = parseFloat(params['bg2_lum']['value']);
 						
 						let hsl_center = "hsl("+bg_hue+","+ bg_sat +"%,"+ bg_lum +"%)";
 						let hsl_outside = "hsl("+bg2_hue+","+ bg2_sat +"%,"+ bg2_lum +"%)";
@@ -227,13 +228,12 @@ let drawCanvas = function() {
 		'EFFECT_RED_STARS': {
 			'on': true,
 			'params': {
-				'num': { 'friendly_name': 'Number Stars', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
-				'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 }
+				'num_stars': { 'friendly_name': 'Stars Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
+				'red_stars': { 'friendly_name': 'Stars Redness', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 }
 			},
 			'call': function() {
-						let num = ('num' in params)?params['num']['value']:80;
-						//let rms = ('rms' in params)?params['rms']['value']:0.5;
-						let red = ('red' in params)?params['red']['value']:122;
+						let num = parseFloat(params['num_stars']['value']);
+						let red = parseFloat(params['red_stars']['value']);
 						let sizex = w/num;
 						let sizexhalf = parseInt((w/num)*0.5,10);
 						let sizey = parseInt(10*(w/h),10);
@@ -275,8 +275,8 @@ let drawCanvas = function() {
 						let colwidth = w/wcolumns;
 						let linspace = h/wlines;
 						
-						let orange_trans = ('otrans' in params)?params['otrans']['value']:0.5;
-						let cyan_trans = ('ctrans' in params)?params['ctrans']['value']:0.5;
+						let orange_trans = parseFloat(params['otrans']['value']);
+						let cyan_trans = parseFloat(params['ctrans']['value']);
 						
 						color2 = "rgba(255,200,100,"+orange_trans+")";
 						color3 = "rgba(88,254,250,"+cyan_trans+")";
@@ -310,20 +310,24 @@ let drawCanvas = function() {
 						
 					}
 		},
-		'EFFECT_CENTER_ARCS': {
+		'EFFECT_CENTERED_CIRCLES': {
 			'on': false,
 			'params': {
-				'num_arcs': { 'friendly_name': 'Number Circles', 'min': 10.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 20.0 },
+				'circles_num': { 'friendly_name': 'Circles Number', 'min': 10.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 20.0 },
 				'circles_light': { 'friendly_name': 'Circles Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
 				'circles_trans': { 'friendly_name': 'Circles Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 1.0, 'value': 1.0 },
 				'circles_size': { 'friendly_name': 'Circles Line Width', 'min': 1.0, 'max': 40.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
 			},
 			'call': function() {
+				
+				function getFloatParam(param) {
+					return parseFloat(params[param]['value']);
+				}
 						let calc = [];
-						let anum = ('num_arcs' in params)?params['num_arcs']['value']:20.0;
-						let lightness = ('circles_light' in params)?params['circles_light']['value']:20.0;
-						let alpha = ('circles_trans' in params)?params['circles_trans']['value']:1.0;
-						let base = ('circles_size' in params)?params['circles_size']['value']:5.0;
+						let anum = parseFloat(params['circles_num']['value']);
+						let lightness = parseFloat(params['circles_light']['value']);
+						let alpha = parseFloat(params['circles_trans']['value']);
+						let base = parseFloat(params['circles_size']['value']);
 
 						for (let i=0; i<anum; i++) {
 							ctx.lineWidth = Math.max(base,(i%6)*2+i*sin1*0.025+cos2*2+2*sin2 + base);
@@ -343,15 +347,21 @@ let drawCanvas = function() {
 		'EFFECT_PINK_SPYRAL': {
 			'on': false,
 			'params': {
-				'num_spyral': { 'friendly_name': 'Spyral Number Triangles', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 60.0 },
-				'lw_spyral': { 'friendly_name': 'Pink Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 2.0, 'value': 2.0 },
-				'parts_spyral': { 'friendly_name': 'Spyral Parts', 'min': 3.0, 'max': 25.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
+				'num_spyral': { 'friendly_name': 'Pink Spyral Triangles', 'min': 2.0, 'max': 25.0, 'step': 2.0, 'default_value': 12.0, 'value': 10.0 },
+				//'lw_spyral': { 'friendly_name': 'Pink Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 2.0, 'value': 2.0 },
+				'parts_spyral': { 'friendly_name': 'Pink Spyral Sections', 'min': 3.0, 'max': 25.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
+				'twist_spyral': { 'friendly_name': 'Pink Spyral Twist', 'min': 0.0, 'max': 30.0, 'step': 0.05, 'default_value': 10.0, 'value': 10.0 },
+				'center_spyral': { 'friendly_name': 'Pink Spyral Pivot', 'min': 0.0, 'max': 200.0, 'step': 1.0, 'default_value': 100.0, 'value': 100.0 },
+				'bend_spyral': { 'friendly_name': 'Pink Spyral Bend', 'min': 2.0, 'max': 10.0, 'step': 1.0, 'default_value': 8.0, 'value': 8.0 }
 
 			},
 			'call': function() {
-						let num = ('num_spyral' in params)?params['num_spyral']['value']:80;
-						let lw = ('lw_spyral' in params)?params['lw_spyral']['value']:2;
-						let parts = ('parts_spyral' in params)?params['parts_spyral']['value']:5;
+						let num = parseFloat(params['num_spyral']['value']);
+						let lw = 2; //parseFloat(params['lw_spyral']['value']);
+						let parts = parseFloat(params['parts_spyral']['value']);
+						let twist = parseFloat(params['twist_spyral']['value']);
+						let center = parseFloat(params['center_spyral']['value']);
+						let bend = parseFloat(params['bend_spyral']['value']);
 
 						ctx.lineWidth = lw;
 						ctx.strokeStyle = "rgba(200,100,200,0.5)";
@@ -359,14 +369,15 @@ let drawCanvas = function() {
 						ctx.save();
 						ctx.translate(w*.5,h*.5);
 						ctx.rotate((n2-n)*0.0001);
+						
 						for (let k=0; k<parts; k++) {
-							for(let i=0; i<num*0.15; i++) {
-								let sizex = i*(4+cos2*20);
-								let sizey = i*(4+cos2*30);
+							for(let i=0; i<num; i++) {
+								let sizex = -center+i*(4+cos2*20+sin1*0.02*k);
+								let sizey = -center+i*(4+cos2*(20+twist)-sin1*0.02*k);
 								ctx.beginPath();
-								ctx.moveTo(sizex+sin3*100, sizey+sin3*100);
-								for (let j=0; j<2; j++) {
-									ctx.lineTo(sizex+j*60*cos2+i*50-k*sin3, sizey-j*20*cos2+i*50 + 20*j+i);
+								ctx.moveTo(sizex+sin3*10, sizey+sin3*200);
+								for (let j=0; j<bend; j++) {
+									ctx.lineTo(sizex+(j%3)*60*cos2+i*50, sizey-j*20*cos2+i*50 + 20*(j%2)+i);
 								}
 								ctx.closePath();
 								ctx.stroke();
@@ -382,7 +393,7 @@ let drawCanvas = function() {
 				'num_lines': { 'friendly_name': 'Number Lines', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
 			},
 			'call': function() {
-						let num = ('num_lines' in params)?params['num_lines']['value']:80;
+						let num = parseFloat(params['num_lines']['value']);
 						let calc = [];
 						let i=0;
 						
@@ -420,8 +431,8 @@ let drawCanvas = function() {
 
 						let parts = 3;
 						let flip = Math.sin(sin1*cos1*cos3);
-						let rotors_speed = ('rotors_speed' in params)?params['rotors_speed']['value']:0.6;
-						let num = ('num_rotors' in params)?params['num_rotors']['value']:80;
+						let rotors_speed = parseFloat(params['rotors_speed']['value']);
+						let num = parseFloat(params['num_rotors']['value']);
 						
 						ctx.lineWidth = 2;
 						ctx.strokeStyle = "rgba(200,200,5,0.4)";
@@ -469,9 +480,9 @@ let drawCanvas = function() {
 				'black_contour': { 'friendly_name': 'Black Contour', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 }
 			},
 			'call': function() {
-						let size = ('white_size' in params)?params['white_size']['value']:20;
-						let maxj = ('white_count' in params)?params['white_count']['value']:20;
-						let black_contour = ('black_contour' in params)?params['black_contour']['value']:20;
+						let size = parseFloat(params['white_size']['value']);
+						let maxj = parseFloat(params['white_count']['value']);
+						let black_contour = parseFloat(params['black_contour']['value']);
 
 						let angle = 0.0; //(Math.PI*2)/num;
 
@@ -502,13 +513,10 @@ let drawCanvas = function() {
 							
 							// clip top-left
 							if (clip) {
-								//ctx.fillStyle = "rgba(0,0,0,1.0)";
 								ctx.beginPath();
 								ctx.moveTo(0,0);
 								ctx.lineTo(centerX,0);
 								ctx.lineTo(centerX,centerY);
-								//ctx.lineTo(0,0);
-								//ctx.fill();
 								ctx.clip();
 								ctx.closePath();
 							}
@@ -682,10 +690,10 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 
-						let num_tlines = ('num_tlines' in params)?params['num_tlines']['value']:40;
-						let num_tsegments = ('num_tsegments' in params)?params['num_tsegments']['value']:40;
-						let sine_line_width = ('sine_line_width' in params)?params['sine_line_width']['value']:5;
-						let rtrans = ('rtrans' in params)?params['rtrans']['value']:5;
+						let num_tlines = parseFloat(params['num_tlines']['value']);
+						let num_tsegments = parseFloat(params['num_tsegments']['value']);
+						let sine_line_width = parseFloat(params['sine_line_width']['value']);
+						let rtrans = parseFloat(params['rtrans']['value']);
 						
 						ctx.lineWidth = sine_line_width;
 
@@ -718,11 +726,11 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 
-						let bw_linewidth = ('bw_linewidth' in params)?params['bw_linewidth']['value']:10;
-						let scratch = ('bw_scratch' in params)?params['bw_scratch']['value']:0;
-						let bw_radius = ('bw_radius' in params)?params['bw_radius']['value']:0.5*Math.PI;
-						let bw_btrans = ('bw_btrans' in params)?params['bw_btrans']['value']:0.5;
-						let bw_wtrans = ('bw_wtrans' in params)?params['bw_wtrans']['value']:0.5;
+						let bw_linewidth = parseFloat(params['bw_linewidth']['value']);
+						let scratch = parseFloat(params['bw_scratch']['value']);
+						let bw_radius = parseFloat(params['bw_radius']['value']);
+						let bw_btrans = parseFloat(params['bw_btrans']['value']);
+						let bw_wtrans = parseFloat(params['bw_wtrans']['value']);
 						
 						let segment_length = bw_radius;
 						let start_angle = scratch + cos3 + timer/2000;
@@ -769,14 +777,14 @@ let drawCanvas = function() {
 			'params': {},
 			'call': function() {
 
+						//TODO: expose some parameters in this effect
+						
 						let columns = 2;
 						let lines = 10;
 						let colwidth = w/columns;
 						let linspace = h/lines;
 						let timer = n2-n;
 						let note = rand(255);
-						
-						//ctx.lineCap = 'round';
 						
 						ctx.save();
 						ctx.translate(0,0);
@@ -819,9 +827,9 @@ let drawCanvas = function() {
 			},
 			'call': function() {
 				
-						let fg_hue = ('fg_hue' in params)?params['fg_hue']['value']:150.0;
-						let fg_sat = ('fg_sat' in params)?params['fg_sat']['value']:20.0;
-						let fg_lum = ('fg_lum' in params)?params['fg_lum']['value']:30.0;
+						let fg_hue = parseFloat(params['fg_hue']['value']);
+						let fg_sat = parseFloat(params['fg_sat']['value']);
+						let fg_lum = parseFloat(params['fg_lum']['value']);
 						
 						let hsl = ctx.fillStyle = "hsl("+fg_hue+","+fg_sat+"%,"+fg_lum+"%)";
 
@@ -1155,7 +1163,7 @@ console.log(keyCode);
 			sendParameters();
 		break;
 		case 50: // 2
-			toggleOnOff('EFFECT_CENTER_ARCS');
+			toggleOnOff('EFFECT_CENTERED_CIRCLES');
 			sendParameters();
 		break;
 		case 51: // 3
