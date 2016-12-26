@@ -228,18 +228,16 @@ let drawCanvas = function() {
 			'on': true,
 			'params': {
 				'num': { 'friendly_name': 'Number Stars', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
-				'rms': { 'friendly_name': 'RMS', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
 				'red': { 'friendly_name': 'Black/Red Stars', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 }
 			},
 			'call': function() {
 						let num = ('num' in params)?params['num']['value']:80;
-						let rms = ('rms' in params)?params['rms']['value']:0.5;
+						//let rms = ('rms' in params)?params['rms']['value']:0.5;
 						let red = ('red' in params)?params['red']['value']:122;
 						let sizex = w/num;
 						let sizexhalf = parseInt((w/num)*0.5,10);
 						let sizey = parseInt(10*(w/h),10);
 						
-						ctx.lineWidth = Math.ceil(sizexhalf*0.5 + rms*sizexhalf,10);
 						let r1 = parseInt(red,10);
 						if (r1 > 255) r1 = 255;
 						if (r1 < 0) r1 = 0;
@@ -252,7 +250,6 @@ let drawCanvas = function() {
 							let posy = parseInt((w*0.25+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 5, true, false);
 							
-							//let posx = parseInt(i*sizex,10);
 							posy = parseInt((w*0.5+ydrift)%w,10);
 							roundRect(ctx, posx, posy, sizexhalf, sizey, 3+20*sin2, true, false);
 							

@@ -18,34 +18,6 @@ function init() {
 	setInterval(recheck_ping, max_timeout);
 }
 
-function resize() {
-/*	
-	var canvas = document.getElementById("canvas");
-	//console.log(canvas);
-	if (!canvas) {
-		canvas = document.createElement('canvas');
-		canvas.setAttribute('id','canvas');
-		document.body.appendChild(canvas);
-	}
-
-	canvas.setAttribute("width", w);
-	canvas.setAttribute("height", h);
-	
-	ctx = canvas.getContext("2d");
-	ctx.width = w;
-	ctx.height = h;
-	halfw = w*.5;
-	halfh = h*.5;
-	
-	var ip = document.getElementById("ip"); 
-	if (!ip) {
-		ip = document.createElement('div');
-		ip.setAttribute('id','ip');
-		document.body.appendChild(ip);
-		ip.innerHTML = 'http://192.168.1.28:8090';
-	}*/
-}
-
 var using = false;
 
 var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
@@ -281,6 +253,8 @@ function recheck_ping() {
 function request_ping_websockets() {
 	//console.log('this: ' + this_ws_open);
 	if (this_ws_open) {
+		//TODO: have a checkbox to toggle on and off sending that param info, otherwise we are always overriding everything whenever master is open
+		
 		//console.log('sent: ' + params);
 		this_ws.send(JSON.stringify({'assisted_performer': 'master', 'ping': lastpingtime, 'params': params}));
 		var d2 = new Date();

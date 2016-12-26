@@ -163,7 +163,7 @@ function catchall(req, res) {
 		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
-	res.render('assisted_performer_slider', {title: 'Assisted Performer Slider'});
+	res.render('assisted_performer_slider_demobit', {title: 'Assisted Performer Slider'});
 }
 
 // serve canvas page
@@ -297,16 +297,9 @@ function onError(error) {
   }
 }
 
-function onListening() {
-	logme('Listening on port ' + server.address().port);
-}
-
 app.use(catchall);
-//app.set('port', port);
-//app.listen(app.get('port'));
 
 app.on('error', onError);
-app.on('listening', onListening);
 
 
 
@@ -405,8 +398,8 @@ function saveLog(filename, message) {
 // websockets
 //
 
-var ws = require('websocket.io');
-var server = ws.listen(3001);
+var WebSocketServer = require('ws').Server
+  , ws_server = new WebSocketServer({ port: 3001 });
 
 var active_conn = [];
 var id = 0;
@@ -421,11 +414,15 @@ function addToParams(theseparams) {
 	}
 }
 
-server.on('connection', function (client) {
+ws_server.on('connection', function (client) {
     client.id = id++;
-	client.ra = client.req.connection.remoteAddress;
-
-	//console.log(client.req.connection.remoteAddress);
+	console.log(client.upgradeReq.connection.remoteAddress);
+	//console.log(client.upgradeReq.headers.host.split(':')[0]);
+	//client.ra = client.req.connection.remoteAddress;
+	//client.ra = client.headers.origin;
+	client.ra = client.upgradeReq.connection.remoteAddress;
+	
+	//console.log(client.ra);
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('new ws connection from: ' + client.ra);
@@ -513,7 +510,7 @@ server.on('connection', function (client) {
 							var prr = {};
 							for (c in connections) {
 								//console.log('pong connection: ' + connections[c]['ip'] + ' ' + active_conn[thisid]['socket'].ra);
-								if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
+								if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra)) {
 									if ('params' in connections[c]) {
 										//console.log(connections[c]['params']);
 										prr[connections[c]['params']] = params[connections[c]['params']];
@@ -564,9 +561,10 @@ server.on('connection', function (client) {
 		}
 		
 		// if IP is not listed on connections, send message to refresh page automatically
+		//console.log('checking ra: ' + active_conn[thisid]['socket'].ra);
 		var found = false;
 		for (c in connections) {
-			if (connections[c]['ip'] == active_conn[thisid]['socket'].ra) {
+			if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra) ){
 				found = true;
 				if (type == 'canvas') connections[c]['canvas'] = true;
 			}

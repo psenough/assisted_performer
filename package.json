@@ -1,6 +1,6 @@
 {
   "name": "assisted_performer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -14,7 +14,7 @@
     "jade": "~1.8.2",
     "request": "^2.69.0",
     "serve-favicon": "~2.2.0",
-    "websocket.io": "^0.2.1",
+    "ws": "^1.1.1",
     "xml2js": "^0.4.17"
   }
 }
