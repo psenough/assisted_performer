@@ -350,7 +350,7 @@ function getUntakenParam() {
 		}
 		if (!istaken) params_available.push(p);
 	}
-	console.log(params_available);
+	//console.log(params_available);
 	if (params_available.length >= 1) param = params_available[parseInt(Math.random()*params_available.length,10)];
 	return param;
 }
@@ -416,7 +416,7 @@ function addToParams(theseparams) {
 
 ws_server.on('connection', function (client) {
     client.id = id++;
-	console.log(client.upgradeReq.connection.remoteAddress);
+	//console.log(client.upgradeReq.connection.remoteAddress);
 	//console.log(client.upgradeReq.headers.host.split(':')[0]);
 	//client.ra = client.req.connection.remoteAddress;
 	//client.ra = client.headers.origin;
@@ -491,8 +491,8 @@ ws_server.on('connection', function (client) {
 									break;
 									default:
 										var value = parseFloat(thistype);
-										if ((value > params[thisparam]['min']) && (value < params[thisparam]['max'])) params[thisparam]['value'] = value;
-										//console.log('weird type received, assuming it\'s a direct value: '+thistype);
+										if ((value >= params[thisparam]['min']) && (value <= params[thisparam]['max'])) params[thisparam]['value'] = value;
+										//console.log('weird type received, assuming it\'s a direct value: '+thistype + ' ' + value);
 									break;
 								}
 								
@@ -724,6 +724,11 @@ stdin.on('data', function (data) {
 	if (data == '1') {
 		output.sendMessage([176,1,0]);
 		console.log('sent midi test message');
+	}
+	if (data == 'p') {
+		var list = [];
+		for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
+		console.log(util.inspect(list));
 	}
 	if (data == 'r') {
 		reassignParameters();

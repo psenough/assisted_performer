@@ -13,23 +13,6 @@ var CONNECTION_MODE_ANY = 2; // try ws if ws exists, if not, try post
 
 var connection_mode = CONNECTION_MODE_ANY;
 
-/*
-var values=[]; //precalc
-function findNearest(includeLeft, includeRight, value) {
-	var nearest = null;
-	var diff = null;
-	for (var i = 0; i < values.length; i++) {
-		if ((includeLeft && values[i] <= value) || (includeRight && values[i] >= value)) {
-			var newDiff = Math.abs(value - values[i]);
-			if (diff == null || newDiff < diff) {
-				nearest = values[i];
-				diff = newDiff;
-			}
-		}
-	}
-	return nearest;
-}*/
-
 var inp_half_height = 0;
 var inp_start_y = 0;
 var inp_start_x = 0;
@@ -84,7 +67,7 @@ function calculate_buttons_position( rebuild ) {
 		var pad_top = usedheight*.23;
 		if (py > pad_bot) py = pad_bot;
 		if (py < pad_top) py = pad_top;
-		console.log('pad bounds: ' + usedwidth + ' ' + usedheight + ' ' + pad_top + ' ' + pad_bot);
+		//console.log('pad bounds: ' + usedwidth + ' ' + usedheight + ' ' + pad_top + ' ' + pad_bot);
 
 		// drag the div to the correct place
 		inp.style.top = (py - inp_half_height) + 'px';
@@ -108,7 +91,7 @@ function calculate_buttons_position( rebuild ) {
 				}
 			}
 			var value3 = parseFloat(value2).toFixed(2);
-			console.log(value + ' ' + value2 + ' ' + value3);
+			//console.log(value + ' ' + value2 + ' ' + value3);
 			
 			// updated output box
 			var outp = document.getElementById('outp');
@@ -212,6 +195,7 @@ window.onresize = function(){
 }
 
 function sendvote(param, type) {
+	//console.log('voting');
 	switch(connection_mode) {
 		case CONNECTION_MODE_WS_ONLY:
 			sendvote_websockets(param, type);
@@ -228,6 +212,7 @@ function sendvote(param, type) {
 
 function sendvote_websockets(param, type) {
 	if (this_ws_open) {
+		//console.log(param + ' ' + type);
 		this_ws.send(JSON.stringify({'assisted_performer': 'control', 'parameters': {'param': param, 'type': type}}));
 		return true;
 	} else {
@@ -475,7 +460,7 @@ function connect_websockets() {
 			}
 			
 			if ('refresh' in parsed) {
-				if (parsed['refresh'] == 'mebeautiful') location = location;
+				if (parsed['refresh'] == 'mebeautiful') setTimeout(function(){location = location;},2000);
 			}
 		
 		} else {

@@ -264,8 +264,8 @@ let drawCanvas = function() {
 		'EFFECT_WALKERS': {
 			'on': true,
 			'params': {
-				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
-				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 },
+				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 }
 			},
 			'call': function() {
 	
@@ -315,7 +315,7 @@ let drawCanvas = function() {
 			'params': {
 				'circles_num': { 'friendly_name': 'Circles Number', 'min': 10.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 20.0 },
 				'circles_light': { 'friendly_name': 'Circles Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-				'circles_trans': { 'friendly_name': 'Circles Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 1.0, 'value': 1.0 },
+				'circles_trans': { 'friendly_name': 'Circles Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 1.0, 'value': 1.0 },
 				'circles_size': { 'friendly_name': 'Circles Line Width', 'min': 1.0, 'max': 40.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
 			},
 			'call': function() {
@@ -685,7 +685,7 @@ let drawCanvas = function() {
 				'num_tlines': { 'friendly_name': 'Number Trail Lines', 'min': 2.0, 'max': 100.0, 'step': 2.0, 'default_value': 40.0, 'value': 40.0 },
 				'num_tsegments': { 'friendly_name': 'Number Segments', 'min': 2.0, 'max': 100.0, 'step': 2.0, 'default_value': 40.0, 'value': 40.0 },
 				'sine_line_width': { 'friendly_name': 'Sinus Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
-				'rtrans': { 'friendly_name': 'Sinus Red Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 }
+				'rtrans': { 'friendly_name': 'Sinus Red Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 }
 
 			},
 			'call': function() {
@@ -720,8 +720,8 @@ let drawCanvas = function() {
 				'bw_linewidth': { 'friendly_name': 'Blue White Linewidth', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 10.0 },
 				'bw_scratch': { 'friendly_name': 'Scratch Arc', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 },
 				'bw_radius': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 },
-				'bw_btrans': { 'friendly_name': 'Blue Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
-				'bw_wtrans': { 'friendly_name': 'White Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.05, 'default_value': 0.5, 'value': 0.5 },
+				'bw_btrans': { 'friendly_name': 'Blue Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 },
+				'bw_wtrans': { 'friendly_name': 'White Arcs Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 },
 
 			},
 			'call': function() {
