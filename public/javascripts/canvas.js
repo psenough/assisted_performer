@@ -975,13 +975,13 @@ function resize() {
 	halfw = w*.5;
 	halfh = h*.5;
 	
-	/*let ip = document.getElementById("ip"); 
-	if (!ip) {
-		ip = document.createElement('div');
-		ip.setAttribute('id','ip');
-		document.body.appendChild(ip);
-		ip.innerHTML = 'http://192.168.1.28:8090';
-	}*/
+	let words = document.getElementById("words"); 
+	if (!words) {
+		words = document.createElement('div');
+		words.setAttribute('id','words');
+		document.body.appendChild(words);
+		words.innerHTML = words_array[words_index];
+	}
 	
 	if (showFPS) {
 		let fps = document.getElementById("fps"); 
@@ -1001,9 +1001,94 @@ function loadLine(thisclass, thistext) {
 	//document.getElementById('message').innerHTML = content;
 }
 
-let words = [
-"test12",
-"test"
+let words_index = 0;
+let words_array = [
+"http://192.168.1.73:8090/",
+"",
+"there is, in cyberspace",
+"",
+"there is a violet shaped star",
+"there is a violet shaped star<br>swirling in my mind",
+"there is a violet shaped star<br>swirling in my mind<br>bending itself",
+"there is a violet shaped star<br>swirling in my mind<br>bending itself<br>so pretty and bright",
+"",
+"there are red shaped stars",
+"there are red shaped stars<br>that fall from the sky",
+"there are red shaped stars<br>that fall from the sky<br>drape my world black",
+"there are red shaped stars<br>that fall from the sky<br>drape my world black<br>the cloud in cyberspace",
+"",
+"there is a well without depth",
+"there is a well without depth<br>a white bright light",
+"there is a well without depth<br>a white bright light<br>cascading in my dreams",
+"there is a well without depth<br>a white bright light<br>cascading in my dreams<br>a well without depth",
+"",
+"spin my golden memory",
+"spin my golden memory<br>tumbling down down down",
+"spin my golden memory<br>tumbling down down down<br>there is a deep deep well",
+"spin my golden memory<br>tumbling down down down<br>there is a deep deep well<br>lost forever out of mind",
+"",
+"lost in cyberspace",
+"lost in cyberspace<br>small and timid",
+"lost in cyberspace<br>small and timid<br>shocking and wild",
+"lost in cyberspace<br>small and timid<br>shocking and wild<br>broken encryption",
+"lost in cyberspace<br>small and timid<br>shocking and wild<br>broken encryption<br>there is a leak in the network",
+"",
+"scratch the surface",
+"scratch the surface<br>scrub the paint",
+"scratch the surface<br>scrub the paint<br>cleanse my tears",
+"scratch the surface<br>scrub the paint<br>cleanse my tears<br>and wave goodbye in cyberspace",
+"",
+"there is a hidden joy",
+"there is a hidden joy<br>a snowing mantra",
+"there is a hidden joy<br>a snowing mantra<br>a tempting fog",
+"there is a hidden joy<br>a snowing mantra<br>a tempting fog<br>encrypted in cyberspace",
+"",
+"there is a burst of ideas",
+"there is a burst of ideas<br>a circle of illusion",
+"there is a burst of ideas<br>a circle of illusion<br>threaded in doubt",
+"there is a burst of ideas<br>a circle of illusion<br>threaded in doubt<br>there is a psychic symphony in cyberspace",
+"",
+"i hide my keys",
+"i hide my keys<br>i cloak my thoughts",
+"i hide my keys<br>i cloak my thoughts<br>there is identity danger",
+"i hide my keys<br>i cloak my thoughts<br>there is identity danger<br>seccluded in cyberspace",
+"",
+"i rotate those spinning doors",
+"i rotate those spinning doors<br>shrouded from the dark side",
+"i rotate those spinning doors<br>shrouded from the dark side<br>there is mischief out there",
+"i rotate those spinning doors<br>shrouded from the dark side<br>there is mischief out there<br>there in mischief inside",
+"",
+"millions of sequences",
+"millions of sequences<br>thousands of paragraphs",
+"millions of sequences<br>thousands of paragraphs<br>there is a convoluted maze",
+"millions of sequences<br>thousands of paragraphs<br>there is a convoluted maze<br>in my mind's cyberspace",
+"",
+"you can bleed for me",
+"you can bleed for me<br>you can bleed from memory",
+"you can bleed for me<br>you can bleed from memory<br>there is blood all over me",
+"you can bleed for me<br>you can bleed from memory<br>there is blood all over me<br>in cyberspace",
+"",
+"dark and red",
+"dark and red<br>blue and white",
+"dark and red<br>blue and white<br>mixed forever",
+"dark and red<br>blue and white<br>mixed forever<br>there is, lost from sight",
+"",
+"phase me",
+"phase me<br>push me",
+"phase me<br>push me<br>there is",
+"phase me<br>push me<br>there is<br>hidden",
+"",
+"the violent stars",
+"the violent stars<br>that fall from the sky",
+"the violent stars<br>that fall from the sky<br>psychedelic shapped",
+"the violent stars<br>that fall from the sky<br>psychedelic shapped<br>lost in cyberspace",
+"",
+"there is a violet shaped star",
+"there is a violet shaped star<br>lilac satin",
+"there is a violet shaped star<br>lilac satin<br>a burn that glows deep inside",
+"there is a violet shaped star<br>lilac satin<br>a burn that glows deep inside<br>in cyberspace",
+"",
+"there is, in cyberspace"
 ];
 
 let this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
@@ -1141,14 +1226,20 @@ let keyCode = e.keyCode;
 console.log(keyCode);
 	switch(keyCode) {
 		case 39: // right arrow
-			active_part++;
-			if (active_part >= arraySize(configs)) active_part = 0;
-			changePart(active_part);
+			// only change part if there are no words on screen
+			//if (words_array[words_index] == "") {
+				active_part++;
+				if (active_part >= arraySize(configs)) active_part = 0;
+				changePart(active_part);
+			//}
 		break;
 		case 37: // left arrow
-			active_part--;
-			if (active_part < 0) active_part = arraySize(configs)-1;
-			changePart(active_part);
+			// only change part if there are no words on screen
+			//if (words_array[words_index] == "") {
+				active_part--;
+				if (active_part < 0) active_part = arraySize(configs)-1;
+				changePart(active_part);
+			//}
 		break;
 		case 48: // 0
 			toggleOnOff('EFFECT_BACKGROUND');
@@ -1200,14 +1291,36 @@ console.log(keyCode);
 			sendParameters();
 		break;
 		
-		case 72: // h
+		case 32: // spacebar
+		{
+			let words = document.getElementById("words"); 
+			if (words) {
+				words_index++;
+				if (words_index >= words_array.length) words_index = 0;
+				words.innerHTML = words_array[words_index];
+			}
+		}
+		break;
+		
+		case 8: // backspace
+		{
+			let words = document.getElementById("words"); 
+			if (words) {
+				words_index--;
+				if (words_index < 0) words_index = words_array.length-1;
+				words.innerHTML = words_array[words_index];
+			}
+		}
+		break;
+		
+		/*case 72: // h
 			//TODO: hide text with ip adress
 			let ip = document.getElementById("ip"); 
 			if (ip) {
 				if ((ip.className) == '') ip.className = 'hidden';
 				 else ip.className = '';
 			}
-		break;
+		break;*/
 	}
 }
 
