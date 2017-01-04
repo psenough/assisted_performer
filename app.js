@@ -12,9 +12,11 @@ var midi = require('midi');
 var audio_config = {
 	'midi_port': 1, // change this id to the listed midi port that you want to use
 	'params': {
-		'audio_0': { 'controller': 0, 'friendly_name': 'Grain Space', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 127.0, 'value': 127.0 },
-		'audio_1': { 'controller': 1, 'friendly_name': 'Grain Start', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 50.0, 'value': 50.0 },
-		'audio_2': { 'controller': 2, 'friendly_name': 'Grain Length', 'min': 0.0, 'max': 127.0, 'step': 1.0, 'default_value': 65.0, 'value': 65.0 }
+		'audio_0': { 'controller': 0, 'friendly_name': 'Bass Temperature', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
+		'audio_1': { 'controller': 1, 'friendly_name': 'Bass Reverb Time', 'min': 1.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+		'audio_2': { 'controller': 2, 'friendly_name': 'Frequency Garble', 'min': 20.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+		'audio_3': { 'controller': 3, 'friendly_name': 'Glitch Volume', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+		'audio_4': { 'controller': 4, 'friendly_name': 'Audio Feedback', 'min': 0.0, 'max': 90.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
 	}
 }
 

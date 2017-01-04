@@ -13,6 +13,42 @@
 	-webkit-backface-visibility: hidden;
 }
 
+@media all and (orientation: landscape) {
+	* {
+		font-size: 11pt;
+	}
+}
+
+@media all and (orientation: portrait) {
+	* {
+		font-size: 18pt;
+	}
+}
+
+@media all and (min-width: 768px) and (orientation: landscape) {
+	* {
+		font-size: 18pt;
+	}
+}
+
+@media all and (min-width: 768px) and (orientation: portrait) {
+	* {
+		font-size: 24pt;
+	}
+}
+
+@media all and (min-width: 1200px) and (orientation: landscape) {
+	* {
+		font-size: 28pt;
+	}
+}
+
+@media all and (min-width: 1024px) and (orientation: portrait) {
+	* {
+		font-size: 36pt;
+	}
+}
+
 @font-face {
 	font-family: 'Roboto';
 	src: url('Roboto-Black.ttf') format('truetype');
@@ -76,24 +112,6 @@ canvas, img {
 	left:0px;
 }
 
-.value {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	bottom: 0px;
-	right: 0px;
-	width: 0px;
-	height: 0px;
-	background-repeat: no-repeat;
-	background-size: contain;
-	background-position: left top;
-	z-index: 18;
-	background-color: transparent;
-	text-align: center;
-	color: #FFF;
-	font-size: 2em;
-}
-
 body {
   color: #404040;
   display: flex;
@@ -101,18 +119,6 @@ body {
   justify-content: space-around;
   align-items: center;
   padding: 50px;
-}
-
-h1 {
-  font-size: 1.6em;
-  font-weight: 300;
-}
-
-output {
-  font-size: 2em;
-  padding: .3em;
-  z-index: 5;
-  background-color: transparent;
 }
 
 input[type="range"] {
@@ -158,14 +164,15 @@ input[type=range]:-moz-focusring{
 }
 
 #outp {
+	z-index: 5;
+	background-color: transparent;
 	font-family: 'Roboto';
 	color: white; 
 	position: absolute;
-	top: 0px;
+	top: 0.5em;
 	left: 0px;
 	margin: auto;
 	text-align: center;
-	font-size: 1.5em;
 	width: 100%;
 }
 
