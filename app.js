@@ -83,7 +83,7 @@ var util = require('util')
 // init express
 //
 
-var port = 8090;
+var port = 70;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
 httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');

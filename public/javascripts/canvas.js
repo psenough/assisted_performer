@@ -1003,7 +1003,7 @@ function loadLine(thisclass, thistext) {
 
 let words_index = 0;
 let words_array = [
-"http://192.168.1.73:8090/",
+"http://192.168.1.70:70",
 "",
 "there is, in cyberspace",
 "",
