@@ -41,7 +41,7 @@ public class AssistedPerformer : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        AssistedPerformerObj assis = new AssistedPerformerObj();
+        assis = new AssistedPerformerObj();
         assis.assisted_performer = "canvas";
         assis.parameters = new AssistedPerformerParameters();
         assis.parameters.banana = new AssistedPerformerValues();

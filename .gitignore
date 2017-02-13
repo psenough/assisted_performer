@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log
 UnityWebSocketsTest/Library/metadata/
 UnityWebSocketsTest/obj/
+_dev/
+assisted_performer_demobit.zip
