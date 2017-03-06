@@ -38,4 +38,7 @@ The system sends back the audio parameters via MIDI interface.
 
 The system sends back the graphic parameters via websocket or POST REQUEST RESPONSE to the canvas element.
 
+Pressing the 'f' key toggles float back mode for all parameter values. Where the value interpolates between their current value and it's default value, floating back into the default value.
+
 The system can be configured to send logs to [winston](http://thisdavej.com/using-winston-a-versatile-logging-library-for-node-js/) or save them locally.
+
