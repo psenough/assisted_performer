@@ -37,3 +37,5 @@ There is a [http://localhost/master](master) webpage available to see all parame
 The system sends back the audio parameters via MIDI interface.
 
 The system sends back the graphic parameters via websocket or POST REQUEST RESPONSE to the canvas element.
+
+The system can be configured to send logs to [winston](http://thisdavej.com/using-winston-a-versatile-logging-library-for-node-js/) or save them locally.
