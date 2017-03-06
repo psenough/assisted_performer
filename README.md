@@ -44,3 +44,11 @@ Pressing the 'f' key toggles float back mode for all parameter values. Where the
 
 The system can be configured to send logs to [winston](http://thisdavej.com/using-winston-a-versatile-logging-library-for-node-js/) or save them locally.
 
+# Project Examples
+
+* [PLUNC Festival](http://artica.cc/blog/2016/11/21/plunc.html)
+
+* [Demobit Wild Entry](https://www.youtube.com/watch?v=KSuc_ZdtgLA)
+
+# Tutorial Videos
+
