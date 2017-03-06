@@ -10,7 +10,7 @@ Download the package and call `npm install` to install all dependencies.
 
 If you want to handle MIDI parameter install [loopmidi](https://www.tobias-erichsen.de/software/loopmidi.html) aswell.
 
-Some audio functionality requiress dependencies that need visual studio runtime distribuables installed before a successful `npm install`
+MIDI module dependencies require [visual studio](https://www.visualstudio.com/downloads/) installed to succeed `npm install`
 
 Only tested on Windows.
 
