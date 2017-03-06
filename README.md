@@ -32,7 +32,7 @@ The system can be configured to manage a voting system, multiple users selecting
 
 The system can also listen in to TSPS OSC connections and bind parameters to blob tracking values. (TODO: module easy to configure the binding)
 
-There is a master webpage available to see all parameters currently available.
+There is a [http://localhost/master](master) webpage available to see all parameters currently available.
 
 The system sends back the audio parameters via MIDI interface.
 
