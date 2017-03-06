@@ -15,6 +15,7 @@ let active_part = 0;
 //TODO: be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
 
 let cl = [
+['UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
@@ -225,8 +226,41 @@ let drawCanvas = function() {
 						ctx.restore();
 					}
 		},
-		'EFFECT_RED_STARS': {
+		'EFFECT_BACKGROUND_CHARS': {
 			'on': true,
+			'params': {
+				
+			},
+			'call': function() {
+				
+						/*let bg_hue = parseFloat(params['bg_hue']['value']);
+						let bg_sat = parseFloat(params['bg_sat']['value']);
+						let bg_lum = parseFloat(params['bg_lum']['value']);
+						let bg2_hue = parseFloat(params['bg2_hue']['value']);
+						let bg2_sat = parseFloat(params['bg2_sat']['value']);
+						let bg2_lum = parseFloat(params['bg2_lum']['value']);*/
+						
+						//http://unicode.org/emoji/charts/full-emoji-list.html
+						
+						ctx.clearRect(0,0,w,h);
+						let num = 20;
+						let fontsize = parseInt(w/num,10);
+						ctx.fillStyle = 'blue';
+						//ctx.font = fontsize + "px serif white";
+						for (let i=0; i<num; i++) {
+							for (let j=0; j<h/fontsize; j++) {
+								ctx.font = parseInt(Math.sin(timer*0.001 + i*(sin1*0.01)*0.75 + j*0.5)*10 - 10 + fontsize ,10) + "px serif";
+								let char = "💗";
+								if (Math.random()>0.98) char = "💖";
+								ctx.fillText(char, i*fontsize, j*fontsize);
+								
+								//ctx.fillText("😆", i*fontsize, j*fontsize);
+							}
+						}							
+					}
+		},
+		'EFFECT_RED_STARS': {
+			'on': false,
 			'params': {
 				'num_stars': { 'friendly_name': 'Stars Number', 'min': 2.0, 'max': 200.0, 'step': 2.0, 'default_value': 80.0, 'value': 80.0 },
 				'red_stars': { 'friendly_name': 'Stars Redness', 'min': 0.0, 'max': 255.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 }
@@ -262,7 +296,7 @@ let drawCanvas = function() {
 					}					
 		},
 		'EFFECT_WALKERS': {
-			'on': true,
+			'on': false,
 			'params': {
 				'otrans': { 'friendly_name': 'Orange Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 },
 				'ctrans': { 'friendly_name': 'Cyan Transparency', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.5, 'value': 0.5 }
@@ -1003,7 +1037,6 @@ function loadLine(thisclass, thistext) {
 
 let words_index = 0;
 let words_array = [
-"MikroTik-F50CF7<br>http://192.168.88.252:70",
 "",
 "there is, in cyberspace",
 "",
