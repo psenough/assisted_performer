@@ -9,16 +9,7 @@
 var midi = require('midi');
 
 // these are only the default config and default values, updated values are stored on the params object
-var audio_config = {
-	'midi_port': 1, // change this id to the listed midi port that you want to use
-	'params': {
-		'audio_0': { 'controller': 0, 'friendly_name': 'Bass Temperature', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
-		'audio_1': { 'controller': 1, 'friendly_name': 'Bass Reverb Time', 'min': 1.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-		'audio_2': { 'controller': 2, 'friendly_name': 'Frequency Garble', 'min': 20.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
-		'audio_3': { 'controller': 3, 'friendly_name': 'Glitch Volume', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
-		'audio_4': { 'controller': 4, 'friendly_name': 'Audio Feedback', 'min': 0.0, 'max': 90.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
-	}
-}
+var midi_port = 1;
 
 var output = new midi.output();
 var midi_port_count = output.getPortCount();
@@ -27,34 +18,22 @@ for (var i=0; i<midi_port_count; i++) {
 	console.log(i + ' :: ' + output.getPortName(i));
 }
 
-if ('midi_port' in audio_config) {
-	if (audio_config['midi_port'] <= midi_port_count) {
-		output.openPort(audio_config['midi_port']);
-	}
-}
-
-function addAudioParams() {
-	// add the audio parameters to the global list of controllable parameters
-	if (audio_config) {
-		if ('params' in audio_config) addToParams(audio_config['params']);
+if (midi_port != undefined) {
+	if (midi_port <= midi_port_count) {
+		output.openPort(midi_port);
 	}
 }
 
 var audio_update_rate = 20;
 
+//TODO: test if this refactor still works
 setInterval(function() {
-	if (audio_config) {
-		if ('params' in audio_config) {
-			for (thisparam in params) {	
-				for (audioparam in audio_config['params']) {
-					if (thisparam == audioparam) {
-						// 176 is the code for control change, all messages are sent on channel 0 it seems
-						//console.log(audio_config['params'][thisparam]['controller']);
-						output.sendMessage([176,audio_config['params'][thisparam]['controller'],parseInt(params[thisparam]['value'],10)]);
-						continue;
-					}
-				}
-			}
+	for (thisparam in params) {
+		if (thisparam.substring(0,6) == 'audio_') {
+			// 176 is the code for control change, all messages are sent on channel 0 it seems
+
+			if ('controller' in params[thisparam]) 
+				output.sendMessage([176,params[thisparam]['controller'],parseInt(params[thisparam]['value'],10)]);
 		}
 	}
 }, audio_update_rate);
@@ -337,6 +316,10 @@ function getUntakenParam() {
 	var params_available = [];
 	for (p in params) {
 		var istaken = false;
+		
+		// skip tsps controllers
+		if (p.substring(0,5) == 'tsps_') continue;
+		
 		//loop1:
 		for (c in connections) {
 			if ('params' in connections[c]) {
@@ -406,7 +389,7 @@ var WebSocketServer = require('ws').Server
 var active_conn = [];
 var id = 0;
 var params = {};
-addAudioParams();
+//addAudioParams();
 //console.log(util.inspect(params));
 
 function addToParams(theseparams) {
@@ -455,7 +438,7 @@ ws_server.on('connection', function (client) {
 		} else {
 			
 			if (!('assisted_performer' in parsed)) {
-				//logme('no assisted performer object found in parse: ' + data);
+				logme('no assisted performer object found in parse: ' + data);
 				
 				// might be an opentsps object
 				checkTSPS(parsed);
@@ -466,7 +449,7 @@ ws_server.on('connection', function (client) {
 			switch (parsed['assisted_performer']) {
 				case 'canvas':
 					params = {};
-					addAudioParams();
+					//addAudioParams();
 					addToParams(parsed['parameters']);
 					type = 'canvas';
 					logme('received: ' + data);
@@ -700,8 +683,35 @@ function checkTSPS(tsps) {
 		}
 	}
 	
-	// TODO: updated values of assigned parameters to oldest active id
-	
+	// update values of assigned parameters
+	for (thisparam in params) {
+		if (thisparam.substring(0,5) == 'tsps_') {
+			//TODO: refactor this code to allow binding to all/more possible values of tsps json and not just centroid of the 2 oldest blobs
+			//reference http://www.tsps.cc/docs/tsps-json-protocol
+			switch(thisparam) {
+				case 'tsps_0_centroid_x':
+					if (tsps_ids.length > 0) { 
+						params[thisparam]['value'] = tsps_ids[0]['centroid']['x'];
+					}
+				break;
+				case 'tsps_0_centroid_y':
+					if (tsps_ids.length > 0) { 
+						params[thisparam]['value'] = tsps_ids[0]['centroid']['y'];
+					}
+				break;
+				case 'tsps_1_centroid_x':
+					if (tsps_ids.length > 1) { 
+						params[thisparam]['value'] = tsps_ids[1]['centroid']['x'];
+					}
+				break;
+				case 'tsps_1_centroid_y':
+					if (tsps_ids.length > 1) { 
+						params[thisparam]['value'] = tsps_ids[1]['centroid']['y'];
+					}
+				break;
+			}
+		}
+	}
 }
 
 

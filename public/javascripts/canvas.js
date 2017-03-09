@@ -15,7 +15,7 @@ let active_part = 0;
 //TODO: be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
 
 let cl = [
-['UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
+['AUDIO_CTRL','TSPS_CTRL','UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
@@ -136,6 +136,25 @@ let drawCanvas = function() {
 	let sin2 = Math.sin(sin1*0.05+cos2)+1.0;
 	
 	this.effects = {
+		'AUDIO_CTRL': {
+			'on': true,
+			'params': {
+				'audio_0': { 'controller': 0, 'friendly_name': 'Bass Temperature', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 3.0, 'value': 3.0 },
+				'audio_1': { 'controller': 1, 'friendly_name': 'Bass Reverb Time', 'min': 1.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'audio_2': { 'controller': 2, 'friendly_name': 'Frequency Garble', 'min': 20.0, 'max': 127.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'audio_3': { 'controller': 3, 'friendly_name': 'Glitch Volume', 'min': 0.0, 'max': 60.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 },
+				'audio_4': { 'controller': 4, 'friendly_name': 'Audio Feedback', 'min': 0.0, 'max': 90.0, 'step': 1.0, 'default_value': 0.0, 'value': 0.0 }
+			},
+			'call': function() {}
+		},
+		'TSPS_CTRL': {
+			'on': true,
+			'params': {
+				'tsps_0_centroid_x': { 'friendly_name': 'Centroid X', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 },
+				'tsps_0_centroid_y': { 'friendly_name': 'Centroid Y', 'min': 0.0, 'max': 1.0, 'step': 0.01, 'default_value': 0.0, 'value': 0.0 }
+			},
+			'call': function() {}
+		},
 		'UPDATE_TIMERS': {
 			'on': true,
 			'params': {
