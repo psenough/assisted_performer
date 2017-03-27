@@ -386,6 +386,7 @@ var WebSocketServer = require('ws').Server
 var active_conn = [];
 var id = 0;
 var params = {};
+var votes = [];
 //addAudioParams();
 //console.log(util.inspect(params));
 
@@ -480,9 +481,27 @@ ws_server.on('connection', function (client) {
 						}
 					}
 					if ('votes' in parsed) {
-						//TODO: process 'votes': { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] }
-						//TODO: process 'votes': { 'type': 'mash_vote', 'options': ['zone 1 option 1', 'zone 1 option 2', 'zone 2 option 1', 'zone 2 option 2'], 'clear_on_send': true }
-						console.log('processing votes');
+						logme('processing votes');
+						for (var i = 0; i < parsed['votes'].length; i++) {
+							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
+								
+								// cant directly replace entire object because the vote results are stored in there 
+								// if it exists, update active state
+								// if it doesnt exist, add it
+								var ispresent = false;
+								for (var j=0; j<votes.length; j++) {
+									// update votes object if it's a new vote
+									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
+										votes[j]['active'] = parsed['votes'][i]['active'];
+									}
+								}
+								if (!ispresent) votes.push(parsed['votes'][i];
+								
+							} else {
+								logme('vote object badly formatted:');
+								logme(parsed['votes'][i]);
+							}
+						}
 						//TODO: create voting interface
 						//TODO: process voting logic
 						//TODO: send 'vote_results': {'option 1':0, 'option 2':0} back to canvas
@@ -507,6 +526,41 @@ ws_server.on('connection', function (client) {
 							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
 						}
 					}
+				break;
+				case 'vote':
+					// 'vote': { 'uid': 'tester', 'vote': 'option 1' }
+					for (var j=0; j<votes.length; j++) {
+						// update votes object if it's a new vote
+						if (votes[j]['uid'] == parsed['vote']['uid']) {
+							
+							switch (votes[j]['type']) {
+								case 'single_vote_per_ip':
+									//TODO: test if this is working
+									logme('storing vote on '+ parsed['vote']['vote'] +' from ' + client.ra);
+									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['vote']['vote'];
+								break;
+								case 'mash_vote':
+									//TODO: process mash votes, store values
+								break;
+								default:
+									console.log('unknown type of votes: ' + votes[j]['type']);
+								break;
+							}							
+						}
+					}
+					
+					/*
+					switch (parsed['vote']['type']) {
+						case 'single_vote_per_ip':
+							//TODO: process 'votes': { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] }
+						break;
+						case 'mash_vote':
+							//TODO: process 'votes': { 'type': 'mash_vote', 'options': ['zone 1 option 1', 'zone 1 option 2', 'zone 2 option 1', 'zone 2 option 2'], 'clear_on_send': true }
+						break;
+						default:
+							console.log('unknown type of votes: ' + parsed['votes']['type']);
+						break;
+					}*/
 				break;
 				case 'master':
 					//console.log('received master');

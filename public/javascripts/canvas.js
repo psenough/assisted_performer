@@ -1150,8 +1150,7 @@ function connectWebSockets() {
 	};
 	
 	this_ws.sendParameters = function() {
-		let obj = {'assisted_performer': 'canvas', 'parameters': params};
-		if (!isEmpty(votes)) votes = votes;
+		let obj = {'assisted_performer': 'canvas', 'parameters': params, 'votes': votes};
 		this_ws.send(JSON.stringify(obj));
 	};
 
@@ -1337,7 +1336,7 @@ console.log(keyCode);
 		
 		case 86: // v
 		{
-			votes = { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] };
+			votes = [{ 'uid': 'tester', 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'], 'active': true }, { 'uid': 'tester 2', 'type': 'single_vote_per_ip', 'options': ['opt 1', 'opt 2'], active: false }];
 			sendParameters();
 		}
 		break;
