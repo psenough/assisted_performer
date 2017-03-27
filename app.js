@@ -493,18 +493,19 @@ ws_server.on('connection', function (client) {
 									// update votes object if it's a new vote
 									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
 										votes[j]['active'] = parsed['votes'][i]['active'];
+										
 									}
 								}
-								if (!ispresent) votes.push(parsed['votes'][i];
+								if (!ispresent) {
+									parsed['votes'][i]['results'] = {};
+									votes.push(parsed['votes'][i]);
+								}
 								
 							} else {
 								logme('vote object badly formatted:');
 								logme(parsed['votes'][i]);
 							}
 						}
-						//TODO: create voting interface
-						//TODO: process voting logic
-						//TODO: send 'vote_results': {'option 1':0, 'option 2':0} back to canvas
 					}
 					if ('ping' in parsed) {
 						// send back a pong in similar way to POST pong
@@ -535,12 +536,13 @@ ws_server.on('connection', function (client) {
 							
 							switch (votes[j]['type']) {
 								case 'single_vote_per_ip':
-									//TODO: test if this is working
+									//TODO: test this
 									logme('storing vote on '+ parsed['vote']['vote'] +' from ' + client.ra);
 									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['vote']['vote'];
 								break;
 								case 'mash_vote':
-									//TODO: process mash votes, store values
+									//TODO: test this
+									votes[j]['results'][parsed['vote']['vote']] += 1;
 								break;
 								default:
 									console.log('unknown type of votes: ' + votes[j]['type']);
@@ -548,19 +550,7 @@ ws_server.on('connection', function (client) {
 							}							
 						}
 					}
-					
-					/*
-					switch (parsed['vote']['type']) {
-						case 'single_vote_per_ip':
-							//TODO: process 'votes': { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] }
-						break;
-						case 'mash_vote':
-							//TODO: process 'votes': { 'type': 'mash_vote', 'options': ['zone 1 option 1', 'zone 1 option 2', 'zone 2 option 1', 'zone 2 option 2'], 'clear_on_send': true }
-						break;
-						default:
-							console.log('unknown type of votes: ' + parsed['votes']['type']);
-						break;
-					}*/
+
 				break;
 				case 'master':
 					//console.log('received master');
@@ -670,12 +660,44 @@ function sendWebSocketUpdateToCanvas(thisparam) {
 var streaming_milliseconds = 100;
 
 setInterval(function() {
-	var update = {};
+	let update = {};
 	for (thisparam in params) {
 		//console.log(thisparam);
 		update[thisparam] = params[thisparam].value;
 	}
 	//console.log(update);
+	let vote_results = [];
+	for (let i=0; i<votes.length; i++) {
+		if (votes[i]['active']) {
+			switch (votes[i]['type']) {
+				case 'single_vote_per_ip':
+					let obj = {};
+					for (cl in votes[j]['results']) {
+						if (votes[j]['results'][cl] in obj) obj[votes[j]['results'][cl]]++;
+						 else obj[votes[j]['results'][cl]] = 0;
+					}
+					vote_results.push({'uid': votes[i]['uid'], results: obj}); 
+				break;
+				case 'mash_vote':
+					let obj2 = votes[j]['results'];					
+					// reset counter
+					if (votes[j]['clear_on_send']) {
+						for (cl in votes[j]['results']) {
+							votes[j]['results'][cl] = 0;
+						}
+					}
+					vote_results.push({'uid': votes[i]['uid'], results: obj2}); 
+				break;
+				default:
+					console.log('unknown type of votes: ' + votes[j]['type']);
+				break;
+			}						
+		}
+	}
+	update['vote_results'] = vote_results;
+	//console.log(update);
+	//TODO: test if this vote_results is working properly for all vote types
+	
 	for (var i = 0; i < active_conn.length; i++) {
 		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
 			active_conn[i]['socket'].send(JSON.stringify(update));
