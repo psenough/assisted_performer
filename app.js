@@ -1,6 +1,6 @@
 
 //TODO: easy way to change system to give same parameter to multiple sources and apply the average
-//TODO: handle multiple canvases connected
+//TODO: handle multiple canvases connected elegantely
 
 //
 // init midi
@@ -26,7 +26,6 @@ if (midi_port != undefined) {
 
 var audio_update_rate = 20;
 
-//TODO: test if this refactor still works
 setInterval(function() {
 	for (thisparam in params) {
 		if (thisparam.substring(0,6) == 'audio_') {
@@ -84,10 +83,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 var connections = [];
 var connection_timeout = 2000;
 var streaming_milliseconds = 50;
-var votes = [];
 var logdir = '';
 var ourclient = null;
-var gamedata = '0||||';
 
 
 
@@ -220,7 +217,7 @@ app.post('/control', function(req, res) {
 		}
 	}
 
-	res.send('rcvd|'+gamedata);
+	res.send('rcvd');
 });
 
 app.post('/ping', function(req, res) {
@@ -401,10 +398,6 @@ function addToParams(theseparams) {
 
 ws_server.on('connection', function (client) {
     client.id = id++;
-	//console.log(client.upgradeReq.connection.remoteAddress);
-	//console.log(client.upgradeReq.headers.host.split(':')[0]);
-	//client.ra = client.req.connection.remoteAddress;
-	//client.ra = client.headers.origin;
 	client.ra = client.upgradeReq.connection.remoteAddress;
 	
 	//console.log(client.ra);
@@ -485,6 +478,14 @@ ws_server.on('connection', function (client) {
 								//sendWebSocketUpdateToCanvas(thisparam);
 							}
 						}
+					}
+					if ('votes' in parsed) {
+						//TODO: process 'votes': { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] }
+						//TODO: process 'votes': { 'type': 'mash_vote', 'options': ['zone 1 option 1', 'zone 1 option 2', 'zone 2 option 1', 'zone 2 option 2'], 'clear_on_send': true }
+						console.log('processing votes');
+						//TODO: create voting interface
+						//TODO: process voting logic
+						//TODO: send 'vote_results': {'option 1':0, 'option 2':0} back to canvas
 					}
 					if ('ping' in parsed) {
 						// send back a pong in similar way to POST pong
@@ -730,7 +731,6 @@ stdin.on('data', function (data) {
 		process.stdout.write('left');
 	}
 	if (data == '0') { 
-		gamedata = 0;
 		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
 	}
 	if (data == '1') {

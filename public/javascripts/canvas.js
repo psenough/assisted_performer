@@ -8,6 +8,7 @@ let ctx;
 let halfw;
 let halfh;
 let params = {};
+let votes = {};
 let active_part = 0;
 
 //TODO: when layers with the keys, remove parameters from effect being toggled off
@@ -1149,7 +1150,9 @@ function connectWebSockets() {
 	};
 	
 	this_ws.sendParameters = function() {
-		this_ws.send(JSON.stringify({'assisted_performer': 'canvas', 'parameters': params}));
+		let obj = {'assisted_performer': 'canvas', 'parameters': params};
+		if (!isEmpty(votes)) votes = votes;
+		this_ws.send(JSON.stringify(obj));
 	};
 
 	this_ws.onmessage = function(evt) {
@@ -1332,6 +1335,13 @@ console.log(keyCode);
 			sendParameters();
 		break;
 		
+		case 86: // v
+		{
+			votes = { 'type': 'single_vote_per_ip', 'options': ['option 1', 'option 2'] };
+			sendParameters();
+		}
+		break;
+		
 		case 32: // spacebar
 		{
 			let words = document.getElementById("words"); 
@@ -1446,5 +1456,9 @@ function listActiveOn() {
 	}
 	output += "']";
 	console.log(output);
+}
+
+function isEmpty(obj) {
+	return Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
