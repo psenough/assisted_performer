@@ -5,7 +5,7 @@
 //
 // init midi
 //
-
+/*
 var midi = require('midi');
 
 // these are only the default config and default values, updated values are stored on the params object
@@ -36,7 +36,7 @@ setInterval(function() {
 		}
 	}
 }, audio_update_rate);
-
+*/
 
 
 //
@@ -61,7 +61,7 @@ var util = require('util')
 // init express
 //
 
-var port = 70;
+var port = 8080;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
 httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
@@ -96,6 +96,7 @@ var ourclient = null;
 app.get('/', catchall);
 app.get('/controller', catchall);
 app.get('/slider', catchall);
+app.get('/vote', catchall);
 function catchall(req, res) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -141,11 +142,17 @@ function catchall(req, res) {
 		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
-	res.render('assisted_performer_slider_demobit', {title: 'Assisted Performer Slider'});
+	res.render('vote', {title: 'Audience Vote'});
 }
 
 // serve canvas page
-app.get('/canvas', canvas);
+app.get('/quiz', canvas);
+function canvas(req, res) {
+	res.render('quiz', {title: 'Who Wants to be a Demoscener?'});
+}
+
+// serve canvas page
+/*app.get('/canvas', canvas);
 function canvas(req, res) {
 	res.render('canvas', {title: 'Assisted Performer Canvas'});
 	// not adding our canvas to the connections list
@@ -156,7 +163,7 @@ app.get('/master', master);
 function master(req, res) {
 	res.render('master', {title: 'Assisted Performer Master'});
 	// not adding master to the connections list
-}
+}*/
 
 // serve favicon
 app.get('/favicon.ico', function(req, res){
@@ -179,7 +186,7 @@ app.get('/favicon.ico', function(req, res){
 	});
 	res.attachment(fileName);
 });
-
+/*
 // receive control values to affect parameter
 app.post('/control', function(req, res) {
 	// get timestamp
@@ -219,6 +226,7 @@ app.post('/control', function(req, res) {
 
 	res.send('rcvd');
 });
+*/
 
 app.post('/ping', function(req, res) {
 	// get timestamp
@@ -449,6 +457,34 @@ ws_server.on('connection', function (client) {
 					logme('received: ' + data);
 					// received message with new parameters, reassigning all existing controller connections
 					reassignParameters();
+					
+					if ('votes' in parsed) {
+						logme('processing votes');
+						for (let i = 0; i < parsed['votes'].length; i++) {
+							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
+								
+								// cant directly replace entire object because the vote results are stored in there 
+								// if it exists, update active state
+								// if it doesnt exist, add it
+								let ispresent = false;
+								for (let j=0; j<votes.length; j++) {
+									// update votes object if it's a new vote
+									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
+										votes[j]['active'] = parsed['votes'][i]['active'];
+										
+									}
+								}
+								if (!ispresent) {
+									parsed['votes'][i]['results'] = {};
+									votes.push(parsed['votes'][i]);
+								}
+								
+							} else {
+								logme('vote object badly formatted:');
+								logme(parsed['votes'][i]);
+							}
+						}
+					}
 				break;
 				case 'control':
 					type = 'control';
@@ -480,10 +516,10 @@ ws_server.on('connection', function (client) {
 							}
 						}
 					}
-					if ('votes' in parsed) {
+					/*if ('votes' in parsed) {
 						logme('processing votes');
 						for (var i = 0; i < parsed['votes'].length; i++) {
-							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
+							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i])) {
 								
 								// cant directly replace entire object because the vote results are stored in there 
 								// if it exists, update active state
@@ -506,7 +542,7 @@ ws_server.on('connection', function (client) {
 								logme(parsed['votes'][i]);
 							}
 						}
-					}
+					}*/
 					if ('ping' in parsed) {
 						// send back a pong in similar way to POST pong
 						var thisid = getID(client.id);
@@ -524,25 +560,31 @@ ws_server.on('connection', function (client) {
 								}
 							}
 							
-							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
+							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr, 'votes': votes}));
 						}
 					}
 				break;
 				case 'vote':
 					// 'vote': { 'uid': 'tester', 'vote': 'option 1' }
-					for (var j=0; j<votes.length; j++) {
+					
+					//console.log('votes:');
+					//console.log(votes);
+					//console.log(votes[0]);
+					//console.log(parsed);
+					for (let j=0; j<votes.length; j++) {
+						//console.log(j);
 						// update votes object if it's a new vote
-						if (votes[j]['uid'] == parsed['vote']['uid']) {
+						if (votes[j]['uid'] == parsed['votes']['uid']) {
 							
 							switch (votes[j]['type']) {
 								case 'single_vote_per_ip':
 									//TODO: test this
-									logme('storing vote on '+ parsed['vote']['vote'] +' from ' + client.ra);
-									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['vote']['vote'];
+									logme('storing vote on '+ parsed['votes']['vote'] +' from ' + client.ra);
+									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['votes']['vote'];
 								break;
 								case 'mash_vote':
 									//TODO: test this
-									votes[j]['results'][parsed['vote']['vote']] += 1;
+									votes[j]['results'][parsed['votes']['vote']] += 1;
 								break;
 								default:
 									console.log('unknown type of votes: ' + votes[j]['type']);
@@ -672,24 +714,24 @@ setInterval(function() {
 			switch (votes[i]['type']) {
 				case 'single_vote_per_ip':
 					let obj = {};
-					for (cl in votes[j]['results']) {
-						if (votes[j]['results'][cl] in obj) obj[votes[j]['results'][cl]]++;
-						 else obj[votes[j]['results'][cl]] = 0;
+					for (cl in votes[i]['results']) {
+						if (votes[i]['results'][cl] in obj) obj[votes[i]['results'][cl]]++;
+						 else obj[votes[i]['results'][cl]] = 0;
 					}
 					vote_results.push({'uid': votes[i]['uid'], results: obj}); 
 				break;
 				case 'mash_vote':
-					let obj2 = votes[j]['results'];					
+					let obj2 = votes[i]['results'];					
 					// reset counter
-					if (votes[j]['clear_on_send']) {
-						for (cl in votes[j]['results']) {
+					if (votes[i]['clear_on_send']) {
+						for (cl in votes[i]['results']) {
 							votes[j]['results'][cl] = 0;
 						}
 					}
 					vote_results.push({'uid': votes[i]['uid'], results: obj2}); 
 				break;
 				default:
-					console.log('unknown type of votes: ' + votes[j]['type']);
+					console.log('unknown type of votes: ' + votes[i]['type']);
 				break;
 			}						
 		}
@@ -719,7 +761,7 @@ function getID(thisid) {
 //
 // computer vision (TSPS)
 //
-
+/*
 var tsps_timeout = 2000;
 var tsps_ids = [];
 
@@ -790,7 +832,7 @@ function checkTSPS(tsps) {
 		}
 	}
 }
-
+*/
 
 
 //
@@ -825,6 +867,9 @@ stdin.on('data', function (data) {
 		floatback = !floatback;
 		console.log('floatback: ' + floatback);
 	}
+	if (data == 'v') {
+		console.log(votes);
+	}
     process.stdout.write('Captured Key : ' + data + "\n");
 });
 stdin.setEncoding('utf8');
@@ -836,7 +881,7 @@ stdin.resume();
 //
 // float back values to default
 //
-
+/*
 var floatback = false;
 var floatback_rate = 500; // miliseconds between each step update
 
@@ -859,7 +904,7 @@ setInterval(function() {
 		}
 	}
 }, floatback_rate);
-
+*/
 //TODO: we could do floatbacks with lerps, would be smoother, and use another variable to define it's float rate?
 //TODO: reminder that the step value was originally used for increase and decrease buttons with post messaging (before websockets enabled slider)
 

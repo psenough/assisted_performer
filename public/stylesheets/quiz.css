@@ -1,0 +1,64 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	-webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-tap-highlight-color: transparent;
+	background-color: #000;
+	/*-webkit-transform: translateZ(0);*/
+	-webkit-backface-visibility: hidden;
+	background-color: transparent;
+}
+
+*:focus { outline:none; }
+
+html, body {
+	overflow:hidden;
+}
+
+.hidden {
+	display: none;
+}
+
+canvas, img {
+	position: absolute;
+	top: 0px;
+    image-rendering: optimizeQuality;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+}
+
+#words {
+	position: absolute;
+	top: 5%;
+	width: 100%;
+	color: #ff75f0;
+	text-align: center;
+	margin: auto;
+	font-size: 3em;
+	z-index: 200;
+    text-shadow: 0 0 3px #effe9b, 0 0 5px #effe9b, 0 0 8px #effe9b, 0 0 10px #effe9b, 0 0 13px #effe9b;
+	background-color: transparent;
+}
+
+#fps {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	font-size: 20px;
+	color: #ff75f0;
+	text-shadow: 0 0 3px #effe9b, 0 0 5px #effe9b, 0 0 8px #effe9b;
+	z-index: 200;
+	background-color: transparent;
+}
+
+.correct {
+	background-color: #6ceacb;
+}
+
