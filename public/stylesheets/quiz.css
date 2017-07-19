@@ -62,3 +62,23 @@ canvas, img {
 	background-color: #6ceacb;
 }
 
+.w3-green,.w3-hover-green:hover{
+	color:#fff!important;
+	background-color:#4CAF50!important;
+	text-align: center;
+	margin: auto;
+	border-radius: 12px;
+	width: 0%;
+}
+
+.w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{
+	background-color:transparent;
+	width: 70%;
+	margin: auto;
+	text-align: center;
+	border-radius: 12px;
+}
+
+.w3-container:after,.w3-container:before,.w3-panel:after,.w3-panel:before,.w3-row:after,.w3-row:before,.w3-row-padding:after,.w3-row-padding:before,
+.w3-cell-row:before,.w3-cell-row:after,.w3-clear:after,.w3-clear:before,.w3-bar:before,.w3-bar:after{content:"";display:table;clear:both}
+

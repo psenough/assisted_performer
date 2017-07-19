@@ -468,10 +468,13 @@ ws_server.on('connection', function (client) {
 								// if it doesnt exist, add it
 								let ispresent = false;
 								for (let j=0; j<votes.length; j++) {
+									votes[j]['active'] = false;
+									//console.log('exists?');
+									//console.log(votes[j]['uid']);
 									// update votes object if it's a new vote
-									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
+									if (('uid' in votes[j]) && (votes[j]['uid'] == parsed['votes'][i]['uid'])) {
 										votes[j]['active'] = parsed['votes'][i]['active'];
-										
+										ispresent = true;
 									}
 								}
 								if (!ispresent) {
@@ -716,7 +719,7 @@ setInterval(function() {
 					let obj = {};
 					for (cl in votes[i]['results']) {
 						if (votes[i]['results'][cl] in obj) obj[votes[i]['results'][cl]]++;
-						 else obj[votes[i]['results'][cl]] = 0;
+						 else obj[votes[i]['results'][cl]] = 1;
 					}
 					vote_results.push({'uid': votes[i]['uid'], results: obj}); 
 				break;

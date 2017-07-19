@@ -11,19 +11,51 @@ let params = {};
 let votes = {};
 let active_part = 0;
 
-//TODO: when layers with the keys, remove parameters from effect being toggled off
-//TODO: text overlays sequence easy triggering
-//TODO: be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
+
+let questions = [
+{
+	'q': 'What edition of Evoke is this?',
+	'a': 'The second',
+	'b': 'The fifth',
+	'c': 'The twentieth',
+	'd': 'I don\'t know, it\'s my first!',
+	'correct': 'c'
+},
+{
+	'q': 'According to TPOLM your mother is a?...',
+	'a': 'Saint',
+	'b': 'Devil',
+	'c': 'Evil witch',
+	'd': 'Motherfucking giraffe',
+	'correct': 'd'
+},
+{
+	'q': 'Which of these is not a Spaceballs release?',
+	'a': 'Nine fingers',
+	'b': 'Urethra',
+	'c': 'Badass 5000',
+	'd': 'Last finger'
+}
+]
 
 let cl = [
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','WHO_WANTS_TO_BE_A_DEMOSCENER'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','WHO_WANTS_TO_BE_A_DEMOSCENER']
+];
+
+// append question screens to list of scenes
+for (let i=0; i<questions.length; i++) {
+cl.push(['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','Q'+i]);
+cl.push(['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','O'+i]);
+cl.push(['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','A'+i]);
+}
+/*,
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','Q1'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','O1'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','A1'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','Q2'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','O2'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','A2']
-];
+];*/
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
 let configs = {};
@@ -274,67 +306,6 @@ let drawCanvas = function() {
 						
 					}
 		},
-		/*'EFFECT_FOREGROUND': {
-			'on': false,
-			'params': {
-				'fg_hue': { 'friendly_name': 'Foreground Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 150.0, 'value': 150.0 },
-				'fg_sat': { 'friendly_name': 'Foreground Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 80.0, 'value': 20.0 },
-				'fg_lum': { 'friendly_name': 'Foreground Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 50.0, 'value': 30.0 }
-			},
-			'call': function() {
-				
-						let fg_hue = parseFloat(params['fg_hue']['value']);
-						let fg_sat = parseFloat(params['fg_sat']['value']);
-						let fg_lum = parseFloat(params['fg_lum']['value']);
-						
-						let hsl = ctx.fillStyle = "hsl("+fg_hue+","+fg_sat+"%,"+fg_lum+"%)";
-
-						let rx = w/Math.sqrt(2);
-						let ry = h/Math.sqrt(2);
-						let cx = w*0.5;
-						let cy = h*0.5;
-						
-						let scaleX;
-						let scaleY;
-						let invScaleX;
-						let invScaleY;
-						let grad;
-						
-						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
-						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
-						//just a solid fill with the outermost gradient color.
-						rx = (rx == 0) ? 0.25 : rx;
-						rr = (ry == 0) ? 0.25 : ry;
-						
-						//we create a circular gradient, but after transforming it properly (by shrinking in either the x or y direction),
-						//we will have an alliptical gradient.
-						if (rx >= ry) {
-							scaleX = 1;
-							invScaleX = 1;
-							scaleY = ry/rx;
-							invScaleY = rx/ry;
-							grad = ctx.createRadialGradient(cx, cy*invScaleY, 0, cx, cy*invScaleY, rx);
-						}
-						else {
-							scaleY = 1;
-							invScaleY = 1;
-							scaleX = rx/ry;
-							invScaleX = ry/rx;
-							grad = ctx.createRadialGradient(cx*invScaleX, cy, 0, cx*invScaleX, cy, ry);
-						}
-						
-						ctx.fillStyle = grad;
-						
-						//add desired colors
-						grad.addColorStop(0,"rgba(0,0,0,0.0)");
-						grad.addColorStop(1,hsl);
-						
-						ctx.save();
-						ctx.setTransform(scaleX,0,0,scaleY,0,0);
-						ctx.fillRect(0,0,w*invScaleX,h*invScaleY);
-						ctx.restore();
-					},
-		},*/
 		'WHO_WANTS_TO_BE_A_DEMOSCENER': {
 			'on': true,
 			'params': {},
@@ -342,57 +313,37 @@ let drawCanvas = function() {
 						let words = getDiv('words');
 						words.innerHTML = title;
 					}
-		},
-		'Q1': {
+		}		
+	}
+	
+	// append questions to effects list
+	for (let i=0; i<questions.length; i++) {
+		this.effects['Q'+i] = {
 			'on': true,
 			'params': {},
 			'call': function() {
 						let words = getDiv('words');
-						words.innerHTML = getQuestion(0);
+						words.innerHTML = getQuestion(i);
 					}
-		},
-		'O1': {
+		};
+		this.effects['O'+i] = {
 			'on': true,
 			'params': {},
-			'votes': getVoteStruct(0),
+			'votes': getVoteStruct(i),
 			'call': function() {
 						let words = getDiv('words');
-						words.innerHTML = getOptions(0);
+						words.innerHTML = getOptions(i);
 					}
-		},
-		'A1': {
+		};
+		this.effects['A'+i] = {
 			'on': true,
 			'params': {},
+			'votes': getVoteStruct(i),
 			'call': function() {
 						let words = getDiv('words');
-						words.innerHTML = getAnswer(0);
+						words.innerHTML = getAnswer(i);
 					}
-		},
-		'Q2': {
-			'on': true,
-			'params': {},
-			'call': function() {
-						let words = getDiv('words');
-						words.innerHTML = getQuestion(1);
-					}
-		},
-		'O2': {
-			'on': true,
-			'params': {},
-			'call': function() {
-						let words = getDiv('words');
-						words.innerHTML = getOptions(1);
-					}
-		},
-		'A2': {
-			'on': true,
-			'params': {},
-			'call': function() {
-						let words = getDiv('words');
-						words.innerHTML = getAnswer(1);
-					}
-		}
-		
+		};
 	}
 	
 	function getVoteStruct(id) {
@@ -404,7 +355,36 @@ let drawCanvas = function() {
 	}
 	
 	function getOptions(id) {
-		return title + '<br><br>' + questions[id]['q'] + '<br><br><div id="answera">A) ' + questions[id]['a'] + '</div><div id="answerb">B) ' + questions[id]['b'] + '</div><div id="answerc">C) ' + questions[id]['c'] + '</div><div id="answerd">D) ' + questions[id]['d'] + '</div>';
+		let vr, total, a_w, b_w, c_w, d_w = 0;
+		for (let i=0; i<vote_results.length; i++) {
+			if (vote_results[i]['uid'] == ('question'+id)) {
+				vr = vote_results[i]['results'];
+				
+				let tt_a = vr[questions[id]['a']]?vr[questions[id]['a']]:0;
+				let tt_b = vr[questions[id]['b']]?vr[questions[id]['b']]:0;
+				let tt_c = vr[questions[id]['c']]?vr[questions[id]['c']]:0;
+				let tt_d = vr[questions[id]['d']]?vr[questions[id]['d']]:0;
+				
+				total = tt_a + tt_b + tt_c + tt_d;
+				a_w = Math.round((tt_a/total)*100)|0;
+				b_w = Math.round((tt_b/total)*100)|0;
+				c_w = Math.round((tt_c/total)*100)|0;
+				d_w = Math.round((tt_d/total)*100)|0;
+				
+				if (isNaN(a_w)) a_w = 0;
+				if (isNaN(b_w)) b_w = 0;
+				if (isNaN(c_w)) c_w = 0;
+				if (isNaN(d_w)) d_w = 0;
+			}
+		}
+		
+		let output = title + '<br><br>' + questions[id]['q'] + '<br><br>';
+		output += '<div id="answera">A) ' + questions[id]['a'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ a_w + '%">'+a_w+'%</div></div>';
+		output += '<div id="answerb">B) ' + questions[id]['b'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ b_w + '%">'+b_w+'%</div></div>';
+		output += '<div id="answerc">C) ' + questions[id]['c'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ c_w + '%">'+c_w+'%</div></div>';
+		output += '<div id="answerd">D) ' + questions[id]['d'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ d_w + '%">'+d_w+'%</div></div>';
+		
+		return output;
 	}
 	
 	function getAnswer(id) {
@@ -537,6 +517,7 @@ function resize() {
 let this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
 let this_ws = null;
 let this_timeout = false;
+let vote_results;
 
 function connectWebSockets() {
 
@@ -556,13 +537,17 @@ function connectWebSockets() {
 	};
 
 	this_ws.onmessage = function(evt) {
-		//console.log(evt.data);
+		console.log(evt.data);
 		let parsed = JSON.parse(evt.data);
-		for (instance in parsed) {
+		/*for (instance in parsed) {
 			if (instance in params) {
 				params[instance]['value'] = parsed[instance];
 			}
+		}*/
+		if (parsed['vote_results'] != undefined) {
+			vote_results = parsed['vote_results'];
 		}
+		
 		//console.log(parsed);
 	};
 
@@ -858,22 +843,3 @@ function listActiveOn() {
 function isEmpty(obj) {
 	return Object.keys(obj).length === 0 && obj.constructor === Object
 }
-
-let questions = [
-{
-	'q': 'According to TPOLM what is your mother?',
-	'a': 'A saint',
-	'b': 'A devil',
-	'c': 'A witch',
-	'd': 'A motherfucking giraffe',
-	'correct': 'd'
-},
-{
-	'q': 'Which of these is not a Spaceballs release?',
-	'a': 'Nine fingers',
-	'b': 'Urethra',
-	'c': 'Badass 5000',
-	'd': 'Last finger'
-}
-
-]

@@ -57,7 +57,10 @@ html, body {
 	background-position: left top;
 	z-index: 21;
 	cursor: pointer;
-	background-color: transparent;
+	background-color: white;
+	color: black;
+	text-align: center;
+	border-radius: 12px;
 }
 
 .asset {
@@ -83,14 +86,6 @@ canvas, img {
     -ms-interpolation-mode: nearest-neighbor;
 }
 
-.join_en_off {
-	background-image: url('../images/0_join_off.png');
-}
-
-.join_en_on {
-	background-image: url('../images/0_join_on.png');
-}
-
 .lag {
 	color: yellow;
 	position: absolute;
@@ -98,20 +93,12 @@ canvas, img {
 	left:0px;
 }
 
-.add_on {
-	background-image: url('../images/add_on.png');
+.btn_on {
+	background-color: green;
 }
 
-.add_off {
-	background-image: url('../images/add_off.png');
-}
-
-.minus_on {
-	background-image: url('../images/minus_on.png');
-}
-
-.minus_off {
-	background-image: url('../images/minus_off.png');
+.btn_off {
+	background-color: white;
 }
 
 .value {
@@ -130,4 +117,14 @@ canvas, img {
 	text-align: center;
 	color: #FFF;
 	font-size: 2em;
+}
+
+.btn span {
+	color: black;
+	background-color: transparent;
+	display: inline-block;
+    vertical-align: middle;
+    line-height: 16px;
+	padding-left: 8px;
+	padding-right: 8px
 }

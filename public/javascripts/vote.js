@@ -45,12 +45,13 @@ function calculate_buttons_position() {
 		document.body.appendChild(background);
 	}
 	
-	console.log(votes);
+	//console.log(votes);
 	if (votes != undefined) {
 		for (v in votes) {
+			if (!votes[v]['active']) continue;
 			let vote = votes[v];
-			console.log('vote:');
-			console.log(vote);
+			//console.log('vote:');
+			//console.log(vote);
 			/*var title = document.getElementById('title');
 			if (title) {
 				title.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
@@ -67,133 +68,161 @@ function calculate_buttons_position() {
 			
 			var opt_a = document.getElementById('opt_a');
 			if (opt_a) {
-				opt_a.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
+				opt_a.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.325,10) + 'px';
 				opt_a.style.top = parseInt(usedheight*0.15,10) + 'px';
-				opt_a.style.width = parseInt(usedwidth*0.5,10) + 'px';
-				opt_a.style.height = parseInt(usedwidth*0.5,10) + 'px';
+				opt_a.style.width = parseInt(usedwidth*0.65,10) + 'px';
+				opt_a.style.height = parseInt(usedwidth*0.15,10) + 'px';
+				opt_a.style.lineHeight = opt_a.style.height;
 			} else {
-				console.log('adding opt a');
+				//console.log('adding opt a');
 				opt_a = document.createElement('div');
 				opt_a.setAttribute('id', 'opt_a');
-				opt_a.setAttribute('class', 'btn opt_a_off');
-				opt_a.innerHTML = vote['options'][0];
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_a.innerHTML = '<span>' + vote['options'][0] + '</span>';
 				opt_a.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][0]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_a.addEventListener('touchstart', function(e){
 					e.preventDefault();				
-					opt_a.setAttribute('class', 'btn opt_a_on');
+					opt_a.setAttribute('class', 'btn btn_on');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 					sendvote(vote['uid'], vote['options'][0]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_a.addEventListener('touchmove', function(e){
 					e.preventDefault();
-					opt_a.setAttribute('class', 'btn opt_a_on');
+					opt_a.setAttribute('class', 'btn btn_on');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 				});
-				opt_a.addEventListener('touchend', function(e){
+				/*opt_a.addEventListener('touchend', function(e){
 					e.preventDefault();
-					opt_a.setAttribute('class', 'btn opt_a_off');
-				});
+					opt_a.setAttribute('class', 'btn btn_off');
+				});*/
 				document.body.appendChild(opt_a);
 			}
 			
 			var opt_b = document.getElementById('opt_b');
 			if (opt_b) {
-				opt_b.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
+				opt_b.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.325,10) + 'px';
 				opt_b.style.top = parseInt(usedheight*0.35,10) + 'px';
-				opt_b.style.width = parseInt(usedwidth*0.5,10) + 'px';
-				opt_b.style.height = parseInt(usedwidth*0.5,10) + 'px';
+				opt_b.style.width = parseInt(usedwidth*0.65,10) + 'px';
+				opt_b.style.height = parseInt(usedwidth*0.15,10) + 'px';
+				opt_b.style.lineHeight = opt_b.style.height;
 			} else {
 				console.log('adding opt b');
 				opt_b = document.createElement('div');
 				opt_b.setAttribute('id', 'opt_b');
-				opt_b.setAttribute('class', 'btn opt_b_off');
-				opt_b.innerHTML = vote['options'][1];
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_b.innerHTML = '<span>' + vote['options'][1] + '</span>';
 				opt_b.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][1]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_b.addEventListener('touchstart', function(e){
 					e.preventDefault();				
-					opt_b.setAttribute('class', 'btn opt_b_on');
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_on');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 					sendvote(vote['uid'], vote['options'][1]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_b.addEventListener('touchmove', function(e){
 					e.preventDefault();
-					opt_b.setAttribute('class', 'btn opt_b_on');
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_on');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 				});
-				opt_b.addEventListener('touchend', function(e){
+				/*opt_b.addEventListener('touchend', function(e){
 					e.preventDefault();
-					opt_b.setAttribute('class', 'btn opt_b_off');
-				});
+					opt_b.setAttribute('class', 'btn btn_off');
+				});*/
 				document.body.appendChild(opt_b);
 			}
 			
 			var opt_c = document.getElementById('opt_c');
 			if (opt_c) {
-				opt_c.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
+				opt_c.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.325,10) + 'px';
 				opt_c.style.top = parseInt(usedheight*0.55,10) + 'px';
-				opt_c.style.width = parseInt(usedwidth*0.5,10) + 'px';
-				opt_c.style.height = parseInt(usedwidth*0.5,10) + 'px';
+				opt_c.style.width = parseInt(usedwidth*0.65,10) + 'px';
+				opt_c.style.height = parseInt(usedwidth*0.15,10) + 'px';
+				opt_c.style.lineHeight = opt_c.style.height;
 			} else {
 				console.log('adding opt c');
 				opt_c = document.createElement('div');
 				opt_c.setAttribute('id', 'opt_c');
-				opt_c.setAttribute('class', 'btn opt_c_off');
-				opt_c.innerHTML = vote['options'][2];
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_c.innerHTML = '<span>' + vote['options'][2] + '</span>';
 				opt_c.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][2]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_c.addEventListener('touchstart', function(e){
 					e.preventDefault();				
-					opt_c.setAttribute('class', 'btn opt_c_on');
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_on');
+					opt_d.setAttribute('class', 'btn btn_off');
 					sendvote(vote['uid'], vote['options'][2]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_c.addEventListener('touchmove', function(e){
 					e.preventDefault();
-					opt_c.setAttribute('class', 'btn opt_c_on');
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_on');
+					opt_d.setAttribute('class', 'btn btn_off');
 				});
-				opt_c.addEventListener('touchend', function(e){
+				/*opt_c.addEventListener('touchend', function(e){
 					e.preventDefault();
-					opt_c.setAttribute('class', 'btn opt_c_off');
-				});
+					opt_c.setAttribute('class', 'btn btn_off');
+				});*/
 				document.body.appendChild(opt_c);
 			}
 			
 			var opt_d = document.getElementById('opt_d');
 			if (opt_d) {
-				opt_d.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
+				opt_d.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.325,10) + 'px';
 				opt_d.style.top = parseInt(usedheight*0.75,10) + 'px';
-				opt_d.style.width = parseInt(usedwidth*0.5,10) + 'px';
-				opt_d.style.height = parseInt(usedwidth*0.5,10) + 'px';
+				opt_d.style.width = parseInt(usedwidth*0.65,10) + 'px';
+				opt_d.style.height = parseInt(usedwidth*0.15,10) + 'px';
+				opt_d.style.lineHeight = opt_d.style.height;
 			} else {
 				console.log('adding opt d');
 				opt_d = document.createElement('div');
 				opt_d.setAttribute('id', 'opt_d');
-				opt_d.setAttribute('class', 'btn opt_d_off');
-				opt_d.innerHTML = vote['options'][3];
+				opt_d.setAttribute('class', 'btn btn_off');
+				opt_d.innerHTML = '<span>' + vote['options'][3] + '</span>';
 				opt_d.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][3]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_d.addEventListener('touchstart', function(e){
 					e.preventDefault();				
-					opt_d.setAttribute('class', 'btn opt_d_on');
-					sendvote(vote['uid'], vote['options'][2]);
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_on');
+					sendvote(vote['uid'], vote['options'][3]);
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_d.addEventListener('touchmove', function(e){
 					e.preventDefault();
-					opt_d.setAttribute('class', 'btn opt_d_on');
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_on');
 				});
-				opt_d.addEventListener('touchend', function(e){
+				/*opt_d.addEventListener('touchend', function(e){
 					e.preventDefault();
-					opt_d.setAttribute('class', 'btn opt_d_off');
-				});
+					opt_d.setAttribute('class', 'btn btn_off');
+				});*/
 				document.body.appendChild(opt_d);
 			}
 		}
@@ -627,7 +656,32 @@ function connect_websockets() {
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
 
+				//get previous active uid
+				let prev_active = '';
+				for (let i=0; i<votes.length; i++) {
+					if (votes[i]['active'] == true) prev_active = votes[i]['uid'];
+				}
+				
+				// update global votes variable
 				votes = parsed['votes'];
+				
+				//get previous active uid
+				let new_active = '';
+				for (let i=0; i<votes.length; i++) {
+					if (votes[i]['active'] == true) new_active = votes[i]['uid'];
+				}
+				
+				// check if we should recreate the buttons
+				if (new_active != prev_active) {
+					var opt_a = document.getElementById('opt_a');
+					if (opt_a) document.body.removeChild(opt_a);
+					var opt_b = document.getElementById('opt_b');
+					if (opt_b) document.body.removeChild(opt_b);
+					var opt_c = document.getElementById('opt_c');
+					if (opt_c) document.body.removeChild(opt_c);
+					var opt_d = document.getElementById('opt_d');
+					if (opt_d) document.body.removeChild(opt_d);
+				}
 				
 				calculate_buttons_position();
 			}
