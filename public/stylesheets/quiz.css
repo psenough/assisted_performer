@@ -12,6 +12,7 @@
 	/*-webkit-transform: translateZ(0);*/
 	-webkit-backface-visibility: hidden;
 	background-color: transparent;
+	font-family: 'Roboto';
 }
 
 *:focus { outline:none; }
@@ -81,4 +82,29 @@ canvas, img {
 
 .w3-container:after,.w3-container:before,.w3-panel:after,.w3-panel:before,.w3-row:after,.w3-row:before,.w3-row-padding:after,.w3-row-padding:before,
 .w3-cell-row:before,.w3-cell-row:after,.w3-clear:after,.w3-clear:before,.w3-bar:before,.w3-bar:after{content:"";display:table;clear:both}
+
+
+#icon1 {
+	position: absolute;
+	top: 13%;
+	left: 30%;
+}
+
+#icon2 {
+	position: absolute;
+	top: 13%;
+	left: 40%;
+}
+
+#icon3 {
+	position: absolute;
+	top: 13%;
+	left: 50%;
+}
+
+#icon4 {
+	position: absolute;
+	top: 13%;
+	left: 60%;
+}
 

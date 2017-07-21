@@ -14,6 +14,22 @@ let active_part = 0;
 
 let questions = [
 {
+	'q': 'How many bytes has a 64kb intro?',
+	'a': '64',
+	'b': '64,480',
+	'c': '65,536',
+	'd': '64,000',
+	'correct': 'b'
+},
+{
+	'q': 'According to the demoscene, what is a tracker?',
+	'a': 'A cool nickname',
+	'b': 'A pan-american scener of indigenous descent',
+	'c': 'Justifiable reason for a flamewar',
+	'd': 'A GPS system',
+	'correct': 'c'
+},
+{
 	'q': 'What edition of Evoke is this?',
 	'a': 'The second',
 	'b': 'The fifth',
@@ -22,24 +38,90 @@ let questions = [
 	'correct': 'c'
 },
 {
-	'q': 'According to TPOLM your mother is a?...',
-	'a': 'Saint',
-	'b': 'Devil',
-	'c': 'Evil witch',
-	'd': 'Motherfucking giraffe',
+	'q': 'What is Conspiracy\'s most famous theory?',
+	'a': 'Atom Theory',
+	'b': 'No Showers Theory',
+	'c': 'Chaos Theory',
+	'd': '64k Theory!',
+	'correct': 'c'
+}
+{
+	'q': 'What is the best computer ever?',
+	'a': 'Amiga 500',
+	'b': 'Amiga 1200',
+	'c': 'Amiga CDTV',
+	'd': 'AMIGGAAAAAAHHHHHH!!!!!',
 	'correct': 'd'
+},
+{
+	'q': 'What is the 1kb category?',
+	'a': 'The next 4kb',
+	'b': 'The previous 4kb',
+	'c': 'Your mother',
+	'd': 'Something to do with shaders',
+	'correct': 'a'
+},
+{
+	'q': 'According to TPOLM, your mother is what?',
+	'a': 'A Saint',
+	'b': 'A Devil',
+	'c': 'An evil witch',
+	'd': 'A motherfucking giraffe',
+	'correct': 'd'
+},
+{
+	'q': 'Where does belgian beer come from?',
+	'a': 'Trappist monks',
+	'b': 'Lots of places in Belgium',
+	'c': 'RBBS',
+	'd': 'all of the above',
+	'correct': 'd'
+},
+{
+	'q': 'Which of these demogroups didn\'t release a production called beertro?',
+	'a': 'Calodox',
+	'b': 'Energy',
+	'c': 'Boozoholics',
+	'd': 'Surprise!Productions',
+	'correct': 'c'
+},
+{
+	'q': 'Which of these groups never collaborated with farbrausch on a release?',
+	'a': 'MFX',
+	'b': 'Metalvotze',
+	'c': 'Conspiracy',
+	'd': 'Jumalauta',
+	'correct': 'c'
 },
 {
 	'q': 'Which of these is not a Spaceballs release?',
 	'a': 'Nine fingers',
 	'b': 'Urethra',
 	'c': 'Badass 5000',
-	'd': 'Last finger'
+	'd': 'Last finger',
+	'correct': 'b'
+},
+{
+	'q': 'What was the first production added to the pouet.net database?',
+	'a': 'Caillou by Mandarine',
+	'b': 'Eden [Explora 2] by Bomb',
+	'c': 'Astral Blur by The Black Lotus',
+	'd': 'Paper by Psychic Link',
+	'correct': 'c'
+},
+{
+	'q': 'Who won 1st place at The Party 92?',
+	'a': 'Spaceballs',
+	'b': 'Melon Design',
+	'c': 'Future Crew',
+	'd': 'The first 2 only',
+	'correct': 'd'
 }
 ]
 
 let cl = [
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','WHO_WANTS_TO_BE_A_DEMOSCENER']
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','WHO_WANTS_TO_BE_A_DEMOSCENER'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','LADDER_INFO']
 ];
 
 // append question screens to list of scenes
@@ -100,6 +182,9 @@ function changePart(next_part) {
 						// toggle the effect on
 						cv.effects[fx]['on'] = true;
 						
+						// if there is an initializer, run it
+						if ('init' in cv.effects[fx]) cv.effects[fx]['init']();
+						
 						// add the params from this effect to our global params list
 						addToParams(cv.effects[fx]['params']);
 						
@@ -155,7 +240,7 @@ function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle
 	ctx.stroke();
 }
 
-var title = 'Who wants to be a demoscener?!';
+var title = '<b>Who wants to be a demoscener?!</b>';
 
 let drawCanvas = function() {
 	resize();
@@ -313,7 +398,23 @@ let drawCanvas = function() {
 						let words = getDiv('words');
 						words.innerHTML = title;
 					}
-		}		
+		},
+		'LADDER_INFO': {
+			'on': true,
+			'params': {},
+			'call': function() {
+						let words = getDiv('words');
+						words.innerHTML = title + '<br><br><br>http://192.168.11.1:8080/';
+						let icon1 = getDiv('icon1');
+						icon1.innerHTML = '<img src="/images/Classic5050used.png" width="107px"/>';
+						let icon2 = getDiv('icon2');
+						icon2.innerHTML = '<img src="/images/ClassicPAFused.png" width="107px" />';
+						let icon3 = getDiv('icon3');
+						icon3.innerHTML = '<img src="/images/ClassicATAused.png" width="107px" />';
+						let icon4 = getDiv('icon4');
+						icon4.innerHTML = '<img src="/images/ClassicATA_WIFI_golden.png" width="107px" />';
+					}
+		}
 	}
 	
 	// append questions to effects list
@@ -321,6 +422,16 @@ let drawCanvas = function() {
 		this.effects['Q'+i] = {
 			'on': true,
 			'params': {},
+			'init': function() {
+				let icon1 = document.getElementById('icon1');
+				if (icon1) document.body.removeChild(icon1);
+				let icon2 = document.getElementById('icon2');
+				if (icon2) document.body.removeChild(icon2);
+				let icon3 = document.getElementById('icon3');
+				if (icon3) document.body.removeChild(icon3);
+				let icon4 = document.getElementById('icon4');
+				if (icon4) document.body.removeChild(icon4);
+			},
 			'call': function() {
 						let words = getDiv('words');
 						words.innerHTML = getQuestion(i);
@@ -388,7 +499,7 @@ let drawCanvas = function() {
 	}
 	
 	function getAnswer(id) {
-		return title + '<br><br>' + questions[id]['q'] + '<br><br><div id="answera" ' + ((questions[id]['correct']=='a')?'class="correct"':'') +'>A) ' + questions[id]['a'] + '</div><div id="answerb" ' + ((questions[id]['correct']=='b')?'class="correct"':'') +'>B) ' + questions[id]['b'] + '</div><div id="answerc" ' + ((questions[id]['correct']=='c')?'class="correct"':'') + '>C) ' + questions[id]['c'] + '</div><div id="answerd" ' + ((questions[id]['correct']=='d')?'class="correct"':'') +'>D) ' + questions[id]['d'] + '</div>';
+		return title + '<br><br>' + questions[id]['q'] + '<br><br><div id="answera" ' + ((questions[id]['correct']=='a')?'class="correct"':'') +'>A) ' + questions[id]['a'] + '</div><br><div id="answerb" ' + ((questions[id]['correct']=='b')?'class="correct"':'') +'>B) ' + questions[id]['b'] + '</div><br><div id="answerc" ' + ((questions[id]['correct']=='c')?'class="correct"':'') + '>C) ' + questions[id]['c'] + '</div><br><div id="answerd" ' + ((questions[id]['correct']=='d')?'class="correct"':'') +'>D) ' + questions[id]['d'] + '</div>';
 	}
 	
 	function getDiv(id) {
@@ -563,87 +674,6 @@ function connectWebSockets() {
 		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
 };
-
-function initAudio() {
-    /*let irRRequest = new XMLHttpRequest();
-    irRRequest.open("GET", "sounds/cardiod-rear-levelled.wav", true);
-    irRRequest.responseType = "arraybuffer";
-    irRRequest.onload = function() {
-        audioContext.decodeAudioData( irRRequest.response, 
-            function(buffer) { reverbBuffer = buffer; } );
-    }
-    irRRequest.send();*/
-
-    /*o3djs.require('o3djs.shader');
-
-    analyser1 = audioContext.createAnalyser();
-    analyser1.fftSize = 1024;
-    analyser2 = audioContext.createAnalyser();
-    analyser2.fftSize = 1024;
-
-    analyserView1 = new AnalyserView("view1");
-    analyserView1.initByteBuffer( analyser1 );
-    analyserView2 = new AnalyserView("view2");
-    analyserView2.initByteBuffer( analyser2 );*/
-
-    /*if (!navigator.getUserMedia)
-        navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-    if (!navigator.getUserMedia)
-        return(alert("Error: getUserMedia not supported!"));
-
-    navigator.getUserMedia(constraints, gotStream, function(e) {
-            alert('Error getting audio');
-            console.log(e);
-        });
-
-    if ((typeof MediaStreamTrack === 'undefined')||(!MediaStreamTrack.getSources)){
-        console.log("This browser does not support MediaStreamTrack, so doesn't support selecting sources.\n\nTry Chrome Canary.");
-    } else {
-        MediaStreamTrack.getSources(gotSources);
-    }
-
-    document.getElementById("effect").onchange=changeEffect;*/
-	
-	MediaStreamTrack.getSources(gotSources);
-	
-	if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-	  console.log("enumerateDevices() not supported.");
-	  return;
-	}
-
-	// List cameras and microphones.
-
-	navigator.mediaDevices.enumerateDevices()
-	.then(function(devices) {
-	  devices.forEach(function(device) {
-		console.log(device.kind + ": " + device.label +
-					" id = " + device.deviceId);
-	  });
-	})
-	.catch(function(err) {
-	  console.log(err.name + ": " + err.message);
-	});
-	
-}
-
-function gotSources(sourceInfos) {
-	console.log(sourceInfos);
-    /*let audioSelect = document.getElementById("audioinput");
-    while (audioSelect.firstChild)
-        audioSelect.removeChild(audioSelect.firstChild);
-
-    for (let i = 0; i != sourceInfos.length; ++i) {
-        let sourceInfo = sourceInfos[i];
-        if (sourceInfo.kind === 'audio') {
-            let option = document.createElement("option");
-            option.value = sourceInfo.id;
-            option.text = sourceInfo.label || 'input ' + (audioSelect.length + 1);
-            audioSelect.appendChild(option);
-        }
-    }
-    audioSelect.onchange = changeInput;*/
-}
 
 document.addEventListener("keydown", keydown, false);
 
