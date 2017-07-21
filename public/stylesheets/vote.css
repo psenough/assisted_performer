@@ -11,7 +11,6 @@
 	background-color: #000;
 	/*-webkit-transform: translateZ(0);*/
 	-webkit-backface-visibility: hidden;
-	color: white;
 }
 
 *:focus { outline:none; }
@@ -32,16 +31,11 @@ html, body {
 	right: 0px;
 	width: 0px;
 	height: 0px;
-	background-repeat: no-repeat;
-	background-size: contain;
+	background-image: url('/images/pattern-optimized.png');
+	background-color: #EFFE9B;
 	background-position: center top;
 	text-align: center;
 	z-index: 2;
-}
-
-.bg_0,
-.bg_0 {
-	background-image: url('../images/0_bg.jpg');
 }
 
 .btn {
@@ -57,8 +51,6 @@ html, body {
 	background-position: left top;
 	z-index: 21;
 	cursor: pointer;
-	background-color: white;
-	color: black;
 	text-align: center;
 	border-radius: 12px;
 }
@@ -94,11 +86,12 @@ canvas, img {
 }
 
 .btn_on {
-	background-color: green;
+	background-color: #00BFD6;
 }
 
 .btn_off {
-	background-color: white;
+	color: #EFFE9B;
+	background-color: #333333;
 }
 
 .value {
@@ -120,7 +113,8 @@ canvas, img {
 }
 
 .btn span {
-	color: black;
+	font-family: 'Roboto';
+	color: inherit;
 	background-color: transparent;
 	display: inline-block;
     vertical-align: middle;

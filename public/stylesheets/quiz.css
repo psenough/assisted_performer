@@ -64,12 +64,14 @@ canvas, img {
 }
 
 .w3-green,.w3-hover-green:hover{
-	color:#fff!important;
-	background-color:#4CAF50!important;
+	color: #EFFE9B;
+	background-color:#603849!important;
 	text-align: center;
 	margin: auto;
 	border-radius: 12px;
 	width: 0%;
+	font-size: 0.5em;
+	margin-bottom: 29px;
 }
 
 .w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{

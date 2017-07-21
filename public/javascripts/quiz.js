@@ -44,7 +44,7 @@ let questions = [
 	'c': 'Chaos Theory',
 	'd': '64k Theory!',
 	'correct': 'c'
-}
+},
 {
 	'q': 'What is the best computer ever?',
 	'a': 'Amiga 500',
@@ -91,7 +91,7 @@ let questions = [
 	'b': 'Metalvotze',
 	'c': 'Conspiracy',
 	'd': 'Jumalauta',
-	'correct': 'c'
+	'correct': 'd'
 },
 {
 	'q': 'Which of these is not a Spaceballs release?',
@@ -490,10 +490,12 @@ let drawCanvas = function() {
 		}
 		
 		let output = title + '<br><br>' + questions[id]['q'] + '<br><br>';
-		output += '<div id="answera">A) ' + questions[id]['a'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ a_w + '%">'+a_w+'%</div></div>';
-		output += '<div id="answerb">B) ' + questions[id]['b'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ b_w + '%">'+b_w+'%</div></div>';
-		output += '<div id="answerc">C) ' + questions[id]['c'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ c_w + '%">'+c_w+'%</div></div>';
-		output += '<div id="answerd">D) ' + questions[id]['d'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ d_w + '%">'+d_w+'%</div></div>';
+		if ((a_w != undefined) && (b_w != undefined) && (c_w != undefined) && (d_w != undefined)) {
+			output += '<div id="answera">A) ' + questions[id]['a'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ a_w + '%">'+a_w+'%</div></div>';
+			output += '<div id="answerb">B) ' + questions[id]['b'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ b_w + '%">'+b_w+'%</div></div>';
+			output += '<div id="answerc">C) ' + questions[id]['c'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ c_w + '%">'+c_w+'%</div></div>';
+			output += '<div id="answerd">D) ' + questions[id]['d'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ d_w + '%">'+d_w+'%</div></div>';
+		}
 		
 		return output;
 	}
