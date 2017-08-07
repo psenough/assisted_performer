@@ -92,7 +92,7 @@ let questions = [
 	'b': 'Metalvotze',
 	'c': 'Conspiracy',
 	'd': 'Jumalauta',
-	'correct': 'c'
+	'correct': 'd'
 },
 {
 	'q': 'Which of these is not a Spaceballs release?',
@@ -521,13 +521,6 @@ let drawCanvas = function() {
 	}
 	
 	requestAnimationFrame( animate );
-	
-	/*let repeater = n;
-	let rperiod = 6000;
-	let index = 0;*/
-	
-	// hack to stop the animation on code to help debug stuff
-	//this.stop = false;
 
 	// for framerate counting
 	let lastCalledTime;
@@ -539,17 +532,6 @@ let drawCanvas = function() {
 		//if (this.stop)
 		requestAnimationFrame( animate );
 		drawThis();
-		
-		/*let dom = document.getElementById('message');
-		if (dom) {
-			let d2 = new Date();
-			let n2 = d2.getTime(); 
-			if (((n2-n) > 6000) && (n2-repeater) > rperiod) {
-				repeater = n2;
-				loadLine('',words[index++]);
-				if (index >= words.length) index = 0;
-			}
-		}*/
 		
 		// fps counter, taken from https://gist.github.com/C0deMaver1ck/d51659371a345a9327bd
 		if (showFPS) {
@@ -605,14 +587,6 @@ function resize() {
 	ctx.height = h;
 	halfw = w*.5;
 	halfh = h*.5;
-	
-	/*let words = document.getElementById("words"); 
-	if (!words) {
-		words = document.createElement('div');
-		words.setAttribute('id','words');
-		document.body.appendChild(words);
-		words.innerHTML = words_array[words_index];
-	}*/
 	
 	if (showFPS) {
 		let fps = document.getElementById("fps"); 

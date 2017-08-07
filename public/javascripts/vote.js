@@ -3,7 +3,7 @@ var zonebase = 120;
 var client_state = 0;
 var game_state = 0;
 
-var display_post_lag = true;
+var display_post_lag = false;
 
 navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 
@@ -81,6 +81,10 @@ function calculate_buttons_position() {
 				opt_a.innerHTML = '<span>' + vote['options'][0] + '</span>';
 				opt_a.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][0]);
+					opt_a.setAttribute('class', 'btn btn_on');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_a.addEventListener('touchstart', function(e){
@@ -121,6 +125,10 @@ function calculate_buttons_position() {
 				opt_b.innerHTML = '<span>' + vote['options'][1] + '</span>';
 				opt_b.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][1]);
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_on');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_off');
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_b.addEventListener('touchstart', function(e){
@@ -161,6 +169,10 @@ function calculate_buttons_position() {
 				opt_c.innerHTML = '<span>' + vote['options'][2] + '</span>';
 				opt_c.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][2]);
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_on');
+					opt_d.setAttribute('class', 'btn btn_off');
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_c.addEventListener('touchstart', function(e){
@@ -201,6 +213,10 @@ function calculate_buttons_position() {
 				opt_d.innerHTML = '<span>' + vote['options'][3] + '</span>';
 				opt_d.addEventListener("mousedown", function() {
 					sendvote(vote['uid'], vote['options'][3]);
+					opt_a.setAttribute('class', 'btn btn_off');
+					opt_b.setAttribute('class', 'btn btn_off');
+					opt_c.setAttribute('class', 'btn btn_off');
+					opt_d.setAttribute('class', 'btn btn_on');
 					if (navigator.vibrate) navigator.vibrate(100);
 				});
 				opt_d.addEventListener('touchstart', function(e){
@@ -227,175 +243,6 @@ function calculate_buttons_position() {
 			}
 		}
 	}
-	
-	//var index = 0;
-	//for (param in server_params) {
-	/*	
-		// increase
-		var add = document.getElementById('p_' + param + '_add');
-		if (add) {
-			add.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
-			add.style.top = parseInt(usedheight*0.15,10) + 'px';
-			add.style.width = parseInt(usedwidth*0.5,10) + 'px';
-			add.style.height = parseInt(usedwidth*0.5,10) + 'px';
-		} else {
-			console.log('adding');
-			add = document.createElement('div');
-			add.setAttribute('id', 'p_' + param + '_add');
-			add.setAttribute('class', 'btn add_off');
-			add.addEventListener("mousedown", function() {
-				sendvote(param, 'add');
-				if (navigator.vibrate) navigator.vibrate(100);
-			});
-			add.addEventListener('touchstart', function(e){
-				e.preventDefault();				
-				add.setAttribute('class', 'btn add_on');
-				sendvote(param, 'add');
-				if (navigator.vibrate) navigator.vibrate(100);
-			});
-			add.addEventListener('touchmove', function(e){
-				e.preventDefault();
-				add.setAttribute('class', 'btn add_on');
-			});
-			add.addEventListener('touchend', function(e){
-				e.preventDefault();				
-				add.setAttribute('class', 'btn add_off');
-			});
-			document.body.appendChild(add);
-		}
-
-		// value
-		var value = document.getElementById('p_' + param + '_value');
-		if (value) {
-			value.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
-			value.style.top = parseInt(usedheight*0.5,10) + 'px';
-			value.style.width = parseInt(usedwidth*0.5,10) + 'px';
-			value.style.height = parseInt(usedheight*0.15,10) + 'px';
-			console.log(server_params[param]['value']);
-			value.innerHTML = server_params[param]['value'];
-		} else {
-			console.log('valueing');
-			value = document.createElement('div');
-			value.setAttribute('id', 'p_' + param + '_value');
-			value.setAttribute('class', 'value');
-			document.body.appendChild(value);
-		}
-		
-		// decrease
-		var minus = document.getElementById('p_' + param + '_minus');
-		if (minus) {
-			minus.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.25,10) + 'px';
-			minus.style.top = parseInt(usedheight*0.6,10) + 'px';
-			minus.style.width = parseInt(usedwidth*0.5,10) + 'px';
-			minus.style.height = parseInt(usedwidth*0.5,10) + 'px';
-		} else {
-			console.log('minusing');
-			minus = document.createElement('div');
-			minus.setAttribute('id', 'p_' + param + '_minus');
-			minus.setAttribute('class', 'btn minus_off');
-			minus.addEventListener("mousedown", function() {
-				sendvote(param, 'minus');
-				if (navigator.vibrate) navigator.vibrate(100);
-			});
-			minus.addEventListener('touchstart', function(e){
-				e.preventDefault();				
-				minus.setAttribute('class', 'btn minus_on');
-				sendvote(param, 'minus');
-				if (navigator.vibrate) navigator.vibrate(100);
-			
-			});
-			minus.addEventListener('touchmove', function(e){
-				e.preventDefault();
-				minus.setAttribute('class', 'btn minus_on');
-			});
-			minus.addEventListener('touchend', function(e){
-				e.preventDefault();				
-				minus.setAttribute('class', 'btn minus_off');
-			});
-			document.body.appendChild(minus);
-		}
-		
-		//TODO: add subtitle
-		
-		//index++;
-	//}
-	*/
-	// rotation canvas
-	/*
-	var rotation_canvas = document.getElementById('rotation_canvas');
-	if (rotation_canvas) {
-		rotation_canvas.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
-		rotation_canvas.style.top = parseInt(usedheight*0.58,10) + 'px';
-
-		var w = parseInt(usedwidth*1.0,10);
-		var h = parseInt(usedheight*0.2,10);
-		rotation_canvas.style.width = w + 'px';
-		rotation_canvas.style.height = h + 'px';
-		rotation_canvas.setAttribute('width', rotation_canvas.style.width);
-		rotation_canvas.setAttribute('height', rotation_canvas.style.height);
-		
-		//switch (client_state) {
-		//	case 2:
-				rotation_canvas.setAttribute('class','asset rotation_canvas');
-				rotation_canvas_animation = true;
-				ctx = rotation_canvas.getContext("2d");
-				ctx.width = w;
-				ctx.height = h;
-				animate_rotation(ctx,w,h);
-		//	break;
-		//	default:
-		//		rotation_canvas_animation = false;
-		//		rotation_canvas.setAttribute('class','hidden');
-		//	break;
-		//}
-	} else {
-		rotation_canvas = document.createElement('canvas');
-		rotation_canvas.setAttribute('id', 'rotation_canvas');
-		document.body.appendChild(rotation_canvas);
-		calculate_buttons_position();
-	}*/
-	/*
-	var bw_fire_left = document.getElementById('bw_fire_left');
-	if (bw_fire_left) {
-		bw_fire_left.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.375,10) + 'px';
-		bw_fire_left.style.top = parseInt(usedheight*0.7,10) + 'px';
-
-		bw_fire_left.style.width = parseInt(usedwidth*0.25,10) + 'px';
-		bw_fire_left.style.height = parseInt(usedheight*0.25,10) + 'px';
-		
-		switch (client_state) {
-			case 4:
-				if (team == 1) bw_fire_left.setAttribute('class','btn tap_off');
-					else bw_fire_left.setAttribute('class','hidden');
-			break;
-			default:
-				bw_fire_left.setAttribute('class','hidden');
-			break;
-		}
-	}
-
-	var shield = document.getElementById('shield');
-	if (shield) {
-		shield_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.35,10);
-		shield.style.left = shield_start_x + 'px';
-		shield_start = parseInt(usedheight*0.58,10);
-		shield.style.top = shield_start + 'px';
-
-		shield_half_height = parseInt(usedwidth*0.2,10);
-		shield.style.width = shield_half_height*2 + 'px';
-		shield.style.height = shield_half_height*2 + 'px';
-		
-		switch (client_state) {
-			case 4:
-				if (team == 5) shield.setAttribute('class','asset shield');
-					else shield.setAttribute('class','hidden');
-			break;
-			default:
-				shield.setAttribute('class','hidden');
-			break;
-		}
-	}
-	*/
 	
 	if (display_post_lag) {
 		var lag = document.getElementById('lag');
@@ -582,42 +429,10 @@ function parseResponseHeaders(headerStr) {
 document.addEventListener("keydown", keyDownTextField, false);
 
 function keyDownTextField(e) {
-var keyCode = e.keyCode;
-console.log(keyCode);
-	switch(keyCode) {
-		case 49: //1
-			team = 0;
-			calculate_buttons_position();
-		break;
-		case 50: //2
-			team = 1;
-			calculate_buttons_position();
-		break;
-		case 51: //3
-			team = 2;
-			calculate_buttons_position();
-		break;
-		case 52: //4
-			team = 3;
-			calculate_buttons_position();
-		break;
-		case 53: //5
-			team = 4;
-			calculate_buttons_position();
-		break;
-		case 54: //6
-			team = 5;
-			calculate_buttons_position();
-		break;
-		
-		case 48: //0
-			client_state = 5;
-			calculate_buttons_position();
-		break;
-	}
+	var keyCode = e.keyCode;
+	console.log(keyCode);	
+	calculate_buttons_position();
 }
-
-
 
 var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
 var this_ws = null;
