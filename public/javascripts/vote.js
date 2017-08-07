@@ -484,6 +484,11 @@ function connect_websockets() {
 				let new_active = '';
 				for (let i=0; i<votes.length; i++) {
 					if (votes[i]['active'] == true) new_active = votes[i]['uid'];
+					
+					// kevin hack
+					if (votes[i]['title'] == 'According to pouet.net what is the most popular demoscene release of all time?') {
+						votes[i]['options'] = ["Hello, Kevin","Hello, Kevin","Hello, Kevin","Hello, Kevin"];
+					}
 				}
 				
 				// check if we should recreate the buttons

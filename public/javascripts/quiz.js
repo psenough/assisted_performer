@@ -20,13 +20,13 @@ let questions = [
 	'b': '64,480',
 	'c': '65,536',
 	'd': '64,000',
-	'correct': 'b'
+	'correct': 'c'
 },
 {
 	'q': 'According to the demoscene, what is a tracker?',
 	'a': 'A cool nickname',
 	'b': 'A pan-american scener of indigenous descent',
-	'c': 'Justifiable reason for a flamewar',
+	'c': 'A justifiable reason for a flamewar',
 	'd': 'A GPS system',
 	'correct': 'c'
 },
@@ -79,7 +79,7 @@ let questions = [
 	'correct': 'd'
 },
 {
-	'q': 'Which of these demogroups didn\'t release a production called beertro?',
+	'q': 'Which of these demogroups didn\'t release a production named beertro?',
 	'a': 'Calodox',
 	'b': 'Energy',
 	'c': 'Boozoholics',
@@ -116,6 +116,54 @@ let questions = [
 	'b': 'Melon Design',
 	'c': 'Future Crew',
 	'd': 'The first 2 only',
+	'correct': 'd'
+},
+{
+	'q': 'What famous demoscener is named Carlos Pardo?',
+	'a': 'Made / Bomb',
+	'b': 'DJ Uno / Batman Group',
+	'c': 'mrdoob',
+	'd': 'All of the above',
+	'correct': 'a'
+},
+{
+	'q': 'What is/are the origins of the pig?',
+	'a': 'A demo',
+	'b': 'A demogroup',
+	'c': 'A 64kb intro',
+	'd': 'a pouet.net meme',
+	'correct': 'd'
+},
+{
+	'q': 'According to pouet.net what is the most popular demoscene release of all time?',
+	'a': 'Second Reality / Future Crew',
+	'b': 'fr-025: the.popular.demo / farbrausch',
+	'c': 'fr-041: debris. / farbrausch',
+	'd': 'bootchess / RSI',
+	'correct': 'c'
+},
+{
+	'q': 'What is the most often used softsynth on 4kb intros?',
+	'a': 'oidos',
+	'b': 'absynth',
+	'c': '4klang',
+	'd': 'v2',
+	'correct': 'c'
+},
+{
+	'q': 'How many colors has the C-64 palette?',
+	'a': '4',
+	'b': '8',
+	'c': '16',
+	'd': 'it depends on the model',
+	'correct': 'c'
+},
+{
+	'q': 'Which of the following is not a soundchip?',
+	'a': 'YM 2612',
+	'b': 'Ricoh 2A03',
+	'c': 'MOS 6561',
+	'd': 'Agnus',
 	'correct': 'd'
 }
 ]
