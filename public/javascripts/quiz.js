@@ -11,6 +11,7 @@ let params = {};
 let votes = {};
 let active_part = 0;
 
+let address = 'http://192.168.11.1:8080/';
 
 let questions = [
 {
@@ -44,7 +45,7 @@ let questions = [
 	'c': 'Chaos Theory',
 	'd': '64k Theory!',
 	'correct': 'c'
-}
+},
 {
 	'q': 'What is the best computer ever?',
 	'a': 'Amiga 500',
@@ -404,7 +405,7 @@ let drawCanvas = function() {
 			'params': {},
 			'call': function() {
 						let words = getDiv('words');
-						words.innerHTML = title + '<br><br><br>http://192.168.11.1:8080/';
+						words.innerHTML = title + '<br>'+address;
 						let icon1 = getDiv('icon1');
 						icon1.innerHTML = '<img src="/images/Classic5050used.png" width="107px"/>';
 						let icon2 = getDiv('icon2');
@@ -462,7 +463,7 @@ let drawCanvas = function() {
 	}
 	
 	function getQuestion(id) {
-		return title + '<br><br>' + questions[id]['q'];
+		return title + '<br>'+address+'<br><br>' + questions[id]['q'];
 	}
 	
 	function getOptions(id) {
@@ -489,7 +490,7 @@ let drawCanvas = function() {
 			}
 		}
 		
-		let output = title + '<br><br>' + questions[id]['q'] + '<br><br>';
+		let output = title + '<br>'+address+'<br><br>' + questions[id]['q'] + '<br><br>';
 		output += '<div id="answera">A) ' + questions[id]['a'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ a_w + '%">'+a_w+'%</div></div>';
 		output += '<div id="answerb">B) ' + questions[id]['b'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ b_w + '%">'+b_w+'%</div></div>';
 		output += '<div id="answerc">C) ' + questions[id]['c'] + '</div><div class="w3-light-grey"><div class="w3-container w3-green" style="width:'+ c_w + '%">'+c_w+'%</div></div>';
@@ -499,7 +500,7 @@ let drawCanvas = function() {
 	}
 	
 	function getAnswer(id) {
-		return title + '<br><br>' + questions[id]['q'] + '<br><br><div id="answera" ' + ((questions[id]['correct']=='a')?'class="correct"':'') +'>A) ' + questions[id]['a'] + '</div><br><div id="answerb" ' + ((questions[id]['correct']=='b')?'class="correct"':'') +'>B) ' + questions[id]['b'] + '</div><br><div id="answerc" ' + ((questions[id]['correct']=='c')?'class="correct"':'') + '>C) ' + questions[id]['c'] + '</div><br><div id="answerd" ' + ((questions[id]['correct']=='d')?'class="correct"':'') +'>D) ' + questions[id]['d'] + '</div>';
+		return title + '<br>'+address+'<br><br>' + questions[id]['q'] + '<br><br><div id="answera" ' + ((questions[id]['correct']=='a')?'class="correct"':'') +'>A) ' + questions[id]['a'] + '</div><br><div id="answerb" ' + ((questions[id]['correct']=='b')?'class="correct"':'') +'>B) ' + questions[id]['b'] + '</div><br><div id="answerc" ' + ((questions[id]['correct']=='c')?'class="correct"':'') + '>C) ' + questions[id]['c'] + '</div><br><div id="answerd" ' + ((questions[id]['correct']=='d')?'class="correct"':'') +'>D) ' + questions[id]['d'] + '</div>';
 	}
 	
 	function getDiv(id) {
