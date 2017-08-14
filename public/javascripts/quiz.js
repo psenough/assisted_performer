@@ -15,35 +15,11 @@ let address = 'http://192.168.11.1:8080/';
 
 let questions = [
 {
-	'q': 'How many bytes has a 64kb intro?',
-	'a': '64',
-	'b': '64,480',
-	'c': '65,536',
-	'd': '64,000',
-	'correct': 'c'
-},
-{
-	'q': 'According to the demoscene, what is a tracker?',
-	'a': 'A cool nickname',
-	'b': 'A pan-american scener of indigenous descent',
-	'c': 'A justifiable reason for a flamewar',
-	'd': 'A GPS system',
-	'correct': 'c'
-},
-{
 	'q': 'What edition of Evoke is this?',
 	'a': 'The second',
 	'b': 'The fifth',
 	'c': 'The twentieth',
 	'd': 'I don\'t know, it\'s my first!',
-	'correct': 'c'
-},
-{
-	'q': 'What is Conspiracy\'s most famous theory?',
-	'a': 'Atom Theory',
-	'b': 'No Showers Theory',
-	'c': 'Chaos Theory',
-	'd': '64k Theory!',
 	'correct': 'c'
 },
 {
@@ -55,15 +31,15 @@ let questions = [
 	'correct': 'd'
 },
 {
-	'q': 'What is the 1kb category?',
-	'a': 'The next 4kb',
-	'b': 'The previous 4kb',
-	'c': 'Your mother',
-	'd': 'Something to do with shaders',
-	'correct': 'a'
+	'q': 'Which of these is not yet a Spaceballs release?',
+	'a': 'Nine fingers',
+	'b': 'Urethra',
+	'c': 'Badass 5000',
+	'd': 'Last finger',
+	'correct': 'b'
 },
 {
-	'q': 'According to TPOLM, your mother is what?',
+	'q': 'According to TPOLM, what is your mother?',
 	'a': 'A Saint',
 	'b': 'A Devil',
 	'c': 'An evil witch',
@@ -79,30 +55,6 @@ let questions = [
 	'correct': 'd'
 },
 {
-	'q': 'Which of these demogroups didn\'t release a production named beertro?',
-	'a': 'Calodox',
-	'b': 'Energy',
-	'c': 'Boozoholics',
-	'd': 'Surprise!Productions',
-	'correct': 'c'
-},
-{
-	'q': 'Which of these groups never collaborated with farbrausch on a release?',
-	'a': 'MFX',
-	'b': 'Metalvotze',
-	'c': 'Conspiracy',
-	'd': 'Jumalauta',
-	'correct': 'd'
-},
-{
-	'q': 'Which of these is not a Spaceballs release?',
-	'a': 'Nine fingers',
-	'b': 'Urethra',
-	'c': 'Badass 5000',
-	'd': 'Last finger',
-	'correct': 'b'
-},
-{
 	'q': 'What was the first production added to the pouet.net database?',
 	'a': 'Caillou by Mandarine',
 	'b': 'Eden [Explora 2] by Bomb',
@@ -111,28 +63,12 @@ let questions = [
 	'correct': 'c'
 },
 {
-	'q': 'Who won 1st place at The Party 92?',
-	'a': 'Spaceballs',
-	'b': 'Melon Design',
-	'c': 'Future Crew',
-	'd': 'The first 2 only',
-	'correct': 'd'
-},
-{
 	'q': 'What famous demoscener is named Carlos Pardo?',
 	'a': 'Made / Bomb',
 	'b': 'DJ Uno / Batman Group',
-	'c': 'mrdoob',
+	'c': 'trace (aka mrdoob)',
 	'd': 'All of the above',
 	'correct': 'a'
-},
-{
-	'q': 'What is/are the origins of the pig?',
-	'a': 'A demo',
-	'b': 'A demogroup',
-	'c': 'A 64kb intro',
-	'd': 'a pouet.net meme',
-	'correct': 'd'
 },
 {
 	'q': 'According to pouet.net what is the most popular demoscene release of all time?',
@@ -141,6 +77,38 @@ let questions = [
 	'c': 'fr-041: debris. / farbrausch',
 	'd': 'bootchess / RSI',
 	'correct': 'c'
+},
+{
+	'q': 'Which of these demogroups did _not_ release a production named beertro?',
+	'a': 'Calodox',
+	'b': 'Energy',
+	'c': 'Boozoholics',
+	'd': 'Surprise!Productions',
+	'correct': 'c'
+},
+{
+	'q': 'Who won 1st place at The Party 92?',
+	'a': 'Spaceballs',
+	'b': 'Melon Design',
+	'c': 'Future Crew',
+	'd': 'The first two options',
+	'correct': 'd'
+},
+{
+	'q': 'Which of the following is not a soundchip?',
+	'a': 'YM 2612',
+	'b': 'Ricoh 2A03',
+	'c': 'MOS 6561',
+	'd': 'Agnus',
+	'correct': 'd'
+},
+{
+	'q': 'What is/are the origins of the pig?',
+	'a': 'A demo',
+	'b': 'A demogroup',
+	'c': 'A 64kb intro',
+	'd': 'a pouet.net meme',
+	'correct': 'd'
 },
 {
 	'q': 'What is the most often used softsynth on 4kb intros?',
@@ -159,17 +127,51 @@ let questions = [
 	'correct': 'c'
 },
 {
-	'q': 'Which of the following is not a soundchip?',
-	'a': 'YM 2612',
-	'b': 'Ricoh 2A03',
-	'c': 'MOS 6561',
-	'd': 'Agnus',
+	'q': 'What is the 1kb category?',
+	'a': 'The next 4kb',
+	'b': 'The previous 4kb',
+	'c': 'Your mother',
+	'd': 'Something to do with shaders',
+	'correct': 'a'
+},
+{
+	'q': 'What is Conspiracy\'s most famous theory?',
+	'a': 'Atom Theory',
+	'b': 'No Showers Theory',
+	'c': 'Chaos Theory',
+	'd': '64k Theory!',
+	'correct': 'c'
+},
+{
+	'q': 'According to the demoscene, what is a tracker?',
+	'a': 'A cool nickname',
+	'b': 'A pan-american scener of indigenous descent',
+	'c': 'A justifiable reason for a flamewar',
+	'd': 'A GPS system',
+	'correct': 'c'
+},
+{
+	'q': 'How many bytes has a 64kb intro?',
+	'a': '64',
+	'b': '64,480',
+	'c': '65,536',
+	'd': '64,000',
+	'correct': 'c'
+},
+{
+	'q': 'Which of these groups never collaborated with farbrausch on a release?',
+	'a': 'MFX',
+	'b': 'Metalvotze',
+	'c': 'Conspiracy',
+	'd': 'Jumalauta',
 	'correct': 'd'
 }
 ]
 
 let cl = [
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','WHO_WANTS_TO_BE_A_DEMOSCENER'],
+['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','CONTESTANT'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','LADDER_INFO']
 ];
 
@@ -333,11 +335,8 @@ let drawCanvas = function() {
 		'EFFECT_BACKGROUND': {
 			'on': false,
 			'params': {
-				
 			},
 			'call': function() {
-				
-						
 						let hsl_center = "rgb(108, 234, 203)";
 						let hsl_outside = "rgb(91, 124, 216)";
 
@@ -443,26 +442,51 @@ let drawCanvas = function() {
 		'WHO_WANTS_TO_BE_A_DEMOSCENER': {
 			'on': true,
 			'params': {},
-			'call': function() {
+			'init': function() {
 						let words = getDiv('words');
-						words.innerHTML = title;
+						words.innerHTML = title + '<br>20 years Evoke edition!';
+						let e20years = getDiv('e20years');
+						let pixels = parseInt(h*0.5,10);
+						e20years.innerHTML = '<img src="/images/logo-optimized.png" width="'+pixels+'px" />';
+						e20years.style.left = parseInt(w*0.5-pixels*0.5,10) + 'px';
+						playAudio('wwm_all/spielende.mp3',false);
+					},
+			'call': function() {
+					}
+		},
+		'CONTESTANT': {
+			'on': true,
+			'params': {},
+			'init': function() {
+						let words = getDiv('words');
+						words.innerHTML = title + '<br><br>Let\'s meet our contestant!';
+						let e20years = document.getElementById('e20years');
+						if (e20years) document.body.removeChild(e20years);
+						playAudio('wwm_all/spielende_kandidat_geht.mp3',false);
+					},
+			'call': function() {
 					}
 		},
 		'LADDER_INFO': {
 			'on': true,
 			'params': {},
+			'init': function() {
+				let words = getDiv('words');
+				words.innerHTML = title + '<br>'+address;
+				let icon1 = getDiv('icon1');
+				icon1.innerHTML = '<img src="/images/Classic5050used.png" width="107px"/>';
+				let icon2 = getDiv('icon2');
+				icon2.innerHTML = '<img src="/images/ClassicPAFused.png" width="107px" />';
+				let icon3 = getDiv('icon3');
+				icon3.innerHTML = '<img src="/images/ClassicATAused.png" width="107px" />';
+				let icon4 = getDiv('icon4');
+				icon4.innerHTML = '<img src="/images/ClassicATA_WIFI_golden.png" width="107px" />';
+				//let e20years = document.getElementById('e20years');
+				//if (e20years) document.body.removeChild(e20years);
+				playAudio('wwm_all/spielregeln.mp3',true);
+			},
 			'call': function() {
-						let words = getDiv('words');
-						words.innerHTML = title + '<br>'+address;
-						let icon1 = getDiv('icon1');
-						icon1.innerHTML = '<img src="/images/Classic5050used.png" width="107px"/>';
-						let icon2 = getDiv('icon2');
-						icon2.innerHTML = '<img src="/images/ClassicPAFused.png" width="107px" />';
-						let icon3 = getDiv('icon3');
-						icon3.innerHTML = '<img src="/images/ClassicATAused.png" width="107px" />';
-						let icon4 = getDiv('icon4');
-						icon4.innerHTML = '<img src="/images/ClassicATA_WIFI_golden.png" width="107px" />';
-					}
+			}
 		}
 	}
 	
@@ -480,6 +504,7 @@ let drawCanvas = function() {
 				if (icon3) document.body.removeChild(icon3);
 				let icon4 = document.getElementById('icon4');
 				if (icon4) document.body.removeChild(icon4);
+				playAudio('wwm_all/eingeloggt_start.mp3',false);
 			},
 			'call': function() {
 						let words = getDiv('words');
@@ -490,6 +515,9 @@ let drawCanvas = function() {
 			'on': true,
 			'params': {},
 			'votes': getVoteStruct(i),
+			'init': function() {
+				playAudio('wwm_all/eingeloggt_loop.mp3',true);
+			},
 			'call': function() {
 						let words = getDiv('words');
 						words.innerHTML = getOptions(i);
@@ -499,6 +527,9 @@ let drawCanvas = function() {
 			'on': true,
 			'params': {},
 			'votes': getVoteStruct(i),
+			'init': function() {
+				playAudio('wwm_all/wechsel_nach_stufe_2.mp3',false);
+			},
 			'call': function() {
 						let words = getDiv('words');
 						words.innerHTML = getAnswer(i);
@@ -611,6 +642,20 @@ let drawCanvas = function() {
 			}
 		}
 	}
+}
+
+let audio = undefined;
+
+function playAudio(source, loop) {
+	if (audio) {
+		audio.pause();
+		delete audio;
+	}
+	audio = document.createElement('audio');
+	audio.setAttribute('src', source);
+	audio.setAttribute('autoplay', 'autoplay');
+	audio.loop = loop;
+	audio.currentTime = 0;
 }
 
 window.onresize = resize;
