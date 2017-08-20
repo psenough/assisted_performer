@@ -1,5 +1,5 @@
 
-let showFPS = true;
+let showFPS = false;
 
 let cv;
 let w;
@@ -11,7 +11,7 @@ let params = {};
 let votes = {};
 let active_part = 0;
 
-let address = 'http://192.168.11.1:8080/';
+let address = 'http://quiz.evoke:8080/';
 
 let questions = [
 {
