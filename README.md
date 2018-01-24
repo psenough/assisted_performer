@@ -4,9 +4,13 @@ Assisted Performer is a node.js server that serves small webpages and acts as a 
 
 # Installing in Windows
 
+Assisted Performer has only been tested on Windows 8 and Windows 10. No clue if it works out of the box on Mac or Linux.
+
 Install [nodejs](http://nodejs.org/)
 
 Clone the repo and call `npm install` to install all dependencies.
+
+## MIDI support
 
 If you want to handle MIDI parameter install [loopmidi](https://www.tobias-erichsen.de/software/loopmidi.html) aswell.
 
@@ -14,7 +18,11 @@ MIDI module dependencies requires [visual studio](https://www.visualstudio.com/d
 
 Please be aware that VS2015CE installer does not install windows 8.1 SDK and visual c++ by default, which is needed. You need to launch VS, go to File -> New -> Projects, select C++ section and click the install option.
 
-Assisted Performer has only been tested on Windows 8 and Windows 10. No clue if it works out of the box on Mac or Linux.
+## serialport support
+
+If you want to handle serialport communication call `npm install -g serialport` to install serialport globally (also installs some useful command-line tools)
+
+`serialport-list` will list you all the devices you have (you'll need it to know the name of the active port you want to interface with)
 
 # Installing in Mac / Linux
 

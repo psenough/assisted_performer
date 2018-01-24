@@ -3,6 +3,40 @@
 //TODO: handle multiple canvases connected elegantely
 
 //
+// init serialport https://github.com/node-serialport/node-serialport#opening-a-port
+//
+
+/*
+var SerialPort = require('serialport');
+var port = new SerialPort('/dev/tty-usbserial1', {
+  baudRate: 57600
+});
+
+port.write('main screen turn on', function(err) {
+  if (err) {
+    return console.log('Error on write: ', err.message);
+  }
+  console.log('message written');
+});
+
+// Open errors will be emitted as an error event
+port.on('error', function(err) {
+  console.log('serialport error: ', err.message);
+})
+
+var serial_update_rate = 20;
+
+setInterval(function() {
+	for (thisparam in params) {
+		if (thisparam.substring(0,7) == 'serial_') {
+			//TODO: bind this output to a parameter
+			port.write('X000100');
+		}
+	}
+}, serial_update_rate);
+*/
+
+//
 // init midi
 //
 
