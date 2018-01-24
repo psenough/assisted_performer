@@ -24,12 +24,17 @@ port.on('error', function(err) {
   console.log('serialport error: ', err.message);
 })
 
+// Read data that is available but keep the stream from entering "flowing mode"
+port.on('readable', function () {
+  console.log('serialport data:', port.read());
+});
+
 var serial_update_rate = 20;
 
 setInterval(function() {
 	for (thisparam in params) {
 		if (thisparam.substring(0,7) == 'serial_') {
-			//TODO: bind this output to a parameter
+			//TODO: bind this output to a parameter, do a test page
 			port.write('X000100');
 		}
 	}
