@@ -2,6 +2,10 @@
 
 Assisted Performer is a node.js server that serves small webpages and acts as a proxy for parameter controllers. Bridging MIDI, OSC, websockets, HTTP requests, etc between applications.
 
+# Schema
+
+<img src="./assisted_performer_schema.svg">
+
 # Installing in Windows
 
 Assisted Performer has only been tested on Windows 8 and Windows 10. No clue if it works out of the box on Mac or Linux.
