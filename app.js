@@ -92,6 +92,7 @@ var http = require('http');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var app = express();
+var expressWs = require('express-ws')(app);
 var util = require('util')
 
 
@@ -100,10 +101,12 @@ var util = require('util')
 // init express
 //
 
-var port = 70;
+var port = 3001;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
-httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+//httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
+//httpServer.on('upgrade', expressWs.handleUpgrade);
+app.listen(port);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -419,9 +422,6 @@ function saveLog(filename, message) {
 // websockets
 //
 
-var WebSocketServer = require('ws').Server
-  , ws_server = new WebSocketServer({ port: 3001 });
-
 var active_conn = [];
 var id = 0;
 var params = {};
@@ -436,21 +436,22 @@ function addToParams(theseparams) {
 	}
 }
 
-ws_server.on('connection', function (client) {
+app.ws('/', function(ws, req) {
+  let client = ws;
+
+  /* // TODO: implement this old code using the new express websockets handler that we have to use due to the new mandatory websockets upgrade handshake handling
+  ws.on('connection', function(client) {
     client.id = id++;
 	client.ra = client.upgradeReq.connection.remoteAddress;
-	
+
 	//console.log(client.ra);
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('new ws connection from: ' + client.ra);
 	logme('total ws active conns: ' + active_conn.length);
-
-    client.on('message', function (data) {
-		//logme('got something');
-        //logme('received: ' + data);
-		//logme('received something');
-
+  });
+*/
+  ws.on('message', function(data) {
 		var lmsg = data;
 		var type = null;
 		
@@ -644,9 +645,9 @@ ws_server.on('connection', function (client) {
 			// will only be properly interpreted by controller pages to reload themselves automatically
 		}
 
-    });
+  });
 
-    client.on('close', function () {
+	ws.on('close', function () {
         logme("websocket closed, removing it");
         var thisid = getID(client.id);
         if (thisid != -1) {
@@ -656,7 +657,7 @@ ws_server.on('connection', function (client) {
 		}
     });
 
-    client.on('error', function () {
+    ws.on('error', function () {
         logme("websocket error, removing it");
         var thisid = getID(client.id);
         if (thisid != -1) {
@@ -664,8 +665,9 @@ ws_server.on('connection', function (client) {
 			//if (client.ra) removeTakenParamFromClosingIP(client.ra);
 			active_conn.splice(thisid, 1);
 		}
-    });
+    });  
 });
+
 
 function reassignParameters() {
 	console.log('reassigning');
