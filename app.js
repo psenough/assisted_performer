@@ -104,8 +104,6 @@ var util = require('util')
 var port = 3001;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
-//httpServer.listen(port); // on windows 8, we need to call httpServer.listen(80,'172.17.0.20');
-//httpServer.on('upgrade', expressWs.handleUpgrade);
 app.listen(port);
 
 // view engine setup
@@ -138,7 +136,7 @@ var ourclient = null;
 app.get('/', catchall);
 app.get('/controller', catchall);
 app.get('/slider', catchall);
-function catchall(req, res) {
+function catchall(req, res, next) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
 	// get timestamp
@@ -184,11 +182,12 @@ function catchall(req, res) {
 	}
 
 	res.render('assisted_performer_slider_demobit', {title: 'Assisted Performer Slider'});
+	res.end();
 }
 
 // serve canvas page
 app.get('/canvas', canvas);
-function canvas(req, res) {
+function canvas(req, res, next) {
 	res.render('canvas', {title: 'Assisted Performer Canvas'});
 	// not adding our canvas to the connections list
 }
@@ -317,8 +316,15 @@ function onError(error) {
   }
 }
 
-app.use(catchall);
+//app.use(catchall);
 
+app.use(function (req, res, next) {
+  console.log('middleware');
+  req.testing = 'testing';
+  return next();
+});
+ 
+ 
 app.on('error', onError);
 
 
@@ -436,11 +442,12 @@ function addToParams(theseparams) {
 	}
 }
 
-app.ws('/', function(ws, req) {
-  let client = ws;
+//TODO: debug parameter non assignment (caused by refactoring using new express-ws code, client is no longer globally static) need to figure out another way to keep track of current client
 
-  /* // TODO: implement this old code using the new express websockets handler that we have to use due to the new mandatory websockets upgrade handshake handling
-  ws.on('connection', function(client) {
+expressWs.getWss().on('connection', function(client) {
+  console.log('connection open');
+  //console.log(client);
+  //ws.on('connection', function(client) {
     client.id = id++;
 	client.ra = client.upgradeReq.connection.remoteAddress;
 
@@ -449,11 +456,49 @@ app.ws('/', function(ws, req) {
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('new ws connection from: ' + client.ra);
 	logme('total ws active conns: ' + active_conn.length);
+  //});
+});
+
+expressWs.getWss().on('close', function(client) {
+//ws.on('close', function () {
+	logme("websocket closed, removing it");
+	var thisid = getID(client.id);
+	if (thisid != -1) {
+		console.log('removing...' + client.ra);
+		//if (client.ra) removeTakenParamFromClosingIP(client.ra);
+		active_conn.splice(thisid, 1);
+	}
+});
+
+expressWs.getWss().on('close', function(client) {
+//    ws.on('error', function () {
+	logme("websocket error, removing it");
+	var thisid = getID(client.id);
+	if (thisid != -1) {
+		console.log('removing...' + client.ra);			
+		//if (client.ra) removeTakenParamFromClosingIP(client.ra);
+		active_conn.splice(thisid, 1);
+	}
+});  
+
+//expressWs.getWss().on('message', function(client) {
+app.ws('/', function(ws, req) {
+  var client = ws;
+  
+  console.log('received ws');
+  //console.log(ws);
+  //console.log(req);
+
+  ws.on('data', function(data) {
+	console.log('received data');
+	console.log(data);
   });
-*/
+  
   ws.on('message', function(data) {
 		var lmsg = data;
 		var type = null;
+		
+		logme('received with bad json format: ' + data);
 		
 		// crashes trying to parse, ignore
 		var parsed;
@@ -564,7 +609,9 @@ app.ws('/', function(ws, req) {
 								}
 							}
 							
-							active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
+							//active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
+							ws.send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
+
 						}
 					}
 				break;
@@ -613,7 +660,8 @@ app.ws('/', function(ws, req) {
 						if ('ping' in parsed) output['pong'] = 'pong';
 						
 						// send the packet
-						active_conn[thisid]['socket'].send(JSON.stringify(output));
+						//active_conn[thisid]['socket'].send(JSON.stringify(output));
+						ws.send(JSON.stringify(output));
 					}
 				break;
 				default:
@@ -641,31 +689,13 @@ app.ws('/', function(ws, req) {
 		}
 		
 		if (!found) {
-			active_conn[thisid]['socket'].send(JSON.stringify({'refresh': 'mebeautiful'}));
+			//active_conn[thisid]['socket'].send(JSON.stringify({'refresh': 'mebeautiful'}));
+			ws.send(JSON.stringify({'refresh': 'mebeautiful'}));
+
 			// will only be properly interpreted by controller pages to reload themselves automatically
 		}
 
   });
-
-	ws.on('close', function () {
-        logme("websocket closed, removing it");
-        var thisid = getID(client.id);
-        if (thisid != -1) {
-			console.log('removing...' + client.ra);
-			//if (client.ra) removeTakenParamFromClosingIP(client.ra);
-			active_conn.splice(thisid, 1);
-		}
-    });
-
-    ws.on('error', function () {
-        logme("websocket error, removing it");
-        var thisid = getID(client.id);
-        if (thisid != -1) {
-			console.log('removing...' + client.ra);			
-			//if (client.ra) removeTakenParamFromClosingIP(client.ra);
-			active_conn.splice(thisid, 1);
-		}
-    });  
 });
 
 

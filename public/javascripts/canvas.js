@@ -1133,7 +1133,7 @@ let words_array = [
 "there is, in cyberspace"
 ];
 
-let this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
+let this_websockets = 'ws://'+location.host.split(':')[0]+':3001/';
 let this_ws = null;
 let this_timeout = false;
 
@@ -1151,6 +1151,7 @@ function connectWebSockets() {
 	
 	this_ws.sendParameters = function() {
 		let obj = {'assisted_performer': 'canvas', 'parameters': params, 'votes': votes};
+		console.log(obj);
 		this_ws.send(JSON.stringify(obj));
 	};
 

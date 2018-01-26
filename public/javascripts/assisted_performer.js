@@ -484,7 +484,7 @@ console.log(keyCode);
 
 
 
-var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
+var this_websockets = 'ws://'+location.host.split(':')[0]+':3001/';
 var this_ws = null;
 var this_ws_open = false;
 var this_timeout = false;
