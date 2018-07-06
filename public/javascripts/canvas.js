@@ -16,7 +16,7 @@ let active_part = 0;
 //TODO: be able to initialize some effects with certain parameters (sequencer to trigger change of effects and such)
 
 let cl = [
-['AUDIO_CTRL','TSPS_CTRL','UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
+//['AUDIO_CTRL','TSPS_CTRL','UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],

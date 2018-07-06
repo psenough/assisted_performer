@@ -45,6 +45,7 @@ setInterval(function() {
 // init midi
 //
 
+/*
 var midi = require('midi');
 
 // these are only the default config and default values, updated values are stored on the params object
@@ -75,7 +76,7 @@ setInterval(function() {
 		}
 	}
 }, audio_update_rate);
-
+*/
 
 
 //
@@ -181,7 +182,7 @@ function catchall(req, res, next) {
 		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
-	res.render('assisted_performer_slider_demobit', {title: 'Assisted Performer Slider'});
+	res.render('assisted_performer_hold_button_aura', {title: 'Festival Aura'});
 	res.end();
 }
 
@@ -498,14 +499,14 @@ app.ws('/', function(ws, req) {
 		var lmsg = data;
 		var type = null;
 		
-		logme('received with bad json format: ' + data);
+		logme('received data: ' + data);
 		
 		// crashes trying to parse, ignore
 		var parsed;
 		try {
 			parsed = JSON.parse(data);
 		} catch (e) {
-			//logme('received with bad json format: ' + data);
+			logme('received with bad json format: ' + data);
 			console.error(e);
 			return;
 		}
@@ -933,6 +934,45 @@ setInterval(function() {
 
 //TODO: we could do floatbacks with lerps, would be smoother, and use another variable to define it's float rate?
 //TODO: reminder that the step value was originally used for increase and decrease buttons with post messaging (before websockets enabled slider)
+
+
+
+//
+// randomize
+//
+
+var random = false;
+var random_rate = 500; // miliseconds between each update
+
+setInterval(function() {
+	if (random) {
+		var update = {};
+		for (thisparam in params) {
+			params[thisparam]['value'] = Math.random()*(params[thisparam]['max']-params[thisparam]['min'])+params[thisparam]['min'];
+		}
+	}
+}, random_rate);
+
+
+
+//
+// float away values
+//
+
+var floataway = true;
+var floataway_rate = 500; // miliseconds between each step update
+
+setInterval(function() {
+	if (floataway) {
+		var update = {};
+		for (thisparam in params) {
+			params[thisparam]['value'] += Math.random()*params[thisparam]['step'] - params[thisparam]['step']*0.5;
+			if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
+			if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
+			console.log('floating away ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
+		}
+	}
+}, floataway_rate);
 
 
 
