@@ -214,7 +214,7 @@ app.get('/favicon.ico', function(req, res){
 	res.sendFile(fileName, options, function (err) {
 		if (err) {
 		  console.log(err);
-		  res.status(err.status).end();
+		  //res.status(err.status).end();
 		} else {
 		  //console.log('Sent:', fileName);
 		}
@@ -723,7 +723,12 @@ function sendWebSocketUpdateToCanvas(thisparam) {
 			if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
 				var obj = {};
 				obj[thisparam] = params[thisparam]['value'];
-				active_conn[i]['socket'].send(JSON.stringify(obj));
+				try {
+					active_conn[i]['socket'].send(JSON.stringify(obj));
+				} catch(exc) {
+					console.log(exc);
+					active_conn.splice(i,1);
+				}
 			}
 		}
 	}
@@ -772,7 +777,12 @@ setInterval(function() {
 	
 	for (var i = 0; i < active_conn.length; i++) {
 		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
-			active_conn[i]['socket'].send(JSON.stringify(update));
+			try {
+				active_conn[i]['socket'].send(JSON.stringify(update));
+			} catch(exc) {
+				console.log(exc);
+				active_conn.splice(i,1);
+			}
 		}
 	}
 }, streaming_milliseconds);
@@ -879,7 +889,14 @@ stdin.on('data', function (data) {
 		process.stdout.write('left');
 	}
 	if (data == '0') { 
-		for (var i=0; i < active_conn.length; i++) active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
+		for (var i=0; i < active_conn.length; i++) {
+			try {
+				active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
+			} catch(exc) {
+				console.log(exc);
+				active_conn.splice(i,1);
+			}
+		}
 	}
 	if (data == '1') {
 		output.sendMessage([176,1,0]);
