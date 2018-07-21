@@ -182,7 +182,7 @@ function catchall(req, res, next) {
 		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
 	}
 
-	res.render('assisted_performer_hold_button_aura', {title: 'Festival Aura'});
+	res.render('assisted_performer_slider_aura', {title: 'Festival Aura'});
 	res.end();
 }
 
