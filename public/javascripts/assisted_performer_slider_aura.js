@@ -104,7 +104,7 @@ function calculate_buttons_position( rebuild ) {
 	function place_inp() {
 		console.log('placing inp');
 		if (inp_dragging) return;
-		inp_start_x = parseInt(window.innerWidth*0.31 - usedwidth*0.15,10);
+		inp_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.4,10);
 		inp.style.left = inp_start_x + 'px';
 		inp_start_y = parseInt(usedheight*0.4,10);
 		inp.style.top = inp_start_y + 'px';
@@ -168,7 +168,7 @@ function calculate_buttons_position( rebuild ) {
 	function place_place() {
 		console.log('placing place button');
 		var width_of_button = parseInt(usedwidth*0.265,10);
-		place.style.left = parseInt(window.innerWidth*0.74 - width_of_button,10) + 'px';
+		place.style.left = parseInt(window.innerWidth*0.5  + usedwidth*0.325 - width_of_button,10) + 'px';
 		place.style.top = parseInt(usedheight*0.225,10) + 'px';
 		place.style.width = width_of_button + 'px';
 		place.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
@@ -185,13 +185,19 @@ function calculate_buttons_position( rebuild ) {
 		place_place();
 		place.addEventListener("mousedown", function(e) {
 			place.setAttribute('class','btn btn_place_on');
+			for (key in server_params) {
+				this_ws.send(JSON.stringify({'assisted_performer': 'place_obj', 'param': key, 'value': server_params[key]['value'] }));
+			}
 		});
 		place.addEventListener("mouseup", function(e) {
 			place.setAttribute('class','btn btn_place_off');			
 		});
 		place.addEventListener('touchstart', function(e){
 			e.preventDefault();
-			place.setAttribute('class','btn btn_place_on');			
+			place.setAttribute('class','btn btn_place_on');	
+			for (key in server_params) {
+				this_ws.send(JSON.stringify({'assisted_performer': 'place_obj', 'param': key, 'value': server_params[key]['value'] }));
+			}
 		});
 		place.addEventListener('touchend', function(e){
 			e.preventDefault();
@@ -202,7 +208,7 @@ function calculate_buttons_position( rebuild ) {
 	function place_skip() {
 		console.log('placing place button');
 		var width_of_button = parseInt(usedwidth*0.265,10);
-		skip.style.left = parseInt(window.innerWidth*0.74 - width_of_button,10) + 'px';
+		skip.style.left = parseInt(window.innerWidth*0.5  + usedwidth*0.325 - width_of_button,10) + 'px';
 		skip.style.top = parseInt(usedheight*0.588,10) + 'px';
 		skip.style.width = width_of_button + 'px';
 		skip.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
@@ -219,6 +225,9 @@ function calculate_buttons_position( rebuild ) {
 		place_skip();
 		skip.addEventListener("mousedown", function(e) {
 			skip.setAttribute('class','btn btn_skip_on');
+			for (key in server_params) {
+				this_ws.send(JSON.stringify({'assisted_performer': 'skip_obj', 'param': key, 'value': server_params[key]['value'] }));
+			}
 		});
 		skip.addEventListener("mouseup", function(e) {
 			skip.setAttribute('class','btn btn_skip_off');
@@ -226,6 +235,9 @@ function calculate_buttons_position( rebuild ) {
 		skip.addEventListener('touchstart', function(e){
 			e.preventDefault();
 			skip.setAttribute('class','btn btn_skip_on');
+			for (key in server_params) {
+				this_ws.send(JSON.stringify({'assisted_performer': 'skip_obj', 'param': key, 'value': server_params[key]['value'] }));
+			}
 		});
 		skip.addEventListener('touchend', function(e){
 			e.preventDefault();
@@ -320,27 +332,6 @@ function sendvote_post(param,type) {
 	http.send(params);
 }
 
-/*
-function sendvote(votetype, pvote) {
-	var zone = votetype; //zonebase + (team * nzones) + votetype;
-	var http = new XMLHttpRequest();
-	var url = "/vote";
-	var params = "vote=fire";
-	if (pvote !== undefined) params += "&pvote="+pvote;
-	params +=  "&zone="+zone;
-	console.log(params);
-	http.open("POST", url, true);
-	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	http.onreadystatechange = function() {
-		if(http.readyState == 4 && http.status == 200) {
-			console.log(http.responseText);
-			//var headers = http.getAllResponseHeaders();
-			//console.log(headers);
-		}
-	}
-	http.send(params);
-}
-*/
 var max_timeout = 1000;
 var d = new Date();
 var n = d.getTime();
@@ -478,29 +469,7 @@ function connect_websockets() {
 					var lag = document.getElementById('lag');
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
-				
 				server_params = parsed['parameters'];
-			
-				/*var outp = document.getElementById('outp');
-				if (outp) {
-					for (key in server_params) {
-						//console.log(server_params[key]);
-						outp.innerHTML = server_params[key]['friendly_name'] + ' ' + parseFloat(server_params[key]['value']).toFixed(2);
-					
-						if (!inp_dragging) {
-							var inp = document.getElementById('inp');
-							if (inp) {
-								var pad_bot = usedheight - usedheight*.26;
-								var pad_top = usedheight*.23;
-								var pad_diff = (pad_bot - pad_top);
-								var val_diff = (server_params[key]['max'] - server_params[key]['min']);
-								var posy = pad_top - ((server_params[key]['value'] - server_params[key]['max']) / val_diff) * pad_diff;
-								inp.style.top = parseInt(posy - inp_half_height,10) + 'px';
-							}
-						}
-					}
-				}*/
-				
 			}
 			
 			if ('refresh' in parsed) {

@@ -1163,7 +1163,7 @@ function connectWebSockets() {
 				params[instance]['value'] = parsed[instance];
 			}
 		}
-		//console.log(parsed);
+		console.log(parsed);
 	};
 
 	this_ws.onclose = function() {

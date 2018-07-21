@@ -80,6 +80,9 @@ public class AssistedPerformer : MonoBehaviour {
                     //if (items.sensitivityNormals != -666) ((EdgeDetection)gameObject.GetComponent("EdgeDetection")).sensitivityNormals = (float)items.sensitivityNormals;
                     //if (items.scanLineJitter != -666) ((AnalogGlitch)gameObject.GetComponent("AnalogGlitch")).scanLineJitter = (float)items.scanLineJitter;
                     //if (items.colorDrift != -666) ((AnalogGlitch)gameObject.GetComponent("AnalogGlitch")).colorDrift = (float)items.colorDrift;
+					
+					
+					//TODO: handle place and skip special messages {assisted_performer: "place_obj", param: "bg2_lum", value: 40}
                 }
 
             }

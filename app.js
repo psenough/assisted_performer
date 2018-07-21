@@ -1,83 +1,4 @@
 
-//TODO: easy way to change system to give same parameter to multiple sources and apply the average
-//TODO: handle multiple canvases connected elegantely
-
-//
-// init serialport https://github.com/node-serialport/node-serialport#opening-a-port
-//
-
-/*
-var SerialPort = require('serialport');
-var port = new SerialPort('/dev/tty-usbserial1', {
-  baudRate: 57600
-});
-
-port.write('main screen turn on', function(err) {
-  if (err) {
-    return console.log('Error on write: ', err.message);
-  }
-  console.log('message written');
-});
-
-// Open errors will be emitted as an error event
-port.on('error', function(err) {
-  console.log('serialport error: ', err.message);
-})
-
-// Read data that is available but keep the stream from entering "flowing mode"
-port.on('readable', function () {
-  console.log('serialport data:', port.read());
-});
-
-var serial_update_rate = 20;
-
-setInterval(function() {
-	for (thisparam in params) {
-		if (thisparam.substring(0,7) == 'serial_') {
-			//TODO: bind this output to a parameter, do a test page
-			port.write('X000100');
-		}
-	}
-}, serial_update_rate);
-*/
-
-//
-// init midi
-//
-
-/*
-var midi = require('midi');
-
-// these are only the default config and default values, updated values are stored on the params object
-var midi_port = 1;
-
-var output = new midi.output();
-var midi_port_count = output.getPortCount();
-
-for (var i=0; i<midi_port_count; i++) {
-	console.log(i + ' :: ' + output.getPortName(i));
-}
-
-if (midi_port != undefined) {
-	if (midi_port <= midi_port_count) {
-		output.openPort(midi_port);
-	}
-}
-
-var audio_update_rate = 20;
-
-setInterval(function() {
-	for (thisparam in params) {
-		if (thisparam.substring(0,6) == 'audio_') {
-			// 176 is the code for control change, all messages are sent on channel 0 it seems
-
-			if ('controller' in params[thisparam]) 
-				output.sendMessage([176,params[thisparam]['controller'],parseInt(params[thisparam]['value'],10)]);
-		}
-	}
-}, audio_update_rate);
-*/
-
 
 //
 // express dependencies
@@ -125,7 +46,6 @@ var connections = [];
 var connection_timeout = 2000;
 var streaming_milliseconds = 50;
 var logdir = '';
-var ourclient = null;
 
 
 
@@ -433,8 +353,6 @@ var active_conn = [];
 var id = 0;
 var params = {};
 var votes = [];
-//addAudioParams();
-//console.log(util.inspect(params));
 
 function addToParams(theseparams) {
 	for (p in theseparams) {
@@ -447,48 +365,36 @@ function addToParams(theseparams) {
 
 expressWs.getWss().on('connection', function(client) {
   console.log('connection open');
-  //console.log(client);
-  //ws.on('connection', function(client) {
     client.id = id++;
 	client.ra = client.upgradeReq.connection.remoteAddress;
 
-	//console.log(client.ra);
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('new ws connection from: ' + client.ra);
 	logme('total ws active conns: ' + active_conn.length);
-  //});
 });
 
 expressWs.getWss().on('close', function(client) {
-//ws.on('close', function () {
 	logme("websocket closed, removing it");
 	var thisid = getID(client.id);
 	if (thisid != -1) {
 		console.log('removing...' + client.ra);
-		//if (client.ra) removeTakenParamFromClosingIP(client.ra);
 		active_conn.splice(thisid, 1);
 	}
 });
 
 expressWs.getWss().on('close', function(client) {
-//    ws.on('error', function () {
 	logme("websocket error, removing it");
 	var thisid = getID(client.id);
 	if (thisid != -1) {
 		console.log('removing...' + client.ra);			
-		//if (client.ra) removeTakenParamFromClosingIP(client.ra);
 		active_conn.splice(thisid, 1);
 	}
 });  
 
-//expressWs.getWss().on('message', function(client) {
 app.ws('/', function(ws, req) {
   var client = ws;
-  
   console.log('received ws');
-  //console.log(ws);
-  //console.log(req);
 
   ws.on('data', function(data) {
 	console.log('received data');
@@ -519,10 +425,6 @@ app.ws('/', function(ws, req) {
 			
 			if (!('assisted_performer' in parsed)) {
 				logme('no assisted performer object found in parse: ' + data);
-				
-				// might be an opentsps object
-				checkTSPS(parsed);
-				
 				return;
 			}
 			
@@ -566,33 +468,6 @@ app.ws('/', function(ws, req) {
 							}
 						}
 					}
-					if ('votes' in parsed) {
-						logme('processing votes');
-						for (var i = 0; i < parsed['votes'].length; i++) {
-							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
-								
-								// cant directly replace entire object because the vote results are stored in there 
-								// if it exists, update active state
-								// if it doesnt exist, add it
-								var ispresent = false;
-								for (var j=0; j<votes.length; j++) {
-									// update votes object if it's a new vote
-									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
-										votes[j]['active'] = parsed['votes'][i]['active'];
-										
-									}
-								}
-								if (!ispresent) {
-									parsed['votes'][i]['results'] = {};
-									votes.push(parsed['votes'][i]);
-								}
-								
-							} else {
-								logme('vote object badly formatted:');
-								logme(parsed['votes'][i]);
-							}
-						}
-					}
 					if ('ping' in parsed) {
 						// send back a pong in similar way to POST pong
 						var thisid = getID(client.id);
@@ -616,53 +491,18 @@ app.ws('/', function(ws, req) {
 						}
 					}
 				break;
-				case 'vote':
-					// 'vote': { 'uid': 'tester', 'vote': 'option 1' }
-					for (var j=0; j<votes.length; j++) {
-						// update votes object if it's a new vote
-						if (votes[j]['uid'] == parsed['vote']['uid']) {
-							
-							switch (votes[j]['type']) {
-								case 'single_vote_per_ip':
-									//TODO: test this
-									logme('storing vote on '+ parsed['vote']['vote'] +' from ' + client.ra);
-									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['vote']['vote'];
-								break;
-								case 'mash_vote':
-									//TODO: test this
-									votes[j]['results'][parsed['vote']['vote']] += 1;
-								break;
-								default:
-									console.log('unknown type of votes: ' + votes[j]['type']);
-								break;
-							}							
-						}
-					}
-
-				break;
-				case 'master':
-					//console.log('received master');
-					var thisid = getID(client.id);
-					if (thisid in active_conn) {
-						
-						// if we were sent back master params, update our local values
-						if ('params' in parsed) {
-							for (p in parsed['params']) {
-								if (p in params) {
-									params[p]['value'] = parsed['params'][p]['value'];
-								}
+				case 'place_obj':
+				case 'skip_obj':
+					// just fwd to canvas (already has all info they need)
+					console.log('place');
+					for (var i = 0; i < active_conn.length; i++) {
+						if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
+							try {
+								active_conn[i]['socket'].send(data);
+							} catch(exc) {
+								console.log(exc);
 							}
 						}
-						
-						// prepare output for sending
-						var output = {'parameters': params};
-						
-						// if we got a ping, make sure we also reply with a pong, we're not savages!
-						if ('ping' in parsed) output['pong'] = 'pong';
-						
-						// send the packet
-						//active_conn[thisid]['socket'].send(JSON.stringify(output));
-						ws.send(JSON.stringify(output));
 					}
 				break;
 				default:
@@ -742,39 +582,6 @@ setInterval(function() {
 		//console.log(thisparam);
 		update[thisparam] = params[thisparam].value;
 	}
-	//console.log(update);
-	let vote_results = [];
-	for (let i=0; i<votes.length; i++) {
-		if (votes[i]['active']) {
-			switch (votes[i]['type']) {
-				case 'single_vote_per_ip':
-					let obj = {};
-					for (cl in votes[j]['results']) {
-						if (votes[j]['results'][cl] in obj) obj[votes[j]['results'][cl]]++;
-						 else obj[votes[j]['results'][cl]] = 0;
-					}
-					vote_results.push({'uid': votes[i]['uid'], results: obj}); 
-				break;
-				case 'mash_vote':
-					let obj2 = votes[j]['results'];					
-					// reset counter
-					if (votes[j]['clear_on_send']) {
-						for (cl in votes[j]['results']) {
-							votes[j]['results'][cl] = 0;
-						}
-					}
-					vote_results.push({'uid': votes[i]['uid'], results: obj2}); 
-				break;
-				default:
-					console.log('unknown type of votes: ' + votes[j]['type']);
-				break;
-			}						
-		}
-	}
-	update['vote_results'] = vote_results;
-	//console.log(update);
-	//TODO: test if this vote_results is working properly for all vote types
-	
 	for (var i = 0; i < active_conn.length; i++) {
 		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
 			try {
@@ -795,202 +602,6 @@ function getID(thisid) {
     }
     return -1;
 }
-
-
-
-//
-// computer vision (TSPS)
-//
-
-var tsps_timeout = 2000;
-var tsps_ids = [];
-
-function checkTSPS(tsps) {
-
-	// reference: http://www.tsps.cc/docs/tsps-json-protocol
-	
-	// check if this object is indeed a TSPS object and update our array
-	if (tsps) {
-		if ('type' in tsps) {
-			if ((tsps['type'] == 'personUpdated') || (tsps['type'] == 'personEntered')) {
-				tsps['timestamp'] = getTimestamp();
-				//console.log(tsps);
-				
-				var found = false;
-				for (var i = 0; i < tsps_ids.length; i++) {
-					//console.log(tsps_ids[i]['id'] + ' ' + tsps['id']);
-					if (tsps_ids[i]['id'] == tsps['id']) {
-						tsps_ids[i] = clone(tsps);
-						found = true;
-						//console.log('found id '+ tsps['id']);
-					}
-				}
-				if (!found) tsps_ids[tsps_ids.length] = clone(tsps);
-				
-				//console.log( tsps['centroid']['x'] + ' ' + tsps['centroid']['y'] < 0.25);
-			}
-		}
-	}
-	//console.log('count: ' + tsps_ids.length);
-	
-	// remove tracking of ids after update timeout
-	for (var i = 0; i < tsps_ids.length; i++) {
-		//console.log(tsps_ids);
-		if ((getTimestamp() - tsps_ids[i]['timestamp']) > tsps_timeout) {
-			tsps_ids.splice(i, 1);
-			i--;
-		}
-	}
-	
-	// update values of assigned parameters
-	for (thisparam in params) {
-		if (thisparam.substring(0,5) == 'tsps_') {
-			//TODO: refactor this code to allow binding to all/more possible values of tsps json and not just centroid of the 2 oldest blobs
-			//reference http://www.tsps.cc/docs/tsps-json-protocol
-			switch(thisparam) {
-				case 'tsps_0_centroid_x':
-					if (tsps_ids.length > 0) { 
-						params[thisparam]['value'] = tsps_ids[0]['centroid']['x'];
-					}
-				break;
-				case 'tsps_0_centroid_y':
-					if (tsps_ids.length > 0) { 
-						params[thisparam]['value'] = tsps_ids[0]['centroid']['y'];
-					}
-				break;
-				case 'tsps_1_centroid_x':
-					if (tsps_ids.length > 1) { 
-						params[thisparam]['value'] = tsps_ids[1]['centroid']['x'];
-					}
-				break;
-				case 'tsps_1_centroid_y':
-					if (tsps_ids.length > 1) { 
-						params[thisparam]['value'] = tsps_ids[1]['centroid']['y'];
-					}
-				break;
-			}
-		}
-	}
-}
-
-
-
-//
-// simulate gamestate changes with arrow keys
-//
-
-stdin = process.stdin;
-stdin.on('data', function (data) {
-    if (data == '\u0003') { process.exit(); }
-	if (data == '\u001B\u005B\u0043') {
-		process.stdout.write('right');
-	}
-    if (data == '\u001B\u005B\u0044') {
-		process.stdout.write('left');
-	}
-	if (data == '0') { 
-		for (var i=0; i < active_conn.length; i++) {
-			try {
-				active_conn[i]['socket'].send(JSON.stringify({'rms': Math.random()}));
-			} catch(exc) {
-				console.log(exc);
-				active_conn.splice(i,1);
-			}
-		}
-	}
-	if (data == '1') {
-		output.sendMessage([176,1,0]);
-		console.log('sent midi test message');
-	}
-	if (data == 'p') {
-		var list = [];
-		for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
-		console.log(util.inspect(list));
-	}
-	if (data == 'r') {
-		reassignParameters();
-	}
-	if (data == 'f') {
-		floatback = !floatback;
-		console.log('floatback: ' + floatback);
-	}
-    process.stdout.write('Captured Key : ' + data + "\n");
-});
-stdin.setEncoding('utf8');
-stdin.setRawMode(true);
-stdin.resume();
-
-
-
-//
-// float back values to default
-//
-
-var floatback = false;
-var floatback_rate = 500; // miliseconds between each step update
-
-setInterval(function() {
-	if (floatback) {
-		var update = {};
-		for (thisparam in params) {
-			// if higher, lower it, floor to default value if it goes over
-			if (params[thisparam]['value'] > params[thisparam]['default_value']) {
-				params[thisparam]['value'] -= params[thisparam]['step'];
-				if (params[thisparam]['value'] < params[thisparam]['default_value']) params[thisparam]['value'] = params[thisparam]['default_value'];
-				console.log('updating ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
-			}
-			// if lower, increase it, floor to default value if it goes over
-			if (params[thisparam]['value'] < params[thisparam]['default_value']) {
-				params[thisparam]['value'] += params[thisparam]['step'];
-				if (params[thisparam]['value'] > params[thisparam]['default_value']) params[thisparam]['value'] = params[thisparam]['default_value'];
-				console.log('updating ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
-			}
-		}
-	}
-}, floatback_rate);
-
-//TODO: we could do floatbacks with lerps, would be smoother, and use another variable to define it's float rate?
-//TODO: reminder that the step value was originally used for increase and decrease buttons with post messaging (before websockets enabled slider)
-
-
-
-//
-// randomize
-//
-
-var random = false;
-var random_rate = 500; // miliseconds between each update
-
-setInterval(function() {
-	if (random) {
-		var update = {};
-		for (thisparam in params) {
-			params[thisparam]['value'] = Math.random()*(params[thisparam]['max']-params[thisparam]['min'])+params[thisparam]['min'];
-		}
-	}
-}, random_rate);
-
-
-
-//
-// float away values
-//
-
-var floataway = true;
-var floataway_rate = 500; // miliseconds between each step update
-
-setInterval(function() {
-	if (floataway) {
-		var update = {};
-		for (thisparam in params) {
-			params[thisparam]['value'] += Math.random()*params[thisparam]['step'] - params[thisparam]['step']*0.5;
-			if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
-			if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
-			console.log('floating away ' + params[thisparam]['friendly_name'] + ' to ' + params[thisparam]['value']);
-		}
-	}
-}, floataway_rate);
-
 
 
 //
