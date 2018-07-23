@@ -11,7 +11,7 @@ var CONNECTION_MODE_WS_ONLY = 0;
 var CONNECTION_MODE_POST_ONLY = 1;
 var CONNECTION_MODE_ANY = 2; // try ws if ws exists, if not, try post
 
-var connection_mode = CONNECTION_MODE_ANY;
+var connection_mode = CONNECTION_MODE_WS_ONLY;
 
 var inp_half_height = 0;
 var inp_start_y = 0;
@@ -247,11 +247,17 @@ function calculate_buttons_position( rebuild ) {
 	
 	function place_color() {
 		console.log('placing color');
-		var width_of_button = parseInt(usedwidth*0.4,10);
-		color.style.left = parseInt(window.innerWidth*0.8 - width_of_button,10) + 'px';
-		color.style.top = parseInt(usedheight*0.8,10) + 'px';
+		var width_of_button = parseInt(usedwidth*0.41,10);
+		color.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.5  - width_of_button,10) + 'px';
+		color.style.top = parseInt(usedheight*0.856,10) + 'px';
 		color.style.width = width_of_button + 'px';
-		color.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
+		color.style.height = parseInt(usedheight*0.067,10) + 'px';
+		for (key in server_params) { // there is only one
+			console.log(server_params[key]['friendly_name']);
+			var c_hex = server_params[key]['friendly_name'].substr(2);
+			console.log(c_hex);
+			color.style.backgroundColor = "'#"+c_hex+"'";
+		}
 	}
 	
 	var color = document.getElementById('color');
@@ -260,7 +266,7 @@ function calculate_buttons_position( rebuild ) {
 	} else {
 		color = document.createElement('div');
 		color.setAttribute('id','color');
-		color.setAttribute('class','asset '); //TODO: add color id
+		color.setAttribute('class','asset'); //TODO: add color id
 		document.body.appendChild(color);
 		place_color();
 	}
@@ -451,7 +457,7 @@ function connect_websockets() {
 
 	this_ws.onmessage = function(evt) {
 		
-		console.log(evt.data);
+		//console.log(evt.data);
 		
 		try {
 			var parsed = JSON.parse(evt.data);
@@ -470,6 +476,12 @@ function connect_websockets() {
 					if (lag) lag.innerHTML = (pingin-pingout) + 'ms';
 				}
 				server_params = parsed['parameters'];
+				
+				for (key in server_params) { // there is only one
+					var c_hex = server_params[key]['friendly_name'].substr(2);
+					console.log(c_hex);
+					color.style.backgroundColor = '#'+c_hex; //"'#"+c_hex+"'";
+				}
 			}
 			
 			if ('refresh' in parsed) {
