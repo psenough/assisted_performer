@@ -306,6 +306,22 @@ function getUntakenParam() {
 	return param;
 }
 
+function isParamTaken(p) {
+	var istaken = false;
+	for (c in connections) {
+		if ('params' in connections[c]) {
+			//console.log(connections[c]['params']);
+			for (p2 in connections[c]['params']) {
+				//console.log('prata: ' + connections[c]['params'][p2] + ' ' + p);
+				if (connections[c]['params'][p2] == p) {
+					istaken = true;
+					//break loop1;
+				}
+			}
+		}
+	}
+	return istaken;
+}
 
 
 //
@@ -361,36 +377,15 @@ function addToParams(theseparams) {
 	}
 }
 
-//TODO: debug parameter non assignment (caused by refactoring using new express-ws code, client is no longer globally static) need to figure out another way to keep track of current client
-
 expressWs.getWss().on('connection', function(client) {
-  console.log('connection open');
+	console.log('connection open');
     client.id = id++;
 	client.ra = client.upgradeReq.connection.remoteAddress;
-
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
     logme('new ws connection from: ' + client.ra);
 	logme('total ws active conns: ' + active_conn.length);
 });
-
-expressWs.getWss().on('close', function(client) {
-	logme("websocket closed, removing it");
-	var thisid = getID(client.id);
-	if (thisid != -1) {
-		console.log('removing...' + client.ra);
-		active_conn.splice(thisid, 1);
-	}
-});
-
-expressWs.getWss().on('close', function(client) {
-	logme("websocket error, removing it");
-	var thisid = getID(client.id);
-	if (thisid != -1) {
-		console.log('removing...' + client.ra);			
-		active_conn.splice(thisid, 1);
-	}
-});  
 
 app.ws('/', function(ws, req) {
   var client = ws;
@@ -523,9 +518,13 @@ app.ws('/', function(ws, req) {
 		//console.log('checking ra: ' + active_conn[thisid]['socket'].ra);
 		var found = false;
 		for (c in connections) {
-			if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra) ){
-				found = true;
-				if (type == 'canvas') connections[c]['canvas'] = true;
+			try {
+				if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra) ){
+					found = true;
+					if (type == 'canvas') connections[c]['canvas'] = true;
+				}
+			} catch(exc) {
+				logme(exc);
 			}
 		}
 		
@@ -536,6 +535,28 @@ app.ws('/', function(ws, req) {
 			// will only be properly interpreted by controller pages to reload themselves automatically
 		}
 
+  });
+  
+  ws.on('close', function(code) {
+	console.log('closed connection');
+	console.log('removing ' + this.id + ' ' + this.ra);
+	var thisid = getID(this.id);
+	removeTakenParamFromClosingIP(this.ra);
+	if (thisid != -1) {
+		console.log('removing...' + client.ra);
+		active_conn.splice(thisid, 1);
+	}
+  });
+  
+  ws.on('error', function(code) {
+	onsole.log('error');
+	console.log('removing ' + this.id + ' ' + this.ra);
+	var thisid = getID(this.id);
+	removeTakenParamFromClosingIP(this.ra);
+	if (thisid != -1) {
+		console.log('removing...' + client.ra);
+		active_conn.splice(thisid, 1);
+	}
   });
 });
 
@@ -576,11 +597,20 @@ function sendWebSocketUpdateToCanvas(thisparam) {
 
 var streaming_milliseconds = 100;
 
+var send_value_and_active = true;
+
 setInterval(function() {
 	let update = {};
 	for (thisparam in params) {
 		//console.log(thisparam);
-		update[thisparam] = params[thisparam].value;
+		if (!send_value_and_active) {
+			update[thisparam] = params[thisparam].value;
+		} else {
+			update[thisparam] = {
+				"value": params[thisparam].value,
+				"active": isParamTaken(thisparam)
+			};
+		}
 	}
 	for (var i = 0; i < active_conn.length; i++) {
 		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
@@ -588,6 +618,8 @@ setInterval(function() {
 				active_conn[i]['socket'].send(JSON.stringify(update));
 			} catch(exc) {
 				console.log(exc);
+				//console.log('cleaning up');
+				//console.log(active_conn[thisid]['socket'].ra);
 				active_conn.splice(i,1);
 			}
 		}
@@ -597,6 +629,15 @@ setInterval(function() {
 function getID(thisid) {
     for (var i = 0; i < active_conn.length; i++) {
         if (active_conn[i]['uid'] == thisid) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function getIDbyRA(thisra) {
+    for (var i = 0; i < active_conn.length; i++) {
+        if (active_conn[i]['socket'].ra == thisra) {
             return i;
         }
     }

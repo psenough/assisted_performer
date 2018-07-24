@@ -1160,7 +1160,8 @@ function connectWebSockets() {
 		let parsed = JSON.parse(evt.data);
 		for (instance in parsed) {
 			if (instance in params) {
-				params[instance]['value'] = parsed[instance];
+				//params[instance]['value'] = parsed[instance];
+				params[instance]['value'] = parsed[instance]['value'];
 			}
 		}
 		console.log(parsed);
