@@ -42,7 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // init global vars used by express
 //
 
-var connections = [];
+var connections = []; // only lists controllers, not canvas
 var connection_timeout = 2000;
 var streaming_milliseconds = 50;
 var logdir = '';
@@ -59,6 +59,8 @@ app.get('/controller', catchall);
 app.get('/slider', catchall);
 function catchall(req, res, next) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	
+	console.log('new controller page request');
 
 	// get timestamp
 	var d = new Date();
@@ -88,6 +90,8 @@ function catchall(req, res, next) {
 			}
 			if (!parapara) connections.splice(i, 1);
 			break;
+			
+			//found = true;
 		}
 	}
 	
@@ -98,8 +102,13 @@ function catchall(req, res, next) {
 		
 		// add the info to our connections records
 		// params is an array because we might want to pass multiple parameters to a controller at some point
-		connections.push({ip: ip, params: [param], lasttime: n, canvas: false});
-		console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
+		if (param == undefined) {
+			connections.push({ip: ip, lasttime: n});
+			console.log('ip: ' + ip + ' on waiting list, total connections: ' + connections.length);
+		} else {
+			connections.push({ip: ip, params: [param], lasttime: n});
+			console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
+		}
 	}
 
 	res.render('assisted_performer_slider_aura', {title: 'Festival Aura'});
@@ -240,7 +249,7 @@ function onError(error) {
 //app.use(catchall);
 
 app.use(function (req, res, next) {
-  console.log('middleware');
+  //console.log('middleware');
   req.testing = 'testing';
   return next();
 });
@@ -260,25 +269,21 @@ function getTimestamp() {
 
 function removeTakenParamFromClosingIP(thisip) {
 	//console.log('ip: ' + thisip);
+	var idx = 0;
 	for (c in connections) {
 		//console.log('connection: ' + connections[c]['ip'] + ' ' + thisip);
 		if (connections[c]['ip'] == thisip) {
-			if ('params' in connections[c]) {
-				//console.log(connections[c]['params']);
-				for (p in connections[c]['params']) {
-					console.log('removing ' + connections[c]['params'][p] + ' from taken list');
-					if (connections[c]['params'][p] in params) {
-						delete params[connections[c]['params'][p]]['taken'];
-					}
-				}
-				break;
-			}
+			delete connections[c]['params'];
+			//delete connections[c];
+			idx = connections.indexOf(c);
+			break;
 		}
 	}
+	//connections.splice(idx,1);
 }
 
 function getUntakenParam() {
-	var param = null;
+	var param = undefined;
 	var params_available = [];
 	for (p in params) {
 		var istaken = false;
@@ -368,7 +373,6 @@ function saveLog(filename, message) {
 var active_conn = [];
 var id = 0;
 var params = {};
-var votes = [];
 
 function addToParams(theseparams) {
 	for (p in theseparams) {
@@ -389,18 +393,13 @@ expressWs.getWss().on('connection', function(client) {
 
 app.ws('/', function(ws, req) {
   var client = ws;
-  console.log('received ws');
+  //console.log('received ws');
 
-  ws.on('data', function(data) {
-	console.log('received data');
-	console.log(data);
-  });
-  
   ws.on('message', function(data) {
 		var lmsg = data;
 		var type = null;
 		
-		logme('received data: ' + data);
+		//logme('received data: ' + data);
 		
 		// crashes trying to parse, ignore
 		var parsed;
@@ -429,7 +428,7 @@ app.ws('/', function(ws, req) {
 					//addAudioParams();
 					addToParams(parsed['parameters']);
 					type = 'canvas';
-					logme('received: ' + data);
+					logme('received canvas: ' + data);
 					// received message with new parameters, reassigning all existing controller connections
 					reassignParameters();
 				break;
@@ -437,7 +436,7 @@ app.ws('/', function(ws, req) {
 					type = 'control';
 					if ('parameters' in parsed) {
 						if (('param' in parsed['parameters']) && ('type' in parsed['parameters'])) {
-							logme('received: ' + data);
+							logme('received control: ' + data);
 							var thisparam = parsed['parameters']['param'];
 							var thistype = parsed['parameters']['type'];
 							if (thisparam in params) {
@@ -489,7 +488,8 @@ app.ws('/', function(ws, req) {
 				case 'place_obj':
 				case 'skip_obj':
 					// just fwd to canvas (already has all info they need)
-					console.log('place');
+					//console.log('place');
+					type = 'control';
 					for (var i = 0; i < active_conn.length; i++) {
 						if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
 							try {
@@ -509,6 +509,7 @@ app.ws('/', function(ws, req) {
 		// keep latest message in memory
 		var thisid = getID(client.id);
 		if (thisid in active_conn) {
+			//console.log('its updating');
 			active_conn[thisid]['latest_message'] = lmsg;
 			active_conn[thisid]['latest_timestamp'] = getTimestamp();
 			active_conn[thisid]['client_type'] = type;
@@ -521,7 +522,7 @@ app.ws('/', function(ws, req) {
 			try {
 				if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra) ){
 					found = true;
-					if (type == 'canvas') connections[c]['canvas'] = true;
+					connections[c]['lasttime'] = getTimestamp();
 				}
 			} catch(exc) {
 				logme(exc);
@@ -541,25 +542,68 @@ app.ws('/', function(ws, req) {
 	console.log('closed connection');
 	console.log('removing ' + this.id + ' ' + this.ra);
 	var thisid = getID(this.id);
-	removeTakenParamFromClosingIP(this.ra);
+	var thisra = this.ra;
 	if (thisid != -1) {
 		console.log('removing...' + client.ra);
 		active_conn.splice(thisid, 1);
 	}
+	removeTakenParamFromClosingIP(thisra);
+	//setTimeout(checkAssignedParameters, check_parameters_delay);
   });
   
   ws.on('error', function(code) {
 	onsole.log('error');
 	console.log('removing ' + this.id + ' ' + this.ra);
 	var thisid = getID(this.id);
-	removeTakenParamFromClosingIP(this.ra);
+	var thisra = this.ra;
 	if (thisid != -1) {
 		console.log('removing...' + client.ra);
 		active_conn.splice(thisid, 1);
 	}
+	removeTakenParamFromClosingIP(thisra);
+	//setTimeout(checkAssignedParameters, check_parameters_delay);
   });
 });
 
+var assign_parameters_delay = 500; // must be higher then the common ping travel time
+var check_parameters_delay = 1000; // must be higher then the assign delay else will reassign to the same "still lingering" connection
+
+function checkAssignedParameters() {
+	// if there are connections waiting to get parameters, assign untaken parameters to one of them
+	for (var i=0; i<connections.length; i++) {
+		if ('params' in connections[i]){
+			continue;
+		} else {
+			// check lastactivetime is lower then 3 seconds
+			if ((getTimestamp() - connections[i]['lasttime']) < assign_parameters_delay) {
+				console.log( connections[i]['ip'] + ' ' + (getTimestamp() - connections[i]['lasttime']));
+				var p =  getUntakenParam();
+				if (p != undefined) {
+					connections[i]['params'] = [ p ];
+					console.log('ip: ' + connections[i]['ip'] + ' now assigned to control param ' + connections[i]['params'] + ', total connections: ' + connections.length);
+				}
+			}
+		}
+	}
+}
+
+setInterval(function() {
+	var worthchecking = false;
+	var countparams = 0;
+	//check for ping timeouts on connections
+	for (var i=0; i<connections.length; i++) {
+		if ((getTimestamp() - connections[i]['lasttime']) > connection_timeout) {
+			//console.log(connections[i]['ip'] + ' ping timeout');
+			removeTakenParamFromClosingIP(connections[i]['ip']);
+			worthchecking = true;
+		} else {
+			countparams++; 
+		}
+	}
+	//console.log(countparams + ' ' + Object.keys(params).length);
+	if (countparams < Object.keys(params).length) worthchecking = true;
+	if (worthchecking == true) checkAssignedParameters();
+}, assign_parameters_delay);
 
 function reassignParameters() {
 	console.log('reassigning');
@@ -571,10 +615,12 @@ function reassignParameters() {
 	}
 	//console.log(util.inspect(connections));
 	// reassign new ones to everyone connected
-	for (var i=0; i<connections.length; i++) {
-		if (connections[i]['canvas']) continue;
-		connections[i]['params'] = getUntakenParam();
-		console.log('ip: ' + connections[i]['ip'] + ' now controlling param ' + connections[i]['params'] + ', total connections: ' + connections.length);
+	for (i=0; i<connections.length; i++) {
+		var p =  getUntakenParam();
+		if (p != undefined) {
+			connections[i]['params'] = [ p ];
+			console.log('ip: ' + connections[i]['ip'] + ' now reassigned controlling param ' + connections[i]['params'] + ', total connections: ' + connections.length);
+		}
 	}
 }
 
@@ -643,6 +689,50 @@ function getIDbyRA(thisra) {
     }
     return -1;
 }
+
+
+
+
+//
+// simulate gamestate changes with arrow keys
+//
+
+stdin = process.stdin;
+stdin.on('data', function (data) {
+    if (data == '\u0003') { process.exit(); }
+	if (data == 'a') {
+		console.log('listing active_conn:');
+		for (a in active_conn) {
+			console.log(active_conn[a]['uid'] + ' ' + active_conn[a]['socket']['id'] + ' ' + active_conn[a]['socket']['ra']);
+			//console.log('connection: ' + connections[c]['ip'] + ' ' + connections[c]['ip']['canvas']);
+			//if ('params' in connections[c]) {
+			//console.log(util.inspect(active_conn[a]));
+			//}
+		}
+	}
+	if (data == 'c') {
+		console.log('listing connections:');
+		for (c in connections) {
+			//console.log('connection: ' + connections[c]['ip'] + ' ' + connections[c]['ip']['canvas']);
+			//if ('params' in connections[c]) {
+				console.log(util.inspect(connections[c]));
+			//}
+		}
+	}
+	if (data == 'p') {
+		//var list = [];
+		//for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
+		console.log('listing parameters:');
+		console.log(util.inspect(params));
+	}
+	if (data == 'r') {
+		reassignParameters();
+	}
+    //process.stdout.write('Captured Key : ' + data + "\n");
+});
+stdin.setEncoding('utf8');
+stdin.setRawMode(true);
+stdin.resume();
 
 
 //

@@ -17,6 +17,7 @@ let active_part = 0;
 
 let cl = [
 //['AUDIO_CTRL','TSPS_CTRL','UPDATE_TIMERS','EFFECT_BACKGROUND_CHARS'],
+['EFFECT_TEST'],
 ['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL'],
 ['UPDATE_TIMERS','EFFECT_RED_STARS','EFFECT_PINK_SPYRAL','EFFECT_WHITE'],
@@ -179,11 +180,20 @@ let drawCanvas = function() {
 				cos5 = Math.cos((timer)/2000);
 			}
 		},
+		'EFFECT_TEST': {
+			'on': false,
+			'params': {
+				'z_00ff00': { 'friendly_name': 'z_00ff00', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+				'z_ff0000': { 'friendly_name': 'z_ff0000', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 }
+			},
+			'call': function() {
+			}
+		},
 		'EFFECT_BACKGROUND': {
 			'on': false,
 			'params': {
-				'bg_hue': { 'friendly_name': 'z_ff0000', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
-				'bg_sat': { 'friendly_name': 'z_ff00ff', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
+				'bg_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
+				'bg_sat': { 'friendly_name': 'Background Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
 				'bg_lum': { 'friendly_name': 'Center Lightness', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 20.0 },
 				'bg2_hue': { 'friendly_name': 'Background Hue', 'min': 0.0, 'max': 360.0, 'step': 1.0, 'default_value': 122.0, 'value': 122.0 },
 				'bg2_sat': { 'friendly_name': 'Background Saturation', 'min': 0.0, 'max': 100.0, 'step': 1.0, 'default_value': 20.0, 'value': 0.0 },
@@ -401,10 +411,10 @@ let drawCanvas = function() {
 		'EFFECT_PINK_SPYRAL': {
 			'on': false,
 			'params': {
-				'num_spyral': { 'friendly_name': 'z_00ff00', 'min': 2.0, 'max': 25.0, 'step': 2.0, 'default_value': 12.0, 'value': 10.0 },
+				'num_spyral': { 'friendly_name': 'Pink Spyral Number', 'min': 2.0, 'max': 25.0, 'step': 2.0, 'default_value': 12.0, 'value': 10.0 },
 				//'lw_spyral': { 'friendly_name': 'Pink Line Width', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 2.0, 'value': 2.0 },
-				'parts_spyral': { 'friendly_name': 'z_aa3200', 'min': 3.0, 'max': 25.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
-				'twist_spyral': { 'friendly_name': 'z_4083aa', 'min': 0.0, 'max': 30.0, 'step': 0.05, 'default_value': 10.0, 'value': 10.0 },
+				'parts_spyral': { 'friendly_name': 'Pink Spyral Parts', 'min': 3.0, 'max': 25.0, 'step': 1.0, 'default_value': 5.0, 'value': 5.0 },
+				'twist_spyral': { 'friendly_name': 'Pink Spyral Twist', 'min': 0.0, 'max': 30.0, 'step': 0.05, 'default_value': 10.0, 'value': 10.0 },
 				'center_spyral': { 'friendly_name': 'Pink Spyral Pivot', 'min': 0.0, 'max': 200.0, 'step': 1.0, 'default_value': 100.0, 'value': 100.0 },
 				'bend_spyral': { 'friendly_name': 'Pink Spyral Bend', 'min': 2.0, 'max': 10.0, 'step': 1.0, 'default_value': 8.0, 'value': 8.0 }
 

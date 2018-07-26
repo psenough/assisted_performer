@@ -271,7 +271,6 @@ function calculate_buttons_position( rebuild ) {
 		place_color();
 	}
 
-
 	if (display_post_lag) {
 		var lag = document.getElementById('lag');
 		if (lag || !rebuild) {
@@ -283,6 +282,24 @@ function calculate_buttons_position( rebuild ) {
 			document.body.appendChild(lag);
 		}
 	}
+	
+	function place_no_param_overlay() {
+		console.log('placing no param overlay');
+		no_param_overlay.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.5,10) + 'px';
+		no_param_overlay.style.width = parseInt(usedwidth,10) + 'px';
+		no_param_overlay.style.height = parseInt(usedheight,10) + 'px';	
+	}
+	
+	var no_param_overlay = document.getElementById('no_param_overlay');
+	if (no_param_overlay || !rebuild) {
+		place_no_param_overlay();
+	} else {
+		no_param_overlay = document.createElement('div');
+		no_param_overlay.setAttribute('id','no_param_overlay');
+		document.body.appendChild(no_param_overlay);
+		place_no_param_overlay();
+	}
+	
 }
 
 window.onload = function(){
@@ -338,7 +355,7 @@ function sendvote_post(param,type) {
 	http.send(params);
 }
 
-var max_timeout = 1000;
+var max_timeout = 500;
 var d = new Date();
 var n = d.getTime();
 
@@ -457,7 +474,7 @@ function connect_websockets() {
 
 	this_ws.onmessage = function(evt) {
 		
-		//console.log(evt.data);
+		console.log(evt.data);
 		
 		try {
 			var parsed = JSON.parse(evt.data);
@@ -477,15 +494,27 @@ function connect_websockets() {
 				}
 				server_params = parsed['parameters'];
 				
-				for (key in server_params) { // there is only one
-					var c_hex = server_params[key]['friendly_name'].substr(2);
-					console.log(c_hex);
-					color.style.backgroundColor = '#'+c_hex; //"'#"+c_hex+"'";
+				if (isEmpty(server_params)) {
+					// display no param overlay
+					var no_param_overlay = document.getElementById('no_param_overlay');
+					if (no_param_overlay) no_param_overlay.setAttribute('class','');
+				} else {
+					// hide no param overlay
+					var no_param_overlay = document.getElementById('no_param_overlay');
+					if (no_param_overlay) no_param_overlay.setAttribute('class','hidden');
+					// update color box
+					for (key in server_params) { // it's an iterator but we are only expecting one param to be passed
+						var c_hex = server_params[key]['friendly_name'].substr(2);
+						//console.log(c_hex);
+						color.style.backgroundColor = '#'+c_hex;
+					}
 				}
 			}
 			
 			if ('refresh' in parsed) {
-				if (parsed['refresh'] == 'mebeautiful') setTimeout(function(){location = location;},2000);
+				if (parsed['refresh'] == 'mebeautiful') setTimeout(function(){
+					location = location;
+				},2000);
 			}
 		
 		} else {
@@ -511,4 +540,8 @@ function connect_websockets() {
 
 document.ontouchmove = function(event){
 	event.preventDefault();
+}
+
+function isEmpty(obj) {
+	return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
