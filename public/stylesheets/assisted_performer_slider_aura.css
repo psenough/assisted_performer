@@ -15,7 +15,7 @@
 
 @font-face {
 	font-family: 'BebasNeue';
-	src: url('BebasNeue-Regular.ttf') format('truetype');
+	src: url('BebasNeue Regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -46,7 +46,7 @@ html, body {
 	background-position: center top;
 	text-align: center;
 	z-index: 2;
-	background-image: url('../images/UIbase_aura.png')
+	background-image: url('../images/Bkg_withTimer.png')
 }
 
 .btn {
@@ -88,11 +88,22 @@ canvas, img {
     -ms-interpolation-mode: nearest-neighbor;
 }
 
-.lag {
+#lag {
 	color: yellow;
 	position: absolute;
 	top: 0px;
 	left:0px;
+}
+
+#timer {
+	background-color: transparent;
+	color: black;
+	position: absolute;
+	top: 0px;
+	left:0px;
+	font-family: 'BebasNeue';
+	z-index: 5;
+	text-align: right;
 }
 
 .value {
@@ -213,5 +224,13 @@ input[type=range]:-moz-focusring{
 	background-size: contain;
 	background-position: center top;
 	z-index: 50;
-	background-image: url('../images/Server_Full.png')
+	background-image: url('../images/Server_Full.png');
+}
+
+.full {
+	background-image: url('../images/Server_Full.png');
+}
+
+.timedout {
+	background-image: url('../images/ThankYou.png');
 }

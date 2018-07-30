@@ -1,4 +1,7 @@
 
+var timeout = 2 * 60 * 1000; // default 2 minutes gameplay timeout
+var start_timer = (new Date()).getTime();
+
 var zonebase = 120;
 var client_state = 0;
 var game_state = 0;
@@ -168,7 +171,7 @@ function calculate_buttons_position( rebuild ) {
 	function place_place() {
 		console.log('placing place button');
 		var width_of_button = parseInt(usedwidth*0.265,10);
-		place.style.left = parseInt(window.innerWidth*0.5  + usedwidth*0.325 - width_of_button,10) + 'px';
+		place.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.325 - width_of_button,10) + 'px';
 		place.style.top = parseInt(usedheight*0.225,10) + 'px';
 		place.style.width = width_of_button + 'px';
 		place.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
@@ -296,19 +299,74 @@ function calculate_buttons_position( rebuild ) {
 	} else {
 		no_param_overlay = document.createElement('div');
 		no_param_overlay.setAttribute('id','no_param_overlay');
+		no_param_overlay.setAttribute('class','full');
 		document.body.appendChild(no_param_overlay);
 		place_no_param_overlay();
+	}
+
+	function place_timer() {
+		console.log('placing timer');
+		var width_of_button = parseInt(usedwidth*0.265,10);
+		timer.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.3 - width_of_button,10) + 'px';
+		timer.style.top = parseInt(usedheight*0.08,10) + 'px';
+		timer.style.width = width_of_button + 'px';
+		timer.style.height = parseInt(usedheight*0.067,10) + 'px';
+		timer.style.fontSize = parseInt(usedheight*0.045,10) + 'px';
+	}
+	
+	var timer = document.getElementById('timer');
+	if (timer || !rebuild) {
+		place_timer();
+	} else {
+		timer = document.createElement('div');
+		timer.setAttribute('id','timer');
+		//timer.setAttribute('class','timer');
+		document.body.appendChild(timer);
+		place_timer();
 	}
 	
 }
 
+var checkping;
+
 window.onload = function(){
 	connect_websockets();
 	request_ping();
-	setInterval(recheck_ping, max_timeout);
+	checkping = setInterval(recheck_ping, max_timeout);
 	calculate_buttons_position( true );
+	window.requestAnimationFrame(timer_step);
 };
 
+function msToTime(duration) {
+    var milliseconds = parseInt((duration%1000)/100)
+        , seconds = parseInt((duration/1000)%60)
+        , minutes = parseInt((duration/(1000*60))%60)
+        , hours = parseInt((duration/(1000*60*60))%24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds; // + "." + milliseconds;
+}
+
+function timer_step() {
+	var curr_timer = (new Date()).getTime();
+	var millis = (curr_timer - start_timer);
+	if (millis > timeout) {
+		clearInterval(checkping);
+		var no_param_overlay = document.getElementById('no_param_overlay');
+		if (no_param_overlay) {
+			no_param_overlay.setAttribute('class','timedout');
+		}
+	} else {
+		var timer = document.getElementById('timer');
+		if (timer) {
+			timer.innerHTML = msToTime(timeout - millis);
+		}
+		window.requestAnimationFrame(timer_step);
+	}
+}
 window.onresize = function(){
 	calculate_buttons_position( true );
 }
