@@ -15,7 +15,7 @@
 
 @font-face {
 	font-family: 'BebasNeue';
-	src: url('BebasNeue Regular.ttf') format('truetype');
+	src: url('BebasNeue Bold.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -97,10 +97,10 @@ canvas, img {
 
 #timer {
 	background-color: transparent;
-	color: black;
+	color: #6d3636;
 	position: absolute;
 	top: 0px;
-	left:0px;
+	left: 0px;
 	font-family: 'BebasNeue';
 	z-index: 5;
 	text-align: right;

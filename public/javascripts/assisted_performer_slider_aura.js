@@ -308,10 +308,10 @@ function calculate_buttons_position( rebuild ) {
 		console.log('placing timer');
 		var width_of_button = parseInt(usedwidth*0.265,10);
 		timer.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.3 - width_of_button,10) + 'px';
-		timer.style.top = parseInt(usedheight*0.05,10) + 'px';
+		timer.style.top = parseInt(usedheight*0.03,10) + 'px';
 		timer.style.width = width_of_button + 'px';
 		timer.style.height = parseInt(usedheight*0.067,10) + 'px';
-		timer.style.fontSize = parseInt(usedheight*0.045,10) + 'px';
+		timer.style.fontSize = parseInt(usedheight*0.1,10) + 'px';
 	}
 	
 	var timer = document.getElementById('timer');
@@ -347,7 +347,7 @@ function msToTime(duration) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    return hours + ":" + minutes + ":" + seconds; // + "." + milliseconds;
+    return minutes + ":" + seconds;
 }
 
 function timer_step() {
@@ -359,6 +359,7 @@ function timer_step() {
 		if (no_param_overlay) {
 			no_param_overlay.setAttribute('class','timedout');
 		}
+		ticking = false;
 	} else {
 		var timer = document.getElementById('timer');
 		if (timer) {
@@ -516,6 +517,7 @@ var this_websockets = 'ws://'+location.host.split(':')[0]+':80';
 var this_ws = null;
 var this_ws_open = false;
 var this_timeout = false;
+var ticking = false;
 
 function connect_websockets() {
 
@@ -555,17 +557,24 @@ function connect_websockets() {
 				if (isEmpty(server_params)) {
 					// display no param overlay
 					var no_param_overlay = document.getElementById('no_param_overlay');
-					if (no_param_overlay) no_param_overlay.setAttribute('class','');
+					if (no_param_overlay) no_param_overlay.setAttribute('class','full');
 				} else {
-					// hide no param overlay
-					var no_param_overlay = document.getElementById('no_param_overlay');
-					if (no_param_overlay) no_param_overlay.setAttribute('class','hidden');
 					// update color box
 					for (key in server_params) { // it's an iterator but we are only expecting one param to be passed
 						var c_hex = server_params[key]['friendly_name'].substr(2);
 						//console.log(c_hex);
 						color.style.backgroundColor = '#'+c_hex;
+						
+						if (ticking == false) 
+						{
+							ticking = true;
+							start_timer = (new Date()).getTime();
+						}
 					}
+					
+					// hide no param overlay
+					var no_param_overlay = document.getElementById('no_param_overlay');
+					if (no_param_overlay) no_param_overlay.setAttribute('class','hidden');
 				}
 			}
 			
