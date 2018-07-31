@@ -1143,7 +1143,7 @@ let words_array = [
 "there is, in cyberspace"
 ];
 
-let this_websockets = 'ws://'+location.host.split(':')[0]+':3001/';
+let this_websockets = 'ws://'+location.host.split(':')[0]+':80/';
 let this_ws = null;
 let this_timeout = false;
 

@@ -25,7 +25,7 @@ var usedwidth = 0;
 	
 function calculate_buttons_position( rebuild ) {
 	var ratio = window.innerWidth / window.innerHeight; // 1080 x 1920
-	var gfxratio = 640/1136;//375/627;//1080/1920;
+	var gfxratio = 1242/2208;//375/627;//1080/1920;
 
 	if (ratio > gfxratio) {
 		//console.log('height touching the sides');
@@ -58,8 +58,8 @@ function calculate_buttons_position( rebuild ) {
 
 	function update_value(px, py) {
 		// check bounds
-		var pad_top = usedheight*.14;
-		var pad_bot = usedheight*.80;
+		var pad_top = usedheight*.23;
+		var pad_bot = usedheight*.698;
 		if (py > pad_bot) py = pad_bot;
 		if (py < pad_top) py = pad_top;
 		//console.log('pad bounds: ' + usedwidth + ' ' + usedheight + ' ' + pad_top + ' ' + pad_bot);
@@ -107,11 +107,11 @@ function calculate_buttons_position( rebuild ) {
 	function place_inp() {
 		console.log('placing inp');
 		if (inp_dragging) return;
-		inp_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.4,10);
+		inp_start_x = parseInt(window.innerWidth*0.5 - usedwidth*0.43,10);
 		inp.style.left = inp_start_x + 'px';
 		inp_start_y = parseInt(usedheight*0.4,10);
 		inp.style.top = inp_start_y + 'px';
-		inp_half_height = parseInt(usedwidth*0.15,10);
+		inp_half_height = parseInt(usedwidth*0.167,10);
 		inp.style.width = inp_half_height*2 + 'px';
 		inp.style.height = inp_half_height*2 + 'px';
 	}
@@ -170,11 +170,11 @@ function calculate_buttons_position( rebuild ) {
 
 	function place_place() {
 		console.log('placing place button');
-		var width_of_button = parseInt(usedwidth*0.265,10);
-		place.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.325 - width_of_button,10) + 'px';
-		place.style.top = parseInt(usedheight*0.225,10) + 'px';
+		var width_of_button = parseInt(usedwidth*0.686,10);
+		place.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.6465 - width_of_button,10) + 'px';
+		place.style.top = parseInt(usedheight*0.1363,10) + 'px';
 		place.style.width = width_of_button + 'px';
-		place.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
+		place.style.height = parseInt((width_of_button * 597) / 712, 10) + 'px';
 	}
 	
 	var place = document.getElementById('place');
@@ -210,11 +210,11 @@ function calculate_buttons_position( rebuild ) {
 
 	function place_skip() {
 		console.log('placing place button');
-		var width_of_button = parseInt(usedwidth*0.265,10);
-		skip.style.left = parseInt(window.innerWidth*0.5  + usedwidth*0.325 - width_of_button,10) + 'px';
-		skip.style.top = parseInt(usedheight*0.588,10) + 'px';
+		var width_of_button = parseInt(usedwidth*0.686,10);
+		skip.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.6465 - width_of_button,10) + 'px';
+		skip.style.top = parseInt(usedheight*0.475,10) + 'px';
 		skip.style.width = width_of_button + 'px';
-		skip.style.height = parseInt((width_of_button * 206) / 342, 10) + 'px';
+		skip.style.height = parseInt((width_of_button * 597) / 712, 10) + 'px';
 	}
 	
 	var skip = document.getElementById('skip');
@@ -250,11 +250,11 @@ function calculate_buttons_position( rebuild ) {
 	
 	function place_color() {
 		console.log('placing color');
-		var width_of_button = parseInt(usedwidth*0.41,10);
-		color.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.5  - width_of_button,10) + 'px';
+		var width_of_button = parseInt(usedwidth*0.895,10);
+		color.style.left = parseInt(window.innerWidth*0.5 - usedwidth*0.4525,10) + 'px';
 		color.style.top = parseInt(usedheight*0.856,10) + 'px';
 		color.style.width = width_of_button + 'px';
-		color.style.height = parseInt(usedheight*0.067,10) + 'px';
+		color.style.height = parseInt(usedheight*0.026,10) + 'px';
 		for (key in server_params) { // there is only one
 			console.log(server_params[key]['friendly_name']);
 			var c_hex = server_params[key]['friendly_name'].substr(2);
@@ -308,7 +308,7 @@ function calculate_buttons_position( rebuild ) {
 		console.log('placing timer');
 		var width_of_button = parseInt(usedwidth*0.265,10);
 		timer.style.left = parseInt(window.innerWidth*0.5 + usedwidth*0.3 - width_of_button,10) + 'px';
-		timer.style.top = parseInt(usedheight*0.08,10) + 'px';
+		timer.style.top = parseInt(usedheight*0.05,10) + 'px';
 		timer.style.width = width_of_button + 'px';
 		timer.style.height = parseInt(usedheight*0.067,10) + 'px';
 		timer.style.fontSize = parseInt(usedheight*0.045,10) + 'px';
@@ -512,7 +512,7 @@ function parseResponseHeaders(headerStr) {
   return headers;
 }
 
-var this_websockets = 'ws://'+location.host.split(':')[0]+':3001';
+var this_websockets = 'ws://'+location.host.split(':')[0]+':80';
 var this_ws = null;
 var this_ws_open = false;
 var this_timeout = false;

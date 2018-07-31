@@ -46,7 +46,7 @@ html, body {
 	background-position: center top;
 	text-align: center;
 	z-index: 2;
-	background-image: url('../images/Bkg_withTimer.png')
+	background-image: url('../images/bg.png')
 }
 
 .btn {
@@ -193,23 +193,23 @@ input[type=range]:-moz-focusring{
 }
 
 #inp {
-	background-image: url('../images/fader_349_aura.png');
+	background-image: url('../images/slider_408.png');
 }
 
 .btn_place_on {
-	background-image: url('../images/btn_placeObj_on.png');
+	background-image: url('../images/obj_place_on.png');
 }
 
 .btn_place_off {
-	background-image: url('../images/btn_placeObj.png');
+	background-image: url('../images/obj_place_off.png');
 }
 
 .btn_skip_on {
-	background-image: url('../images/btn_skipObj_on.png');
+	background-image: url('../images/obj_next_on.png');
 }
 
 .btn_skip_off {
-	background-image: url('../images/btn_skipObj.png');
+	background-image: url('../images/obj_next_off.png');
 }
 
 #no_param_overlay {
@@ -223,8 +223,8 @@ input[type=range]:-moz-focusring{
 	background-repeat: no-repeat;
 	background-size: contain;
 	background-position: center top;
+	background-color: transparent;
 	z-index: 50;
-	background-image: url('../images/Server_Full.png');
 }
 
 .full {

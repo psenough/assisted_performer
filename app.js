@@ -23,7 +23,7 @@ var util = require('util')
 // init express
 //
 
-var port = 3001;
+var port = 80;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
 app.listen(port);
