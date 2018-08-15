@@ -55,8 +55,6 @@ var logdir = '';
 
 // serve controller page
 app.get('/', catchall);
-app.get('/controller', catchall);
-app.get('/slider', catchall);
 function catchall(req, res, next) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 	
@@ -111,22 +109,15 @@ function catchall(req, res, next) {
 		}
 	}
 
-	res.render('assisted_performer_slider_aura', {title: 'Festival Aura'});
+	res.render('vote', {title: 'Evoke 2018'});
 	res.end();
 }
 
 // serve canvas page
-app.get('/canvas', canvas);
+app.get('/screen', canvas);
 function canvas(req, res, next) {
-	res.render('canvas', {title: 'Assisted Performer Canvas'});
+	res.render('screen', {title: 'Assisted Performer Canvas'});
 	// not adding our canvas to the connections list
-}
-
-// serve master page
-app.get('/master', master);
-function master(req, res) {
-	res.render('master', {title: 'Assisted Performer Master'});
-	// not adding master to the connections list
 }
 
 // serve favicon
@@ -149,46 +140,6 @@ app.get('/favicon.ico', function(req, res){
 		}
 	});
 	res.attachment(fileName);
-});
-
-// receive control values to affect parameter
-app.post('/control', function(req, res) {
-	// get timestamp
-	var d = new Date();
-	var n = d.getTime();
-
-	var thisparam = req.body.param;
-	var thistype = req.body.type;
-	
-	if (thisparam in params) {
-		//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
-		switch(thistype) {
-			case 'add':
-				params[thisparam]['value'] += params[thisparam]['step'];
-				if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
-			break;
-			case 'minus':
-				params[thisparam]['value'] -= params[thisparam]['step'];
-				if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
-			break;
-			default:
-				console.log('weird type received:'+thistype);
-			break;
-		}
-		
-		// update param on canvas via websockets
-		sendWebSocketUpdateToCanvas(thisparam);
-	}
-
-	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	for (var i=0; i<connections.length; i++) {
-		if (ip == connections[i]['ip']) {
-			connections[i]['lasttime'] = n;
-			break;
-		}
-	}
-
-	res.send('rcvd');
 });
 
 app.post('/ping', function(req, res) {
@@ -246,14 +197,11 @@ function onError(error) {
   }
 }
 
-//app.use(catchall);
-
 app.use(function (req, res, next) {
   //console.log('middleware');
   req.testing = 'testing';
   return next();
 });
- 
  
 app.on('error', onError);
 
@@ -274,12 +222,10 @@ function removeTakenParamFromClosingIP(thisip) {
 		//console.log('connection: ' + connections[c]['ip'] + ' ' + thisip);
 		if (connections[c]['ip'] == thisip) {
 			delete connections[c]['params'];
-			//delete connections[c];
 			idx = connections.indexOf(c);
 			break;
 		}
 	}
-	//connections.splice(idx,1);
 }
 
 function getUntakenParam() {
@@ -291,7 +237,6 @@ function getUntakenParam() {
 		// skip tsps controllers
 		if (p.substring(0,5) == 'tsps_') continue;
 		
-		//loop1:
 		for (c in connections) {
 			if ('params' in connections[c]) {
 				//console.log(connections[c]['params']);
@@ -299,7 +244,6 @@ function getUntakenParam() {
 					//console.log('prata: ' + connections[c]['params'][p2] + ' ' + p);
 					if (connections[c]['params'][p2] == p) {
 						istaken = true;
-						//break loop1;
 					}
 				}
 			}
@@ -373,6 +317,7 @@ function saveLog(filename, message) {
 var active_conn = [];
 var id = 0;
 var params = {};
+var votes = [];
 
 function addToParams(theseparams) {
 	for (p in theseparams) {
@@ -399,7 +344,7 @@ app.ws('/', function(ws, req) {
 		var lmsg = data;
 		var type = null;
 		
-		//logme('received data: ' + data);
+		logme('received data: ' + data);
 		
 		// crashes trying to parse, ignore
 		var parsed;
@@ -431,12 +376,43 @@ app.ws('/', function(ws, req) {
 					logme('received canvas: ' + data);
 					// received message with new parameters, reassigning all existing controller connections
 					reassignParameters();
+					
+					if ('votes' in parsed) {
+						logme('processing votes');
+						for (let i = 0; i < parsed['votes'].length; i++) {
+							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
+								
+								// cant directly replace entire object because the vote results are stored in there 
+								// if it exists, update active state
+								// if it doesnt exist, add it
+								let ispresent = false;
+								for (let j=0; j<votes.length; j++) {
+									votes[j]['active'] = false;
+									//console.log('exists?');
+									//console.log(votes[j]['uid']);
+									// update votes object if it's a new vote
+									if (('uid' in votes[j]) && (votes[j]['uid'] == parsed['votes'][i]['uid'])) {
+										votes[j]['active'] = parsed['votes'][i]['active'];
+										ispresent = true;
+									}
+								}
+								if (!ispresent) {
+									parsed['votes'][i]['results'] = {};
+									votes.push(parsed['votes'][i]);
+								}
+								
+							} else {
+								logme('vote object badly formatted:');
+								logme(parsed['votes'][i]);
+							}
+						}
+					}
 				break;
 				case 'control':
 					type = 'control';
 					if ('parameters' in parsed) {
 						if (('param' in parsed['parameters']) && ('type' in parsed['parameters'])) {
-							logme('received control: ' + data);
+							logme('received: ' + data);
 							var thisparam = parsed['parameters']['param'];
 							var thistype = parsed['parameters']['type'];
 							if (thisparam in params) {
@@ -462,6 +438,33 @@ app.ws('/', function(ws, req) {
 							}
 						}
 					}
+					/*if ('votes' in parsed) {
+						logme('processing votes');
+						for (var i = 0; i < parsed['votes'].length; i++) {
+							if (('uid' in parsed['votes'][i]) && ('type' in parsed['votes'][i]) && ('options' in parsed['votes'][i])) {
+								
+								// cant directly replace entire object because the vote results are stored in there 
+								// if it exists, update active state
+								// if it doesnt exist, add it
+								var ispresent = false;
+								for (var j=0; j<votes.length; j++) {
+									// update votes object if it's a new vote
+									if (('uid' in votes[j]) && (votes[j]['uid'] != parsed['votes'][i]['uid'])) {
+										votes[j]['active'] = parsed['votes'][i]['active'];
+										
+									}
+								}
+								if (!ispresent) {
+									parsed['votes'][i]['results'] = {};
+									votes.push(parsed['votes'][i]);
+								}
+								
+							} else {
+								logme('vote object badly formatted:');
+								logme(parsed['votes'][i]);
+							}
+						}
+					}*/
 					if ('ping' in parsed) {
 						// send back a pong in similar way to POST pong
 						var thisid = getID(client.id);
@@ -480,25 +483,40 @@ app.ws('/', function(ws, req) {
 							}
 							
 							//active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
-							ws.send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
+							ws.send(JSON.stringify({'pong': 'pong', 'parameters': prr, 'votes': votes}));
 
 						}
 					}
 				break;
-				case 'place_obj':
-				case 'skip_obj':
-					// just fwd to canvas (already has all info they need)
-					//console.log('place');
-					type = 'control';
-					for (var i = 0; i < active_conn.length; i++) {
-						if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
-							try {
-								active_conn[i]['socket'].send(data);
-							} catch(exc) {
-								console.log(exc);
-							}
+				case 'vote':
+					// 'vote': { 'uid': 'tester', 'vote': 'option 1' }
+					
+					//console.log('votes:');
+					//console.log(votes);
+					//console.log(votes[0]);
+					//console.log(parsed);
+					for (let j=0; j<votes.length; j++) {
+						//console.log(j);
+						// update votes object if it's a new vote
+						if (votes[j]['uid'] == parsed['votes']['uid']) {
+							
+							switch (votes[j]['type']) {
+								case 'single_vote_per_ip':
+									//TODO: test this
+									logme('storing vote on '+ parsed['votes']['vote'] +' from ' + client.ra);
+									if (client.ra != undefined) votes[j]['results'][client.ra] = parsed['votes']['vote'];
+								break;
+								case 'mash_vote':
+									//TODO: test this
+									votes[j]['results'][parsed['votes']['vote']] += 1;
+								break;
+								default:
+									console.log('unknown type of votes: ' + votes[j]['type']);
+								break;
+							}							
 						}
 					}
+
 				break;
 				default:
 					logme('unknown assisted perfomer');
@@ -649,15 +667,39 @@ setInterval(function() {
 	let update = {};
 	for (thisparam in params) {
 		//console.log(thisparam);
-		if (!send_value_and_active) {
-			update[thisparam] = params[thisparam].value;
-		} else {
-			update[thisparam] = {
-				"value": params[thisparam].value,
-				"active": isParamTaken(thisparam)
-			};
+		update[thisparam] = params[thisparam].value;
+	}
+	//console.log(update);
+	let vote_results = [];
+	for (let i=0; i<votes.length; i++) {
+		if (votes[i]['active']) {
+			switch (votes[i]['type']) {
+				case 'single_vote_per_ip':
+					let obj = {};
+					for (cl in votes[i]['results']) {
+						if (votes[i]['results'][cl] in obj) obj[votes[i]['results'][cl]]++;
+						 else obj[votes[i]['results'][cl]] = 1;
+					}
+					vote_results.push({'uid': votes[i]['uid'], results: obj}); 
+				break;
+				case 'mash_vote':
+					let obj2 = votes[i]['results'];					
+					// reset counter
+					if (votes[i]['clear_on_send']) {
+						for (cl in votes[i]['results']) {
+							votes[j]['results'][cl] = 0;
+						}
+					}
+					vote_results.push({'uid': votes[i]['uid'], results: obj2}); 
+				break;
+				default:
+					console.log('unknown type of votes: ' + votes[i]['type']);
+				break;
+			}						
 		}
 	}
+	update['vote_results'] = vote_results;
+	//console.log(update);
 	for (var i = 0; i < active_conn.length; i++) {
 		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
 			try {
