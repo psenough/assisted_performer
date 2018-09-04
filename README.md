@@ -94,15 +94,16 @@ The system can be configured to send logs to [winston](http://thisdavej.com/usin
 
 # Project Examples
 
-* [PLUNC Festival 2017 - Underwater Assisted Performer](http://artica.cc/blog/2016/11/21/plunc.html)
+* [PLUNC Festival 2017 - Underwater Assisted Performer](http://artica.cc/blog/2016/11/21/plunc.html) [plunc branch](https://github.com/psenough/assisted_performer/tree/plunc)
 
-* [Demobit 2017 - There is, in cyberspace](https://www.youtube.com/watch?v=KSuc_ZdtgLA)
+* [Demobit 2017 - There is, in cyberspace](https://www.youtube.com/watch?v=KSuc_ZdtgLA) [demobit branch](https://github.com/psenough/assisted_performer/tree/demobit) [alt_poem branch](https://github.com/psenough/assisted_performer/tree/alt_poem)
 
-* [Evoke 2017 - Who wants to be a demoscener?](http://www.pouet.net/prod.php?which=71569)
+* [Evoke 2017 - Who wants to be a demoscener?](http://www.pouet.net/prod.php?which=71569) [who_wants_to_be_a_demoscener branch](https://github.com/psenough/assisted_performer/tree/who_wants_to_be_a_demoscener)
 
-* [Aura Festival 2018 - Procedural Forest](https://www.facebook.com/artica.cc/videos/316982048867870/)
+* [Aura Festival 2018 - Procedural Forest](https://www.facebook.com/artica.cc/videos/316982048867870/) [festival_aura branch](https://github.com/psenough/assisted_performer/tree/festival_aura)
 
-* [Evoke 2018 - Interactive fun with accents!](http://www.pouet.net/prod.php?which=77814)
+* [Evoke 2018 - Interactive fun with accents!](http://www.pouet.net/prod.php?which=77814) [interactive_standup branch](https://github.com/psenough/assisted_performer/tree/interactive_stand_up)
 
 # Tutorial Videos
 
+Some day, who knows? :)
