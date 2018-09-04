@@ -1,6 +1,8 @@
 # Assisted Performer 
 
-Assisted Performer is a node.js server that serves small webpages and acts as a proxy for parameter controllers. Bridging MIDI, OSC, websockets, HTTP requests, etc between applications.
+Assisted Performer is a node.js server project that serves small webpages and acts as a proxy for parameter controllers. Bridging MIDI, OSC, websockets, HTTP requests, etc between applications.
+
+Check the branches of this repository for different example projects that have been done using the same core functionality that is explained below.
 
 # Schema
 
@@ -92,11 +94,15 @@ The system can be configured to send logs to [winston](http://thisdavej.com/usin
 
 # Project Examples
 
-* [PLUNC Festival](http://artica.cc/blog/2016/11/21/plunc.html)
+* [PLUNC Festival 2017 - Underwater Assisted Performer](http://artica.cc/blog/2016/11/21/plunc.html)
 
-* [Demobit 2017 Performance](https://www.youtube.com/watch?v=KSuc_ZdtgLA)
+* [Demobit 2017 - There is, in cyberspace](https://www.youtube.com/watch?v=KSuc_ZdtgLA)
 
 * [Evoke 2017 - Who wants to be a demoscener?](http://www.pouet.net/prod.php?which=71569)
+
+* [Aura Festival 2018 - Procedural Forest](https://www.facebook.com/artica.cc/videos/316982048867870/)
+
+* [Evoke 2018 - Interactive fun with accents!](http://www.pouet.net/prod.php?which=77814)
 
 # Tutorial Videos
 
