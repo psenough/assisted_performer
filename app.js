@@ -111,7 +111,7 @@ function catchall(req, res, next) {
 		}
 	}
 
-	res.render('assisted_performer_slider_aura', {title: 'Festival Aura'});
+	res.render('assisted_performer_slider_love', {title: 'What is love?'});
 	res.end();
 }
 
