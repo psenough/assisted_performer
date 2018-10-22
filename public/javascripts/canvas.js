@@ -265,9 +265,9 @@ let drawCanvas = function() {
 		'EFFECT_METAGENHAIKU': {
 			'on': false,
 			'params': {
-				'wordlist1': { 'friendly_name': 'Wordlist 1', 'possible': ['word1','word2','word3','word4'], 'default_value': 'word1', 'value': 'word1' },
-				'wordlist2': { 'friendly_name': 'Wordlist 2', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
-				'wordlist3': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }
+				'wordlist1': { 'friendly_name': 'Wordlist 1', 'possible': ['word1','word2','word3','word4'], 'default_value': 'word1', 'value': 'word1' }
+				/*'wordlist2': { 'friendly_name': 'Wordlist 2', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
+				'wordlist3': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }*/
 			},
 			'call': function() {
 
@@ -278,9 +278,9 @@ let drawCanvas = function() {
 		}
 	}
 		
-	function getVoteStruct(id) {
+	/*function getVoteStruct(id) {
 		return { 'uid': 'question'+id, 'title': questions[id]['q'], 'type': 'single_vote_per_ip', 'options': [questions[id]['a'], questions[id]['b'], questions[id]['c'], questions[id]['d']], 'active': true };
-	}
+	}*/
 	
 	function getDiv(id) {
 		let words = document.getElementById(id); 
@@ -418,16 +418,16 @@ function connectWebSockets() {
 	this_ws.onmessage = function(evt) {
 		//console.log(evt.data);
 		let parsed = JSON.parse(evt.data);
-		/*for (instance in parsed) {
+		for (instance in parsed) {
 			if (instance in params) {
 				params[instance]['value'] = parsed[instance];
 			}
-		}*/
-		if (parsed['vote_results'] != undefined) {
-			vote_results = parsed['vote_results'];
 		}
+		/*if (parsed['vote_results'] != undefined) {
+			vote_results = parsed['vote_results'];
+		}*/
 		
-		//console.log(parsed);
+		console.log(parsed);
 	};
 
 	this_ws.onclose = function() {

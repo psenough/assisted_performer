@@ -111,7 +111,7 @@ function catchall(req, res, next) {
 		}
 	}
 
-	res.render('assisted_performer_slider_love', {title: 'What is love?'});
+	res.render('select', {title: 'Haiku'});
 	res.end();
 }
 
@@ -435,30 +435,14 @@ app.ws('/', function(ws, req) {
 				case 'control':
 					type = 'control';
 					if ('parameters' in parsed) {
-						if (('param' in parsed['parameters']) && ('type' in parsed['parameters'])) {
+						if ('param' in parsed['parameters']) {
 							logme('received control: ' + data);
 							var thisparam = parsed['parameters']['param'];
-							var thistype = parsed['parameters']['type'];
 							if (thisparam in params) {
-								//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
-								switch(thistype) {
-									case 'add':
-										params[thisparam]['value'] += params[thisparam]['step'];
-										if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
-									break;
-									case 'minus':
-										params[thisparam]['value'] -= params[thisparam]['step'];
-										if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
-									break;
-									default:
-										var value = parseFloat(thistype);
-										if ((value >= params[thisparam]['min']) && (value <= params[thisparam]['max'])) params[thisparam]['value'] = value;
-										//console.log('weird type received, assuming it\'s a direct value: '+thistype + ' ' + value);
-									break;
+								console.log(thisparam);
+								if ('value' in parsed['parameters']) {
+									params[thisparam]['value'] = parsed['parameters']['value'];
 								}
-								
-								// update param on canvas via websockets, not needed here, is being streamed constantly
-								//sendWebSocketUpdateToCanvas(thisparam);
 							}
 						}
 					}
@@ -482,21 +466,6 @@ app.ws('/', function(ws, req) {
 							//active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
 							ws.send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
 
-						}
-					}
-				break;
-				case 'place_obj':
-				case 'skip_obj':
-					// just fwd to canvas (already has all info they need)
-					//console.log('place');
-					type = 'control';
-					for (var i = 0; i < active_conn.length; i++) {
-						if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
-							try {
-								active_conn[i]['socket'].send(data);
-							} catch(exc) {
-								console.log(exc);
-							}
 						}
 					}
 				break;
