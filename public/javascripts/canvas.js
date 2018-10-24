@@ -24,7 +24,7 @@ let questions = [
 ]
 
 let cl = [
-['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','EFFECT_METAGENHAIKU']
+	['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','Spring1']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
@@ -261,13 +261,13 @@ let drawCanvas = function() {
 						ctx.restore();
 						
 					}
-		},
+		}/*,
 		'EFFECT_METAGENHAIKU': {
 			'on': false,
 			'params': {
 				'wordlist1': { 'friendly_name': 'Wordlist 1', 'possible': ['word1','word2','word3','word4'], 'default_value': 'word1', 'value': 'word1' }
-				/*'wordlist2': { 'friendly_name': 'Wordlist 2', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
-				'wordlist3': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }*/
+				'wordlist2': { 'friendly_name': 'Wordlist 2', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
+				'wordlist3': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }
 			},
 			'call': function() {
 
@@ -275,12 +275,39 @@ let drawCanvas = function() {
 						let words = getDiv('words');
 						words.innerHTML = wordlist1;
 					}
-		}
+		}*/
 	}
-		
-	/*function getVoteStruct(id) {
-		return { 'uid': 'question'+id, 'title': questions[id]['q'], 'type': 'single_vote_per_ip', 'options': [questions[id]['a'], questions[id]['b'], questions[id]['c'], questions[id]['d']], 'active': true };
-	}*/
+	
+	for (haiku in metagenhaiku['genhaikus']) {
+		console.log(haiku);
+		var thisparams = {};
+		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
+			console.log(wordlist);
+			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist] };
+		}
+		var effect = {'on':false, 'params':thisparams, 'call': function() { 
+			console.log('london calling');
+			var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
+			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
+			var output = '';
+			for (lines in haikuforms) {
+				for (words in haikuforms[lines]) {
+					var word_ref = haikuforms[lines][words][1];
+					//console.log(word_ref);
+					var word = '';
+					if (word_ref in params) {
+						if ('value' in params[word_ref]['value']) word = params[word_ref]['value']['value'];
+						 else word = word_ref;
+					}
+					//console.log(word);
+					output += word + ' ';
+				}
+				output += '<br>';
+			}
+			console.log(output);
+		} };
+		this.effects[haiku] = effect;
+	}
 	
 	function getDiv(id) {
 		let words = document.getElementById(id); 
@@ -344,6 +371,7 @@ let drawCanvas = function() {
 	}
 }
 
+let selected_haiku = 'Spring1';
 let audio = undefined;
 
 function playAudio(source, loop) {
@@ -427,7 +455,7 @@ function connectWebSockets() {
 			vote_results = parsed['vote_results'];
 		}*/
 		
-		console.log(parsed);
+		//console.log(parsed);
 	};
 
 	this_ws.onclose = function() {
