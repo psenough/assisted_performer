@@ -13,18 +13,13 @@ let active_part = 0;
 
 let address = 'http://';
 
-let questions = [
-{
-	'q': '',
-	'a': 'Standard English',
-	'b': 'Holy Grail French',
-	'c': 'Russian Platinum Standard',
-	'd': 'German Scooter'
-}
-]
+let backgrounds = {};
+let spring_ddg = {};
+let window_frame;
+let speedbump = 0.5;
 
 let cl = [
-	['UPDATE_TIMERS','EFFECT_BACKGROUND','EFFECT_BLUE_WHITE_SEGMENTS','Spring1']
+	['UPDATE_TIMERS','Spring1']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
@@ -278,33 +273,134 @@ let drawCanvas = function() {
 		}*/
 	}
 	
+	for (let v=0; v<14; v++) {
+		spring_ddg[v] = document.getElementById('spring_ddg_'+v);
+	}
+	
 	for (haiku in metagenhaiku['genhaikus']) {
 		console.log(haiku);
+		
+		// load backgrounds
+		backgrounds[haiku] = document.getElementById(haiku);
+		window_frame = document.getElementById('window_frame');
+		
+		// load all wordlists
 		var thisparams = {};
 		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
 			console.log(wordlist);
 			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist] };
 		}
+		
+		// add haiku form to effects
 		var effect = {'on':false, 'params':thisparams, 'call': function() { 
-			console.log('london calling');
+			//console.log('london calling');
+			
+			let fw = window_frame.width;
+			let fh = window_frame.height;
+			
+			// window frame aspect ratio
+			let imageAspectRatio = fw / fh;
+			let canvasAspectRatio = w / h;
+			let renderableHeight, renderableWidth, xStart, yStart;
+			if(imageAspectRatio < canvasAspectRatio) {
+				renderableHeight = h;
+				renderableWidth = fw * (renderableHeight / fh);
+				xStart = (w - renderableWidth) / 2;
+				yStart = 0;
+			} else if(imageAspectRatio > canvasAspectRatio) {
+				renderableWidth = w;
+				renderableHeight = fh * (renderableWidth / fw);
+				xStart = 0;
+				yStart = (h - renderableHeight) / 2;
+			} else {
+				renderableHeight = h;
+				renderableWidth = w;
+				xStart = 0;
+				yStart = 0;
+			}
+			
+			let pad = w*0.05;
+						
+			// background image
+			//ctx.drawImage(backgrounds[selected_haiku], 500 + Math.sin(timer*0.0001)*250, 200 + Math.cos(timer*0.0002)*100, renderableWidth*2.5, renderableHeight*2.5, xStart, yStart, renderableWidth, renderableHeight);
+			
+			if (speedbump > 0.0) speedbump = speedbump * 0.999;
+			let index = (parseInt(timer*0.0001+speedbump*500, 10) % 14);
+			
+			ctx.drawImage(spring_ddg[index], 0, 0, spring_ddg[0].width, spring_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			
+			//TODO: test rotation of same backgrounds with different ddg (accelerates when a word changes)
+			
+			//TODO: test particles
+			
+			// window frame
+			ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
+
+			
+			var cardx = w-xStart*0.9*2;
+			var cardy = h*0.65;
+			var cardw = xStart*0.9*2;
+			var cardh = h*0.25;
+			var cardpad = w*0.02;
+			
+			// text frame shadow
+			//ctx.fillStyle = 'rgba(15,15,15,0.8)';
+			//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
+			
+			ctx.fillStyle = 'rgba(255,255,255,1.0)';
+			roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
+			
+			//ctx.fillRect(w-xStart*0.9*2, h*0.8, xStart*0.9*2, h*0.2);
+			ctx.fillStyle = 'rgba(250,250,250,1.0)';
+			roundRect(ctx, cardx+cardpad, cardy+cardpad, cardw-cardpad*2, cardh-cardpad*2, 30, true, false);
+
+			// bevel
+			ctx.save();
+			ctx.clip();
+			ctx.shadowColor = '#000';
+			for(var i=0;i<3;i++){
+				for(var j=0;j<3;j++){
+					ctx.shadowBlur=4+i;
+					ctx.lineWidth=0.50;
+					ctx.stroke();
+				}
+			}
+			ctx.restore();
+			
+			// text
 			var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
+			var linecounter = 0;
 			for (lines in haikuforms) {
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
 					//console.log(word_ref);
 					var word = '';
 					if (word_ref in params) {
-						if ('value' in params[word_ref]['value']) word = params[word_ref]['value']['value'];
-						 else word = word_ref;
+						if ('value' in params[word_ref]) {
+							if ('value' in params[word_ref]['value']) word = params[word_ref]['value']['value'];
+								else word = word_ref;
+						}
 					}
 					//console.log(word);
 					output += word + ' ';
 				}
-				output += '<br>';
+
+				ctx.font="28px Verdana";
+				ctx.textAlign="center"; 
+				// Create gradient
+				//var gradient=ctx.createLinearGradient(0,0,0,w);
+				//gradient.addColorStop("0","magenta");
+				//gradient.addColorStop("0.5","blue");
+				//gradient.addColorStop("1.0","red");
+				// Fill with gradient
+				ctx.fillStyle='rgba(0,0,0,1.0)';
+				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.3 + (linecounter++)*w*0.03);
+				output = ''; //+= '<br>';
 			}
-			console.log(output);
+			
+			//console.log(output);
 		} };
 		this.effects[haiku] = effect;
 	}
@@ -572,6 +668,12 @@ console.log(keyCode);
 		}
 		break;
 		
+		case 66: // b
+		{
+			speedbump = 0.5;
+		}
+		break;
+		
 		/*case 72: // h
 			//TODO: hide text with ip adress
 			let ip = document.getElementById("ip"); 
@@ -669,3 +771,90 @@ function listActiveOn() {
 function isEmpty(obj) {
 	return Object.keys(obj).length === 0 && obj.constructor === Object
 }
+
+/**
+ * Draws a rounded rectangle using the current state of the canvas.
+ * If you omit the last three params, it will draw a rectangle
+ * outline with a 5 pixel border radius
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate
+ * @param {Number} width The width of the rectangle
+ * @param {Number} height The height of the rectangle
+ * @param {Number} [radius = 5] The corner radius; It can also be an object 
+ *                 to specify different radii for corners
+ * @param {Number} [radius.tl = 0] Top left
+ * @param {Number} [radius.tr = 0] Top right
+ * @param {Number} [radius.br = 0] Bottom right
+ * @param {Number} [radius.bl = 0] Bottom left
+ * @param {Boolean} [fill = false] Whether to fill the rectangle.
+ * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+ */
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == 'undefined') {
+    stroke = true;
+  }
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.stroke();
+  }
+
+}
+
+
+var fitImageOn = function(ctx, imageObj) {
+	var imageAspectRatio = imageObj.width / imageObj.height;
+	var canvasAspectRatio = w / h;
+	var renderableHeight, renderableWidth, xStart, yStart;
+
+	// If image's aspect ratio is less than canvas's we fit on height
+	// and place the image centrally along width
+	if(imageAspectRatio < canvasAspectRatio) {
+		renderableHeight = h;
+		renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
+		xStart = (w - renderableWidth) / 2;
+		yStart = 0;
+	}
+
+	// If image's aspect ratio is greater than canvas's we fit on width
+	// and place the image centrally along height
+	else if(imageAspectRatio > canvasAspectRatio) {
+		renderableWidth = w;
+		renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
+		xStart = 0;
+		yStart = (h - renderableHeight) / 2;
+	}
+
+	// Happy path - keep aspect ratio
+	else {
+		renderableHeight = h;
+		renderableWidth = w;
+		xStart = 0;
+		yStart = 0;
+	}
+	ctx.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
+};
