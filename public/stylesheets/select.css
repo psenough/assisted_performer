@@ -32,7 +32,7 @@ html, body {
 	width: 0px;
 	height: 0px;
 	/*background-image: url('/images/pattern-optimized.png');*/
-	background-color: #dedcce;
+	background-color: #000;
 	background-position: center top;
 	text-align: center;
 	z-index: 2;
@@ -86,12 +86,12 @@ canvas, img {
 }
 
 .btn_on {
-	background-color: #00BFD6;
+	background-color: #fff;
 }
 
 .btn_off {
-	color: #dedcce;
-	background-color: #333333;
+	color: #fff;
+	background-color: #333;
 }
 
 .value {

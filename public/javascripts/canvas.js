@@ -15,8 +15,9 @@ let address = 'http://';
 
 let backgrounds = {};
 let spring_ddg = {};
+let num_spring_ddg = 24;
 let window_frame;
-let speedbump = 0.5;
+let speedbump = 0.1;
 
 let cl = [
 	['UPDATE_TIMERS','Spring1']
@@ -273,7 +274,7 @@ let drawCanvas = function() {
 		}*/
 	}
 	
-	for (let v=0; v<14; v++) {
+	for (let v=0; v<num_spring_ddg; v++) {
 		spring_ddg[v] = document.getElementById('spring_ddg_'+v);
 	}
 	
@@ -325,11 +326,9 @@ let drawCanvas = function() {
 			//ctx.drawImage(backgrounds[selected_haiku], 500 + Math.sin(timer*0.0001)*250, 200 + Math.cos(timer*0.0002)*100, renderableWidth*2.5, renderableHeight*2.5, xStart, yStart, renderableWidth, renderableHeight);
 			
 			if (speedbump > 0.0) speedbump = speedbump * 0.999;
-			let index = (parseInt(timer*0.0001+speedbump*500, 10) % 14);
+			let index = (parseInt(timer*0.0001+speedbump*500, 10) % num_spring_ddg);
 			
 			ctx.drawImage(spring_ddg[index], 0, 0, spring_ddg[0].width, spring_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
-			
-			//TODO: test rotation of same backgrounds with different ddg (accelerates when a word changes)
 			
 			//TODO: test particles
 			
@@ -544,6 +543,22 @@ function connectWebSockets() {
 		let parsed = JSON.parse(evt.data);
 		for (instance in parsed) {
 			if (instance in params) {
+				if (params[instance]['value'] != undefined) {
+					if (params[instance]['value']['value'] != undefined) {
+						// value changed
+						if (parsed[instance]['value'] != undefined) {
+							if (params[instance]['value']['value'] != parsed[instance]['value']) {
+								speedbump = 0.3;
+							}
+						}
+					}
+				} else {
+					// first value
+					if (parsed[instance]['value'] != undefined) {
+						speedbump = 0.3;
+					}
+				}
+				// update params
 				params[instance]['value'] = parsed[instance];
 			}
 		}
