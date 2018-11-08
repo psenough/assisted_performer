@@ -9,7 +9,7 @@ let halfw;
 let halfh;
 let params = {};
 let votes = {};
-let active_part = 0;
+let active_part = 1;
 
 let address = 'http://';
 
@@ -20,7 +20,7 @@ let window_frame;
 let speedbump = 0.1;
 
 let cl = [
-	['UPDATE_TIMERS','Spring1']
+	['UPDATE_TIMERS']
 ];
 
 // not sure if i won't need other stuff stored in the configs struct, so i'll leave it as a struct object for now instead of a plain array
@@ -36,7 +36,8 @@ function init() {
 		console.log(e);
 	}
 	cv = new drawCanvas();
-	changePart(active_part);
+	activateEffect('Spring1');
+	//changePart(active_part);
 }
 
 function changePart(next_part) {
@@ -79,6 +80,42 @@ function changePart(next_part) {
 	}
 }
 
+function activateEffect(effect_name) {
+	if (selected_haiku == effect_name) {
+		console.log(effect_name + ' was already activated');
+		return;
+	}
+	
+	console.log('activating ' + effect_name);
+	selected_haiku = effect_name;
+	
+	// clear params
+	params = {};
+	
+	// clear all active effects
+	for (fx in cv.effects) {
+		cv.effects[fx]['on'] = false;
+	}
+	
+	for (fx in cv.effects) {
+		if (fx == effect_name) {
+			// toggle the effect on
+			cv.effects[fx]['on'] = true;
+			
+			// if there is an initializer, run it
+			if ('init' in cv.effects[fx]) cv.effects[fx]['init']();
+			
+			// add the params from this effect to our global params list
+			addToParams(cv.effects[fx]['params']);
+			
+		}
+	}
+	speedbump = 0.3;
+	
+	// report the new parameters to the server		
+	sendParameters();
+}
+
 function addToParams(this_fx_params) {
 	// add the params from this effect to our global params list
 	for (p in this_fx_params) {
@@ -119,160 +156,8 @@ let drawCanvas = function() {
 	let d = d2 = new Date();
 	let n = n2 = d.getTime();
 	let timer = n2-n;
-	let sin1 = Math.sin((n2-n)/200)+1.0;
-	let sin3 = Math.sin((n2-n)/2800)+1.0;
-	let cos1 = Math.cos((n2-n)/800)+1.0;
-	let cos2 = Math.cos((n2-n)/2800);
-	let cos3 = Math.cos((n2-n)/1600);
-	let cos4 = Math.cos((n2-n)/5711);
-	let sin2 = Math.sin(sin1*0.05+cos2)+1.0;
 	
-	this.effects = {
-		'UPDATE_TIMERS': {
-			'on': true,
-			'params': {
-				//'slow': { 'friendly_name': 'Slow Time', 'min': 1.0, 'max': 10.0, 'step': 0.05, 'default_value': 1.0, 'value': 1.0 },
-			},
-			'call': function() {
-				d2 = new Date();
-				n2 = d2.getTime(); 
-				//let slow = parseFloat(params['slow']['value']);
-				timer = (n2-n);///(slow);
-				//TODO: scrub speed without jumping
-	
-				// precalc some basic sin functions for optimized reuse
-				sin1 = Math.sin((timer)/200)+1.0;
-				sin3 = Math.sin((timer)/2800)+1.0;
-				cos1 = Math.cos((timer)/800)+1.0;
-				cos2 = Math.cos((timer)/2800);
-				cos3 = Math.cos((timer)/1600);
-				cos4 = Math.cos((timer)/5711);
-				sin2 = Math.sin(sin1*0.05+cos2)+1.0;
-				cos5 = Math.cos((timer)/2000);
-			}
-		},
-		'EFFECT_BACKGROUND': {
-			'on': false,
-			'params': {
-			},
-			'call': function() {
-						let hsl_center = "rgb(222, 220, 206)";
-						let hsl_outside = "rgb(122, 120, 106)";
-
-						let rx = w/Math.sqrt(2);
-						let ry = h/Math.sqrt(2);
-						let cx = w*0.5;
-						let cy = h*0.5;
-						
-						let scaleX;
-						let scaleY;
-						let invScaleX;
-						let invScaleY;
-						let grad;
-						
-						//If rx or ry is zero, this doesn't create much of a gradient, but we'll allow it in the code, just in case.
-						//we will handle these zero lengths by changing them to 0.25 pixel, which will create a gradient indistinguishable from
-						//just a solid fill with the outermost gradient color.
-						rx = (rx == 0) ? 0.25 : rx;
-						rr = (ry == 0) ? 0.25 : ry;
-						
-						//we create a circular gradient, but after transforming it properly (by shrinking in either the x or y direction),
-						//we will have an alliptical gradient.
-						if (rx >= ry) {
-							scaleX = 1;
-							invScaleX = 1;
-							scaleY = ry/rx;
-							invScaleY = rx/ry;
-							grad = ctx.createRadialGradient(cx, cy*invScaleY, 0, cx, cy*invScaleY, rx);
-						} else {
-							scaleY = 1;
-							invScaleY = 1;
-							scaleX = rx/ry;
-							invScaleX = ry/rx;
-							grad = ctx.createRadialGradient(cx*invScaleX, cy, 0, cx*invScaleX, cy, ry);
-						}
-						
-						ctx.fillStyle = grad;
-						
-						//add desired colors
-						grad.addColorStop(0,hsl_center);
-						grad.addColorStop(1,hsl_outside);
-						
-						ctx.save();
-						ctx.setTransform(scaleX,0,0,scaleY,0,0);
-						ctx.fillRect(0,0,w*invScaleX,h*invScaleY);
-						ctx.restore();
-					}
-		},
-		'EFFECT_BLUE_WHITE_SEGMENTS': {
-			'on': false,
-			'params': {
-				//'bw_linewidth': { 'friendly_name': 'Blue White Linewidth', 'min': 1.0, 'max': 20.0, 'step': 1.0, 'default_value': 10.0, 'value': 10.0 },
-				//'bw_scratch': { 'friendly_name': 'Scratch Arc', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
-				//'bw_radius': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }
-			},
-			'call': function() {
-
-						let bw_linewidth = 10.0; //parseFloat(params['bw_linewidth']['value']);
-						let scratch = 3.0; //parseFloat(params['bw_scratch']['value']);
-						let bw_radius = 1.61; //parseFloat(params['bw_radius']['value']);
-						let bw_btrans = 0.5;
-						let bw_wtrans = 0.1;
-						
-						let segment_length = bw_radius;
-						let start_angle = scratch + cos3*0.1 + timer/10000;
-						
-						let lineWidth = bw_linewidth;
-					
-						ctx.lineWidth = lineWidth;
-						ctx.lineCap = 'round';	
-						ctx.strokeStyle = "rgba(200,200,200,"+bw_btrans+")";
-						
-						let radius = 28;
-						let narcs = 40;
-
-						ctx.save();
-						ctx.translate(w*0.5,h*0.5);
-						
-						for (let i=0; i<narcs; i++) {
-							let r = radius * i;
-							ctx.beginPath();
-							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
-							ctx.stroke();
-						}
-						
-						ctx.strokeStyle = "rgba(115,155,255,"+bw_wtrans+")";
-						
-						//start_angle += Math.PI;
-						
-						ctx.rotate(Math.PI);
-						
-						for (let i=0; i<narcs; i++) {
-							let r = radius * i;
-							ctx.beginPath();
-							ctx.arc(0, 0, r, (start_angle * i), (start_angle * i) + segment_length);
-							ctx.stroke();
-						}
-						
-						ctx.restore();
-						
-					}
-		}/*,
-		'EFFECT_METAGENHAIKU': {
-			'on': false,
-			'params': {
-				'wordlist1': { 'friendly_name': 'Wordlist 1', 'possible': ['word1','word2','word3','word4'], 'default_value': 'word1', 'value': 'word1' }
-				'wordlist2': { 'friendly_name': 'Wordlist 2', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 0.0, 'value': 3.0 },
-				'wordlist3': { 'friendly_name': 'Arcs Radius', 'min': 0.0, 'max': 6.28, 'step': 0.01, 'default_value': 1.61, 'value': 1.61 }
-			},
-			'call': function() {
-
-						let wordlist1 = parseFloat(params['wordlist1']['value']);
-						let words = getDiv('words');
-						words.innerHTML = wordlist1;
-					}
-		}*/
-	}
+	this.effects = {};
 	
 	for (let v=0; v<num_spring_ddg; v++) {
 		spring_ddg[v] = document.getElementById('spring_ddg_'+v);
@@ -289,12 +174,15 @@ let drawCanvas = function() {
 		var thisparams = {};
 		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
 			console.log(wordlist);
-			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist] };
+			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist], 'value': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist][0] };
 		}
 		
 		// add haiku form to effects
 		var effect = {'on':false, 'params':thisparams, 'call': function() { 
-			//console.log('london calling');
+		
+			d2 = new Date();
+			n2 = d2.getTime(); 
+			timer = (n2-n);
 			
 			let fw = window_frame.width;
 			let fh = window_frame.height;
@@ -335,7 +223,6 @@ let drawCanvas = function() {
 			// window frame
 			ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
 
-			
 			var cardx = w-xStart*0.9*2;
 			var cardy = h*0.65;
 			var cardw = xStart*0.9*2;
@@ -375,13 +262,14 @@ let drawCanvas = function() {
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
 					//console.log(word_ref);
-					var word = '';
+					/*var word = '';
 					if (word_ref in params) {
 						if ('value' in params[word_ref]) {
 							if ('value' in params[word_ref]['value']) word = params[word_ref]['value']['value'];
 								else word = word_ref;
 						}
-					}
+					}*/
+					word = params[word_ref]['value'];
 					//console.log(word);
 					output += word + ' ';
 				}
@@ -466,7 +354,7 @@ let drawCanvas = function() {
 	}
 }
 
-let selected_haiku = 'Spring1';
+let selected_haiku = '';
 let audio = undefined;
 
 function playAudio(source, loop) {
@@ -543,23 +431,22 @@ function connectWebSockets() {
 		let parsed = JSON.parse(evt.data);
 		for (instance in parsed) {
 			if (instance in params) {
-				if (params[instance]['value'] != undefined) {
-					if (params[instance]['value']['value'] != undefined) {
+				//if (params[instance]['value'] != undefined) {
+				//	if (params[instance]['value']['value'] != undefined) {
 						// value changed
-						if (parsed[instance]['value'] != undefined) {
-							if (params[instance]['value']['value'] != parsed[instance]['value']) {
+						//if (parsed[instance]['value'] != undefined) {
+							if (params[instance]['value'] != parsed[instance]['value']) {
 								speedbump = 0.3;
 							}
-						}
-					}
-				} else {
-					// first value
-					if (parsed[instance]['value'] != undefined) {
-						speedbump = 0.3;
-					}
-				}
+						//}
+					//}
+				//}
 				// update params
-				params[instance]['value'] = parsed[instance];
+				params[instance]['value'] = parsed[instance]['value'];
+			}
+			if (instance == 'changeseason') {
+				//console.log('time for a change');
+				activateEffect(randomProperty(metagenhaiku['genhaikus']));
 			}
 		}
 		/*if (parsed['vote_results'] != undefined) {
@@ -580,6 +467,11 @@ function connectWebSockets() {
 		this_ws = null;
 		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
 	};
+};
+
+var randomProperty = function (obj) {
+    var keys = Object.keys(obj)
+    return keys[ keys.length * Math.random() << 0];
 };
 
 document.addEventListener("keydown", keydown, false);

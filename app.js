@@ -661,6 +661,36 @@ function getIDbyRA(thisra) {
 
 
 
+//
+// serial port
+//
+
+var SerialPort = require('serialport');
+var Readline = require('@serialport/parser-readline')
+var serialPort = new SerialPort('COM3', { baudRate: 9600 });
+const parser = serialPort.pipe(new Readline());
+var previous_parser_input = '';
+function parserfunction(someinput) {
+	if (someinput != previous_parser_input) {
+		//console.log('banana changed:'  + someinput);
+		if (parseInt(someinput,10) == 1) {
+			console.log('change of guardians!!!');
+			for (var i = 0; i < active_conn.length; i++) {
+				if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
+					try {
+						active_conn[i]['socket'].send(JSON.stringify({'changeseason':true}));
+					} catch(exc) {
+						console.log('failed to send conn to canvas');
+					}
+				}
+			}
+		}
+		previous_parser_input = someinput;
+	}
+}
+parser.on('data', parserfunction);
+
+
 
 //
 // simulate gamestate changes with arrow keys

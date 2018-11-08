@@ -74,7 +74,8 @@ function calculate_buttons_position() {
 		//console.log('adding opt a');
 		opt_a = document.createElement('div');
 		opt_a.setAttribute('id', 'opt_a');
-		opt_a.setAttribute('class', 'btn btn_off');
+		if (key['value'] == key['possible'][0]) opt_a.setAttribute('class', 'btn btn_on');
+			else opt_a.setAttribute('class', 'btn btn_off');
 		opt_a.innerHTML = '<span>' + key['possible'][0] + '</span>';
 		opt_a.addEventListener("mousedown", function() {
 			//sendvote(vote['uid'], vote['options'][0]);
@@ -120,7 +121,8 @@ function calculate_buttons_position() {
 		console.log('adding opt b');
 		opt_b = document.createElement('div');
 		opt_b.setAttribute('id', 'opt_b');
-		opt_b.setAttribute('class', 'btn btn_off');
+		if (key['value'] == key['possible'][1]) opt_b.setAttribute('class', 'btn btn_on');
+			else opt_b.setAttribute('class', 'btn btn_off');
 		opt_b.innerHTML = '<span>' + key['possible'][1] + '</span>';
 		opt_b.addEventListener("mousedown", function() {
 			sendparam(ke, key['possible'][1]);
@@ -166,7 +168,8 @@ function calculate_buttons_position() {
 		console.log('adding opt c');
 		opt_c = document.createElement('div');
 		opt_c.setAttribute('id', 'opt_c');
-		opt_c.setAttribute('class', 'btn btn_off');
+		if (key['value'] == key['possible'][2]) opt_c.setAttribute('class', 'btn btn_on');
+			else opt_c.setAttribute('class', 'btn btn_off');
 		opt_c.innerHTML = '<span>' + key['possible'][2] + '</span>';
 		opt_c.addEventListener("mousedown", function() {
 			sendparam(ke, key['possible'][2]);
@@ -212,7 +215,8 @@ function calculate_buttons_position() {
 		console.log('adding opt d');
 		opt_d = document.createElement('div');
 		opt_d.setAttribute('id', 'opt_d');
-		opt_d.setAttribute('class', 'btn btn_off');
+		if (key['value'] == key['possible'][3]) opt_d.setAttribute('class', 'btn btn_on');
+			else opt_d.setAttribute('class', 'btn btn_off');
 		opt_d.innerHTML = '<span>' + key['possible'][3] + '</span>';
 		opt_d.addEventListener("mousedown", function() {
 			sendparam(ke, key['possible'][3]);
@@ -430,6 +434,7 @@ var this_websockets = 'ws://'+location.host.split(':')[0];
 var this_ws = null;
 var this_ws_open = false;
 var this_timeout = false;
+var prev_active = '';
 
 function connect_websockets() {
 
@@ -478,8 +483,11 @@ function connect_websockets() {
 					if (votes[i]['active'] == true) new_active = votes[i]['uid'];
 				}*/
 				
-				// check if we should recreate the buttons
-				/*if (new_active != prev_active) {
+				var ke = (Object.keys(parsed['parameters']))[0];
+				var key = parsed['parameters'][ke];
+				if (prev_active != ke) {
+					console.log('changing to ' + ke);
+					prev_active = ke;
 					var opt_a = document.getElementById('opt_a');
 					if (opt_a) document.body.removeChild(opt_a);
 					var opt_b = document.getElementById('opt_b');
@@ -488,7 +496,7 @@ function connect_websockets() {
 					if (opt_c) document.body.removeChild(opt_c);
 					var opt_d = document.getElementById('opt_d');
 					if (opt_d) document.body.removeChild(opt_d);
-				}*/
+				}
 				
 				calculate_buttons_position();
 			}
