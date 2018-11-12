@@ -13,9 +13,9 @@ let active_part = 1;
 
 let address = 'http://';
 
-let backgrounds = {};
-let spring_ddg = {};
-let num_spring_ddg = 24;
+//let backgrounds = {};
+//let spring_ddg = {};
+//let num_spring_ddg = 24;
 let window_frame;
 let speedbump = 0.1;
 
@@ -132,22 +132,7 @@ function addToParams(this_fx_params) {
 	}
 }
 
-// used on EFFECT_WHITE
-function drawShape(centerX, centerY, rotAngle, scaleX, scaleY, posX, posY, angle, size, height, stroke) {
-	ctx.strokeStyle = stroke;
-	ctx.translate( centerX, centerY );
-	ctx.rotate(rotAngle);
-	ctx.scale( scaleX, scaleY );
-	ctx.translate( posX, posY );
-	ctx.rotate(angle);
-	ctx.beginPath();
-	ctx.moveTo(-size,-size);
-	ctx.lineTo(0,height*2);
-	ctx.lineTo(size,-size);
-	ctx.fill();
-	ctx.closePath();
-	ctx.stroke();
-}
+let bg_ddg = {};
 
 let drawCanvas = function() {
 	resize();
@@ -159,15 +144,11 @@ let drawCanvas = function() {
 	
 	this.effects = {};
 	
-	for (let v=0; v<num_spring_ddg; v++) {
-		spring_ddg[v] = document.getElementById('spring_ddg_'+v);
-	}
-	
 	for (haiku in metagenhaiku['genhaikus']) {
 		console.log(haiku);
 		
 		// load backgrounds
-		backgrounds[haiku] = document.getElementById(haiku);
+		//backgrounds[haiku] = document.getElementById(haiku);
 		window_frame = document.getElementById('window_frame');
 		
 		// load all wordlists
@@ -176,6 +157,18 @@ let drawCanvas = function() {
 			console.log(wordlist);
 			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist], 'value': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist][0] };
 		}
+		
+		let counter = 0;
+		let dom = document.getElementById(haiku.toLowerCase() + '_ddg_' + counter);
+		console.log(haiku.toLowerCase() + '_ddg_' + counter);
+		let temp_bg_ddg = []; 
+		while(dom != undefined) {
+			temp_bg_ddg[counter] = dom;
+			counter++;
+			dom = document.getElementById(haiku.toLowerCase() + '_ddg_' + counter);
+		}
+		bg_ddg[haiku] = temp_bg_ddg;
+		console.log(bg_ddg);
 		
 		// add haiku form to effects
 		var effect = {'on':false, 'params':thisparams, 'call': function() { 
@@ -212,11 +205,13 @@ let drawCanvas = function() {
 						
 			// background image
 			//ctx.drawImage(backgrounds[selected_haiku], 500 + Math.sin(timer*0.0001)*250, 200 + Math.cos(timer*0.0002)*100, renderableWidth*2.5, renderableHeight*2.5, xStart, yStart, renderableWidth, renderableHeight);
+			let s_ddg = bg_ddg[selected_haiku];
+			if (s_ddg.length == 0) return;
 			
 			if (speedbump > 0.0) speedbump = speedbump * 0.999;
-			let index = (parseInt(timer*0.0001+speedbump*500, 10) % num_spring_ddg);
+			let index = (parseInt(timer*0.0001+speedbump*500, 10) % s_ddg.length);
 			
-			ctx.drawImage(spring_ddg[index], 0, 0, spring_ddg[0].width, spring_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
 			
 			//TODO: test particles
 			
@@ -446,7 +441,11 @@ function connectWebSockets() {
 			}
 			if (instance == 'changeseason') {
 				//console.log('time for a change');
-				activateEffect(randomProperty(metagenhaiku['genhaikus']));
+				var newstyle = randomProperty(metagenhaiku['genhaikus']);
+				while (selected_haiku == newstyle) {
+					newstyle = randomProperty(metagenhaiku['genhaikus']);
+				}
+				activateEffect(newstyle);
 			}
 		}
 		/*if (parsed['vote_results'] != undefined) {
