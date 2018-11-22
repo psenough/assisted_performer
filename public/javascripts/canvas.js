@@ -219,9 +219,9 @@ let drawCanvas = function() {
 			ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
 
 			var cardx = w-xStart*0.9*2;
-			var cardy = h*0.65;
+			var cardy = h*0.45;
 			var cardw = xStart*0.9*2;
-			var cardh = h*0.25;
+			var cardh = h*0.45;
 			var cardpad = w*0.02;
 			
 			// text frame shadow
@@ -253,6 +253,9 @@ let drawCanvas = function() {
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
+			ctx.font="18px Verdana";
+			ctx.textAlign="center"; 
+			ctx.fillStyle='rgba(0,0,0,1.0)';
 			for (lines in haikuforms) {
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
@@ -269,18 +272,21 @@ let drawCanvas = function() {
 					output += word + ' ';
 				}
 
-				ctx.font="28px Verdana";
-				ctx.textAlign="center"; 
-				// Create gradient
-				//var gradient=ctx.createLinearGradient(0,0,0,w);
-				//gradient.addColorStop("0","magenta");
-				//gradient.addColorStop("0.5","blue");
-				//gradient.addColorStop("1.0","red");
-				// Fill with gradient
-				ctx.fillStyle='rgba(0,0,0,1.0)';
-				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.3 + (linecounter++)*w*0.03);
+				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.02);
 				output = ''; //+= '<br>';
 			}
+			
+			// divider line
+			ctx.strokeStyle = 'rgba(0,0,0,1.0)';
+			ctx.moveTo(cardx+cardpad*2, cardy+cardh*0.5);
+			ctx.lineTo(cardx+cardw-cardpad*2, cardy+cardh*0.5);
+			ctx.stroke();
+
+			// connection text
+			ctx.textAlign="left";
+			ctx.fillText('Use smartphone to interact', cardx+cardpad*2, cardy+cardh*0.5 + 2*w*0.02);
+			ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
+			ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
 			
 			//console.log(output);
 		} };
