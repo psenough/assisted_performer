@@ -674,22 +674,25 @@ function parserfunction(someinput) {
 	if (someinput != previous_parser_input) {
 		//console.log('banana changed:'  + someinput);
 		if (parseInt(someinput,10) == 1) {
-			console.log('change of guardians!!!');
-			for (var i = 0; i < active_conn.length; i++) {
-				if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
-					try {
-						active_conn[i]['socket'].send(JSON.stringify({'changeseason':true}));
-					} catch(exc) {
-						console.log('failed to send conn to canvas');
-					}
-				}
-			}
+			sendChangeSeason();
 		}
 		previous_parser_input = someinput;
 	}
 }
 parser.on('data', parserfunction);
 
+function sendChangeSeason() {
+	console.log('send message to change season!!!');
+	for (var i = 0; i < active_conn.length; i++) {
+		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
+			try {
+				active_conn[i]['socket'].send(JSON.stringify({'changeseason':true}));
+			} catch(exc) {
+				console.log('failed to send conn to canvas');
+			}
+		}
+	}
+}
 
 
 //
@@ -726,6 +729,9 @@ stdin.on('data', function (data) {
 	}
 	if (data == 'r') {
 		reassignParameters();
+	}
+	if (data == 'c') {
+		sendChangeSeason();
 	}
     //process.stdout.write('Captured Key : ' + data + "\n");
 });
