@@ -208,10 +208,16 @@ let drawCanvas = function() {
 			let s_ddg = bg_ddg[selected_haiku];
 			if (s_ddg.length == 0) return;
 			
-			if (speedbump > 0.0) speedbump = speedbump * 0.999;
-			let index = (parseInt(timer*0.0001+speedbump*500, 10) % s_ddg.length);
+			if (speedbump > 0.0) speedbump = speedbump * 0.989;
+			let index = (parseInt(timer*0.0001+speedbump*400, 10) % s_ddg.length);
 			
-			ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			//ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			if (selected_haiku == 'Spring1') {
+				// hack crop 16:9 images
+				ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			} else {
+				ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+			}
 			
 			//TODO: test particles
 			
@@ -253,7 +259,7 @@ let drawCanvas = function() {
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
-			ctx.font="18px Verdana";
+			ctx.font="26px Verdana";
 			ctx.textAlign="center"; 
 			ctx.fillStyle='rgba(0,0,0,1.0)';
 			for (lines in haikuforms) {
@@ -272,7 +278,7 @@ let drawCanvas = function() {
 					output += word + ' ';
 				}
 
-				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.02);
+				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.025);
 				output = ''; //+= '<br>';
 			}
 			
@@ -284,6 +290,7 @@ let drawCanvas = function() {
 
 			// connection text
 			ctx.textAlign="left";
+			ctx.font="18px Verdana";
 			ctx.fillText('Use smartphone to interact', cardx+cardpad*2, cardy+cardh*0.5 + 2*w*0.02);
 			ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
 			ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
