@@ -137,7 +137,6 @@ let bg_ddg = {};
 let drawCanvas = function() {
 	resize();
 	
-	let seedrand = rand(360);
 	let d = d2 = new Date();
 	let n = n2 = d.getTime();
 	let timer = n2-n;
@@ -147,15 +146,15 @@ let drawCanvas = function() {
 	for (haiku in metagenhaiku['genhaikus']) {
 		console.log(haiku);
 		
-		// load backgrounds
-		//backgrounds[haiku] = document.getElementById(haiku);
 		window_frame = document.getElementById('window_frame');
 		
 		// load all wordlists
 		var thisparams = {};
 		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
-			console.log(wordlist);
-			thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist], 'value': metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist][0] };
+			//console.log(wordlist);
+			var wtym =  metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist];
+			var rvalue = wtym[rand(wtym.length)];
+			if (wtym.length > 1) thisparams[wordlist] = { 'friendly_name': wordlist, 'possible': wtym, 'value': rvalue };
 		}
 		
 		let counter = 0;
@@ -202,16 +201,16 @@ let drawCanvas = function() {
 			}
 			
 			let pad = w*0.05;
-						
+			
+			//
 			// background image
-			//ctx.drawImage(backgrounds[selected_haiku], 500 + Math.sin(timer*0.0001)*250, 200 + Math.cos(timer*0.0002)*100, renderableWidth*2.5, renderableHeight*2.5, xStart, yStart, renderableWidth, renderableHeight);
+			//
 			let s_ddg = bg_ddg[selected_haiku];
 			if (s_ddg.length == 0) return;
 			
 			if (speedbump > 0.0) speedbump = speedbump * 0.989;
 			let index = (parseInt(timer*0.0001+speedbump*400, 10) % s_ddg.length);
 			
-			//ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
 			if (selected_haiku == 'Spring1') {
 				// hack crop 16:9 images
 				ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
@@ -221,21 +220,38 @@ let drawCanvas = function() {
 			
 			//TODO: test particles
 			
+			//
 			// window frame
+			//
 			ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
 
+			//
+			// text card frame
+			//
 			var cardx = w-xStart*0.9*2;
 			var cardy = h*0.45;
 			var cardw = xStart*0.9*2;
 			var cardh = h*0.45;
 			var cardpad = w*0.02;
 			
-			// text frame shadow
 			//ctx.fillStyle = 'rgba(15,15,15,0.8)';
 			//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
 			
 			ctx.fillStyle = 'rgba(255,255,255,1.0)';
 			roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
+			
+			// bevel
+			ctx.save();
+			ctx.clip();
+			ctx.shadowColor = '#000';
+			for(var i=0;i<3;i++){
+				for(var j=0;j<3;j++){
+					ctx.shadowBlur=4+i;
+					ctx.lineWidth=2.0;
+					ctx.stroke();
+				}
+			}
+			ctx.restore();
 			
 			//ctx.fillRect(w-xStart*0.9*2, h*0.8, xStart*0.9*2, h*0.2);
 			ctx.fillStyle = 'rgba(250,250,250,1.0)';
@@ -244,6 +260,7 @@ let drawCanvas = function() {
 			// bevel
 			ctx.save();
 			ctx.clip();
+			ctx.strokeStyle = 'rgba(250,250,250,1.0)';
 			ctx.shadowColor = '#000';
 			for(var i=0;i<3;i++){
 				for(var j=0;j<3;j++){
@@ -254,12 +271,14 @@ let drawCanvas = function() {
 			}
 			ctx.restore();
 			
-			// text
+			//
+			// haiku text on text card
+			//
 			var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
-			ctx.font="26px Verdana";
+			ctx.font="24px Verdana";
 			ctx.textAlign="center"; 
 			ctx.fillStyle='rgba(0,0,0,1.0)';
 			for (lines in haikuforms) {
@@ -273,7 +292,11 @@ let drawCanvas = function() {
 								else word = word_ref;
 						}
 					}*/
-					word = params[word_ref]['value'];
+					if (params[word_ref]) {
+						word = params[word_ref]['value'];
+					} else {
+						word = wordlists[word_ref][0];
+					}
 					//console.log(word);
 					output += word + ' ';
 				}
@@ -282,20 +305,23 @@ let drawCanvas = function() {
 				output = ''; //+= '<br>';
 			}
 			
-			// divider line
+			//
+			// divider line on text card
+			//
 			ctx.strokeStyle = 'rgba(0,0,0,1.0)';
 			ctx.moveTo(cardx+cardpad*2, cardy+cardh*0.5);
 			ctx.lineTo(cardx+cardw-cardpad*2, cardy+cardh*0.5);
 			ctx.stroke();
 
-			// connection text
+			//
+			// router connection text on text card
+			//
 			ctx.textAlign="left";
 			ctx.font="18px Verdana";
 			ctx.fillText('Use smartphone to interact', cardx+cardpad*2, cardy+cardh*0.5 + 2*w*0.02);
 			ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
 			ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
 			
-			//console.log(output);
 		} };
 		this.effects[haiku] = effect;
 	}

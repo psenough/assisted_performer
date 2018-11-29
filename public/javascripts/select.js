@@ -72,42 +72,44 @@ function calculate_buttons_position() {
 		opt_a.style.lineHeight = opt_a.style.height;
 	} else {
 		//console.log('adding opt a');
-		opt_a = document.createElement('div');
-		opt_a.setAttribute('id', 'opt_a');
-		if (key['value'] == key['possible'][0]) opt_a.setAttribute('class', 'btn btn_on');
-			else opt_a.setAttribute('class', 'btn btn_off');
-		opt_a.innerHTML = '<span>' + key['possible'][0] + '</span>';
-		opt_a.addEventListener("mousedown", function() {
-			//sendvote(vote['uid'], vote['options'][0]);
-			sendparam(ke, key['possible'][0]);
-			opt_a.setAttribute('class', 'btn btn_on');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_a.addEventListener('touchstart', function(e){
-			e.preventDefault();				
-			opt_a.setAttribute('class', 'btn btn_on');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-			sendparam(ke, key['possible'][0]);
-			//sendvote(vote['uid'], vote['options'][0]);
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_a.addEventListener('touchmove', function(e){
-			e.preventDefault();
-			opt_a.setAttribute('class', 'btn btn_on');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-		});
-		/*opt_a.addEventListener('touchend', function(e){
-			e.preventDefault();
-			opt_a.setAttribute('class', 'btn btn_off');
-		});*/
-		document.body.appendChild(opt_a);
+		if (key['possible'][0] != undefined) {
+			opt_a = document.createElement('div');
+			opt_a.setAttribute('id', 'opt_a');
+			if (key['value'] == key['possible'][0]) opt_a.setAttribute('class', 'btn btn_on');
+				else opt_a.setAttribute('class', 'btn btn_off');
+			opt_a.innerHTML = '<span>' + key['possible'][0] + '</span>';
+			opt_a.addEventListener("mousedown", function() {
+				//sendvote(vote['uid'], vote['options'][0]);
+				sendparam(ke, key['possible'][0]);
+				opt_a.setAttribute('class', 'btn btn_on');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_a.addEventListener('touchstart', function(e){
+				e.preventDefault();				
+				opt_a.setAttribute('class', 'btn btn_on');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+				sendparam(ke, key['possible'][0]);
+				//sendvote(vote['uid'], vote['options'][0]);
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_a.addEventListener('touchmove', function(e){
+				e.preventDefault();
+				opt_a.setAttribute('class', 'btn btn_on');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+			});
+			/*opt_a.addEventListener('touchend', function(e){
+				e.preventDefault();
+				opt_a.setAttribute('class', 'btn btn_off');
+			});*/
+			document.body.appendChild(opt_a);
+		}
 	}
 	
 	var opt_b = document.getElementById('opt_b');
@@ -118,43 +120,45 @@ function calculate_buttons_position() {
 		opt_b.style.height = parseInt(usedwidth*0.15,10) + 'px';
 		opt_b.style.lineHeight = opt_b.style.height;
 	} else {
-		console.log('adding opt b');
-		opt_b = document.createElement('div');
-		opt_b.setAttribute('id', 'opt_b');
-		if (key['value'] == key['possible'][1]) opt_b.setAttribute('class', 'btn btn_on');
-			else opt_b.setAttribute('class', 'btn btn_off');
-		opt_b.innerHTML = '<span>' + key['possible'][1] + '</span>';
-		opt_b.addEventListener("mousedown", function() {
-			sendparam(ke, key['possible'][1]);
-			//sendvote(vote['uid'], vote['options'][1]);
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_on');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_b.addEventListener('touchstart', function(e){
-			e.preventDefault();				
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_on');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-			sendparam(ke, key['possible'][1]);
-			//sendvote(vote['uid'], vote['options'][1]);
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_b.addEventListener('touchmove', function(e){
-			e.preventDefault();
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_on');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_off');
-		});
-		/*opt_b.addEventListener('touchend', function(e){
-			e.preventDefault();
-			opt_b.setAttribute('class', 'btn btn_off');
-		});*/
-		document.body.appendChild(opt_b);
+		//console.log('adding opt b');
+		if (key['possible'][1] != undefined) {
+			opt_b = document.createElement('div');
+			opt_b.setAttribute('id', 'opt_b');
+			if (key['value'] == key['possible'][1]) opt_b.setAttribute('class', 'btn btn_on');
+				else opt_b.setAttribute('class', 'btn btn_off');
+			opt_b.innerHTML = '<span>' + key['possible'][1] + '</span>';
+			opt_b.addEventListener("mousedown", function() {
+				sendparam(ke, key['possible'][1]);
+				//sendvote(vote['uid'], vote['options'][1]);
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_on');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_b.addEventListener('touchstart', function(e){
+				e.preventDefault();				
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_on');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+				sendparam(ke, key['possible'][1]);
+				//sendvote(vote['uid'], vote['options'][1]);
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_b.addEventListener('touchmove', function(e){
+				e.preventDefault();
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_on');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_off');
+			});
+			/*opt_b.addEventListener('touchend', function(e){
+				e.preventDefault();
+				opt_b.setAttribute('class', 'btn btn_off');
+			});*/
+			document.body.appendChild(opt_b);
+		}
 	}
 	
 	var opt_c = document.getElementById('opt_c');
@@ -165,43 +169,45 @@ function calculate_buttons_position() {
 		opt_c.style.height = parseInt(usedwidth*0.15,10) + 'px';
 		opt_c.style.lineHeight = opt_c.style.height;
 	} else {
-		console.log('adding opt c');
-		opt_c = document.createElement('div');
-		opt_c.setAttribute('id', 'opt_c');
-		if (key['value'] == key['possible'][2]) opt_c.setAttribute('class', 'btn btn_on');
-			else opt_c.setAttribute('class', 'btn btn_off');
-		opt_c.innerHTML = '<span>' + key['possible'][2] + '</span>';
-		opt_c.addEventListener("mousedown", function() {
-			sendparam(ke, key['possible'][2]);
-			//sendvote(vote['uid'], vote['options'][2]);
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_on');
-			opt_d.setAttribute('class', 'btn btn_off');
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_c.addEventListener('touchstart', function(e){
-			e.preventDefault();				
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_on');
-			opt_d.setAttribute('class', 'btn btn_off');
-			sendparam(ke, key['possible'][2]);
-			//sendvote(vote['uid'], vote['options'][2]);
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_c.addEventListener('touchmove', function(e){
-			e.preventDefault();
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_on');
-			opt_d.setAttribute('class', 'btn btn_off');
-		});
-		/*opt_c.addEventListener('touchend', function(e){
-			e.preventDefault();
-			opt_c.setAttribute('class', 'btn btn_off');
-		});*/
-		document.body.appendChild(opt_c);
+		//console.log('adding opt c');
+		if (key['possible'][2] != undefined) {
+			opt_c = document.createElement('div');
+			opt_c.setAttribute('id', 'opt_c');
+			if (key['value'] == key['possible'][2]) opt_c.setAttribute('class', 'btn btn_on');
+				else opt_c.setAttribute('class', 'btn btn_off');
+			opt_c.innerHTML = '<span>' + key['possible'][2] + '</span>';
+			opt_c.addEventListener("mousedown", function() {
+				sendparam(ke, key['possible'][2]);
+				//sendvote(vote['uid'], vote['options'][2]);
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_on');
+				opt_d.setAttribute('class', 'btn btn_off');
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_c.addEventListener('touchstart', function(e){
+				e.preventDefault();				
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_on');
+				opt_d.setAttribute('class', 'btn btn_off');
+				sendparam(ke, key['possible'][2]);
+				//sendvote(vote['uid'], vote['options'][2]);
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_c.addEventListener('touchmove', function(e){
+				e.preventDefault();
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_on');
+				opt_d.setAttribute('class', 'btn btn_off');
+			});
+			/*opt_c.addEventListener('touchend', function(e){
+				e.preventDefault();
+				opt_c.setAttribute('class', 'btn btn_off');
+			});*/
+			document.body.appendChild(opt_c);
+		}
 	}
 	
 	var opt_d = document.getElementById('opt_d');
@@ -212,43 +218,45 @@ function calculate_buttons_position() {
 		opt_d.style.height = parseInt(usedwidth*0.15,10) + 'px';
 		opt_d.style.lineHeight = opt_d.style.height;
 	} else {
-		console.log('adding opt d');
-		opt_d = document.createElement('div');
-		opt_d.setAttribute('id', 'opt_d');
-		if (key['value'] == key['possible'][3]) opt_d.setAttribute('class', 'btn btn_on');
-			else opt_d.setAttribute('class', 'btn btn_off');
-		opt_d.innerHTML = '<span>' + key['possible'][3] + '</span>';
-		opt_d.addEventListener("mousedown", function() {
-			sendparam(ke, key['possible'][3]);
-			//sendvote(vote['uid'], vote['options'][3]);
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_on');
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_d.addEventListener('touchstart', function(e){
-			e.preventDefault();				
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_on');
-			sendparam(ke, key['possible'][3]);
-			//sendvote(vote['uid'], vote['options'][3]);
-			if (navigator.vibrate) navigator.vibrate(100);
-		});
-		opt_d.addEventListener('touchmove', function(e){
-			e.preventDefault();
-			opt_a.setAttribute('class', 'btn btn_off');
-			opt_b.setAttribute('class', 'btn btn_off');
-			opt_c.setAttribute('class', 'btn btn_off');
-			opt_d.setAttribute('class', 'btn btn_on');
-		});
-		/*opt_d.addEventListener('touchend', function(e){
-			e.preventDefault();
-			opt_d.setAttribute('class', 'btn btn_off');
-		});*/
-		document.body.appendChild(opt_d);
+		//console.log('adding opt d');
+		if (key['possible'][3] != undefined) {
+			opt_d = document.createElement('div');
+			opt_d.setAttribute('id', 'opt_d');
+			if (key['value'] == key['possible'][3]) opt_d.setAttribute('class', 'btn btn_on');
+				else opt_d.setAttribute('class', 'btn btn_off');
+			opt_d.innerHTML = '<span>' + key['possible'][3] + '</span>';
+			opt_d.addEventListener("mousedown", function() {
+				sendparam(ke, key['possible'][3]);
+				//sendvote(vote['uid'], vote['options'][3]);
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_on');
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_d.addEventListener('touchstart', function(e){
+				e.preventDefault();				
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_on');
+				sendparam(ke, key['possible'][3]);
+				//sendvote(vote['uid'], vote['options'][3]);
+				if (navigator.vibrate) navigator.vibrate(100);
+			});
+			opt_d.addEventListener('touchmove', function(e){
+				e.preventDefault();
+				opt_a.setAttribute('class', 'btn btn_off');
+				opt_b.setAttribute('class', 'btn btn_off');
+				opt_c.setAttribute('class', 'btn btn_off');
+				opt_d.setAttribute('class', 'btn btn_on');
+			});
+			/*opt_d.addEventListener('touchend', function(e){
+				e.preventDefault();
+				opt_d.setAttribute('class', 'btn btn_off');
+			});*/
+			document.body.appendChild(opt_d);
+		}
 	}
 	
 	if (display_post_lag) {
