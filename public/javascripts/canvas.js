@@ -18,6 +18,7 @@ let address = 'http://';
 //let num_spring_ddg = 24;
 let window_frame;
 let speedbump = 0.1;
+let zoom_canvas = 0.75;
 
 let cl = [
 	['UPDATE_TIMERS']
@@ -186,20 +187,32 @@ let drawCanvas = function() {
 			if(imageAspectRatio < canvasAspectRatio) {
 				renderableHeight = h;
 				renderableWidth = fw * (renderableHeight / fh);
+				
+				renderableHeight = renderableHeight*zoom_canvas;
+				renderableWidth = renderableWidth*zoom_canvas;
+				
 				xStart = (w - renderableWidth) / 2;
 				yStart = 0;
 			} else if(imageAspectRatio > canvasAspectRatio) {
 				renderableWidth = w;
 				renderableHeight = fh * (renderableWidth / fw);
+				
+				renderableHeight = renderableHeight*zoom_canvas;
+				renderableWidth = renderableWidth*zoom_canvas;
+				
 				xStart = 0;
 				yStart = (h - renderableHeight) / 2;
 			} else {
 				renderableHeight = h;
 				renderableWidth = w;
+				
+				renderableHeight = renderableHeight*zoom_canvas;
+				renderableWidth = renderableWidth*zoom_canvas;
+				
 				xStart = 0;
 				yStart = 0;
 			}
-			
+
 			let pad = w*0.05;
 			
 			//
@@ -229,19 +242,19 @@ let drawCanvas = function() {
 			// text card frame
 			//
 			var cardx = w-xStart*0.9*2;
-			var cardy = h*0.45;
+			var cardy = h*0.4;
 			var cardw = xStart*0.9*2;
-			var cardh = h*0.45;
-			var cardpad = w*0.02;
+			var cardh = h*0.35;
+			var cardpad = w*0.01;
 			
 			//ctx.fillStyle = 'rgba(15,15,15,0.8)';
 			//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
 			
-			ctx.fillStyle = 'rgba(255,255,255,1.0)';
-			roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
+			//ctx.fillStyle = 'rgba(255,255,255,1.0)';
+			//roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
 			
 			// bevel
-			ctx.save();
+			/*ctx.save();
 			ctx.clip();
 			ctx.shadowColor = '#000';
 			for(var i=0;i<3;i++){
@@ -251,14 +264,13 @@ let drawCanvas = function() {
 					ctx.stroke();
 				}
 			}
-			ctx.restore();
+			ctx.restore();*/
 			
-			//ctx.fillRect(w-xStart*0.9*2, h*0.8, xStart*0.9*2, h*0.2);
 			ctx.fillStyle = 'rgba(250,250,250,1.0)';
 			roundRect(ctx, cardx+cardpad, cardy+cardpad, cardw-cardpad*2, cardh-cardpad*2, 30, true, false);
 
 			// bevel
-			ctx.save();
+			/*ctx.save();
 			ctx.clip();
 			ctx.strokeStyle = 'rgba(250,250,250,1.0)';
 			ctx.shadowColor = '#000';
@@ -269,7 +281,7 @@ let drawCanvas = function() {
 					ctx.stroke();
 				}
 			}
-			ctx.restore();
+			ctx.restore();*/
 			
 			//
 			// haiku text on text card
@@ -278,7 +290,7 @@ let drawCanvas = function() {
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
-			ctx.font="24px Verdana";
+			ctx.font="14px Verdana";
 			ctx.textAlign="center"; 
 			ctx.fillStyle='rgba(0,0,0,1.0)';
 			for (lines in haikuforms) {
@@ -309,18 +321,20 @@ let drawCanvas = function() {
 			// divider line on text card
 			//
 			ctx.strokeStyle = 'rgba(0,0,0,1.0)';
-			ctx.moveTo(cardx+cardpad*2, cardy+cardh*0.5);
-			ctx.lineTo(cardx+cardw-cardpad*2, cardy+cardh*0.5);
+			ctx.moveTo(cardx+cardpad*4, cardy+cardh*0.5);
+			ctx.lineTo(cardx+cardw-cardpad*4, cardy+cardh*0.5);
 			ctx.stroke();
 
 			//
 			// router connection text on text card
 			//
 			ctx.textAlign="left";
-			ctx.font="18px Verdana";
-			ctx.fillText('Use smartphone to interact', cardx+cardpad*2, cardy+cardh*0.5 + 2*w*0.02);
-			ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
-			ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
+			ctx.font="12px Verdana";
+			ctx.fillText('Use smartphone to interact', cardx+cardpad*4, cardy+cardh*0.5 + 2*w*0.02);
+			//ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
+			//ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
+			ctx.fillText('Network "celeiro"', cardx+cardpad*4, cardy+cardh*0.5 + 3*w*0.02);
+			ctx.fillText('http://192.168.0.103', cardx+cardpad*4, cardy+cardh*0.5 + 4*w*0.02);
 			
 		} };
 		this.effects[haiku] = effect;
