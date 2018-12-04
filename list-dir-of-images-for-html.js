@@ -17,8 +17,7 @@ function listfiles(testFolder) {
 		fs.readdir(testFolder+dir+'/', (err, files) => {
 		  var counter = 0;
 		  files.forEach(file => {
-			  //'    img(id="spring_ddg_0", src="/images/spring_ddg/1b30589d38936e5e82fd411841b5078754a30758.jpg")';
-			  console.log("    img(id=\""+dir+"_"+(counter++)+"\" src=\""+testFolder.substring(8)+dir+"/"+file+"\")");
+			  if (file != "removed") console.log("    img(id=\""+dir+"_"+(counter++)+"\" src=\""+testFolder.substring(8)+dir+"/"+file+"\")");
 		  });
 		});
 	});

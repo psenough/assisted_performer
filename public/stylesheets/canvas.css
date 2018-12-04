@@ -13,6 +13,26 @@
 	-webkit-backface-visibility: hidden;
 }
 
+@font-face {
+    font-family: NothingYouCouldDo;
+    src: url('./NothingYouCouldDo.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: Parisienne;
+    src: url('./Parisienne-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: GreatVibes;
+    src: url('./GreatVibes-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: HaikuScript;
+    src: url('./Haiku\'s Script version 09 Bold.ttf') format('truetype');
+}
+
 *:focus { outline:none; }
 
 html, body {
@@ -31,6 +51,7 @@ canvas, img {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor;
+	font-family: HaikuScript;
 }
 
 #words {

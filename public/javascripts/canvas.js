@@ -17,8 +17,9 @@ let address = 'http://';
 //let spring_ddg = {};
 //let num_spring_ddg = 24;
 let window_frame;
+let name_plates;
 let speedbump = 0.1;
-let zoom_canvas = 0.75;
+let zoom_canvas = 1.0;
 
 let cl = [
 	['UPDATE_TIMERS']
@@ -148,6 +149,7 @@ let drawCanvas = function() {
 		console.log(haiku);
 		
 		window_frame = document.getElementById('window_frame');
+		name_plates = document.getElementById('name_plates');
 		
 		// load all wordlists
 		var thisparams = {};
@@ -241,100 +243,57 @@ let drawCanvas = function() {
 			//
 			// text card frame
 			//
-			var cardx = w-xStart*0.9*2;
+			/*var cardx = w-xStart*0.9*2;
 			var cardy = h*0.4;
 			var cardw = xStart*0.9*2;
 			var cardh = h*0.35;
 			var cardpad = w*0.01;
 			
-			//ctx.fillStyle = 'rgba(15,15,15,0.8)';
-			//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
+			drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad);*/
 			
-			//ctx.fillStyle = 'rgba(255,255,255,1.0)';
-			//roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
 			
-			// bevel
-			/*ctx.save();
-			ctx.clip();
-			ctx.shadowColor = '#000';
-			for(var i=0;i<3;i++){
-				for(var j=0;j<3;j++){
-					ctx.shadowBlur=4+i;
-					ctx.lineWidth=2.0;
-					ctx.stroke();
-				}
-			}
-			ctx.restore();*/
-			
-			ctx.fillStyle = 'rgba(250,250,250,1.0)';
-			roundRect(ctx, cardx+cardpad, cardy+cardpad, cardw-cardpad*2, cardh-cardpad*2, 30, true, false);
-
-			// bevel
-			/*ctx.save();
-			ctx.clip();
-			ctx.strokeStyle = 'rgba(250,250,250,1.0)';
-			ctx.shadowColor = '#000';
-			for(var i=0;i<3;i++){
-				for(var j=0;j<3;j++){
-					ctx.shadowBlur=4+i;
-					ctx.lineWidth=0.50;
-					ctx.stroke();
-				}
-			}
-			ctx.restore();*/
 			
 			//
-			// haiku text on text card
+			// haiku text on screen
 			//
 			var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
-			ctx.font="14px Verdana";
+			ctx.font="30px NothingYouCouldDo";
 			ctx.textAlign="center"; 
-			ctx.fillStyle='rgba(0,0,0,1.0)';
+			ctx.fillStyle='rgba(255,255,255,1.0)';
+			ctx.shadowColor='rgba(0,0,0,1.0)';
+			ctx.lineWidth=5;
 			for (lines in haikuforms) {
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
-					//console.log(word_ref);
-					/*var word = '';
-					if (word_ref in params) {
-						if ('value' in params[word_ref]) {
-							if ('value' in params[word_ref]['value']) word = params[word_ref]['value']['value'];
-								else word = word_ref;
-						}
-					}*/
 					if (params[word_ref]) {
 						word = params[word_ref]['value'];
 					} else {
 						word = wordlists[word_ref][0];
 					}
-					//console.log(word);
 					output += word + ' ';
 				}
-
-				ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.025);
-				output = ''; //+= '<br>';
+				ctx.shadowBlur=7;
+				var lin = (linecounter++);
+				ctx.strokeText(output, renderableWidth*0.5, renderableHeight*0.7 + lin*w*0.045);
+				ctx.shadowBlur=0;
+				ctx.fillText(output, renderableWidth*0.5, renderableHeight*0.7 + lin*w*0.045);
+				output = '';
 			}
+			ctx.shadowBlur = 0;
+		
 			
-			//
-			// divider line on text card
-			//
-			ctx.strokeStyle = 'rgba(0,0,0,1.0)';
-			ctx.moveTo(cardx+cardpad*4, cardy+cardh*0.5);
-			ctx.lineTo(cardx+cardw-cardpad*4, cardy+cardh*0.5);
-			ctx.stroke();
+			//ctx.fillStyle = 'rgba(230,150,20,1.0)';
+			//roundRect(ctx, renderableWidth*0.4, renderableHeight*0.89, renderableWidth*0.2, renderableWidth*0.04, 25, true, false);
 
-			//
-			// router connection text on text card
-			//
-			ctx.textAlign="left";
-			ctx.font="12px Verdana";
-			ctx.fillText('Use smartphone to interact', cardx+cardpad*4, cardy+cardh*0.5 + 2*w*0.02);
-			//ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
-			//ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
-			ctx.fillText('Network "celeiro"', cardx+cardpad*4, cardy+cardh*0.5 + 3*w*0.02);
-			ctx.fillText('http://192.168.0.103', cardx+cardpad*4, cardy+cardh*0.5 + 4*w*0.02);
+			ctx.drawImage(name_plates, renderableWidth*0.39, renderableHeight*0.89, renderableWidth*0.22, renderableWidth*0.05);
+			
+			ctx.font="30px Parisienne";
+			ctx.textAlign="center"; 
+			ctx.fillStyle='rgba(80,50,20,1.0)';
+			ctx.fillText(selected_haiku, renderableWidth*0.5, renderableHeight*0.935);
 			
 		} };
 		this.effects[haiku] = effect;
@@ -355,6 +314,88 @@ let drawCanvas = function() {
 			//console.log(effects[fx]['call']);
 			if (cv.effects[fx]['on'] === true) cv.effects[fx]['call']();
 		}
+	}
+	
+	function drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad) {
+		//ctx.fillStyle = 'rgba(15,15,15,0.8)';
+		//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
+		
+		//ctx.fillStyle = 'rgba(255,255,255,1.0)';
+		//roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
+		
+		// bevel
+		/*ctx.save();
+		ctx.clip();
+		ctx.shadowColor = '#000';
+		for(var i=0;i<3;i++){
+			for(var j=0;j<3;j++){
+				ctx.shadowBlur=4+i;
+				ctx.lineWidth=2.0;
+				ctx.stroke();
+			}
+		}
+		ctx.restore();*/
+		
+		ctx.fillStyle = 'rgba(250,250,250,1.0)';
+		roundRect(ctx, cardx+cardpad, cardy+cardpad, cardw-cardpad*2, cardh-cardpad*2, 30, true, false);
+
+		// bevel
+		ctx.save();
+		ctx.clip();
+		ctx.strokeStyle = 'rgba(250,250,250,1.0)';
+		ctx.shadowColor = '#000';
+		for(var i=0;i<3;i++){
+			for(var j=0;j<3;j++){
+				ctx.shadowBlur=4+i;
+				ctx.lineWidth=0.50;
+				ctx.stroke();
+			}
+		}
+		ctx.restore();
+		
+		//
+		// haiku text on text card
+		//
+		var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
+		var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
+		var output = '';
+		var linecounter = 0;
+		ctx.font="14px Verdana";
+		ctx.textAlign="center"; 
+		ctx.fillStyle='rgba(0,0,0,1.0)';
+		for (lines in haikuforms) {
+			for (words in haikuforms[lines]) {
+				var word_ref = haikuforms[lines][words][1];
+				if (params[word_ref]) {
+					word = params[word_ref]['value'];
+				} else {
+					word = wordlists[word_ref][0];
+				}
+				output += word + ' ';
+			}
+			ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.025);
+			output = '';
+		}
+		
+		
+		//
+		// divider line on text card
+		//
+		ctx.strokeStyle = 'rgba(0,0,0,1.0)';
+		ctx.moveTo(cardx+cardpad*4, cardy+cardh*0.5);
+		ctx.lineTo(cardx+cardw-cardpad*4, cardy+cardh*0.5);
+		ctx.stroke();
+
+		//
+		// router connection text on text card
+		//
+		ctx.textAlign="left";
+		ctx.font="12px Verdana";
+		ctx.fillText('Use smartphone to interact', cardx+cardpad*4, cardy+cardh*0.5 + 2*w*0.02);
+		//ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
+		//ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
+		ctx.fillText('Network "celeiro"', cardx+cardpad*4, cardy+cardh*0.5 + 3*w*0.02);
+		ctx.fillText('http://192.168.0.103', cardx+cardpad*4, cardy+cardh*0.5 + 4*w*0.02);	
 	}
 	
 	requestAnimationFrame( animate );
@@ -429,6 +470,7 @@ function resize() {
 		canvas = document.createElement('canvas');
 		canvas.setAttribute('id','canvas');
 		document.body.appendChild(canvas);
+		canvas.innerHTML = 'canvas';		
 	}
 
 	canvas.setAttribute("width", w);

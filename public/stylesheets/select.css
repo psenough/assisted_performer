@@ -31,7 +31,6 @@ html, body {
 	right: 0px;
 	width: 0px;
 	height: 0px;
-	/*background-image: url('/images/pattern-optimized.png');*/
 	background-color: #000;
 	background-position: center top;
 	text-align: center;
@@ -113,7 +112,6 @@ canvas, img {
 }
 
 .btn span {
-	font-family: 'sofia-pro-soft';
 	color: inherit;
 	background-color: transparent;
 	display: inline-block;
