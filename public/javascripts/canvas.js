@@ -10,6 +10,7 @@ let halfh;
 let params = {};
 let votes = {};
 let active_part = 1;
+let audio = undefined;
 
 let address = 'http://';
 
@@ -38,7 +39,7 @@ function init() {
 		console.log(e);
 	}
 	cv = new drawCanvas();
-	activateEffect('Spring1');
+	activateEffect('Autumn1');
 	//changePart(active_part);
 }
 
@@ -116,6 +117,30 @@ function activateEffect(effect_name) {
 	
 	// report the new parameters to the server		
 	sendParameters();
+	
+	if (audio != undefined) {
+		audio.pause();
+		audio.currentTime = 0;
+	}
+	audio = new Audio( "sounds/" + effect_name + ".wav");
+	audio.play();
+	audio.loop = true;
+}
+
+let sfx = undefined;
+let sfx_ended = true;
+
+function playSFX(source) {
+	console.log('playing ' + source);
+	let sfx = new Audio( "sounds/" + source + ".wav");
+	sfx.addEventListener("ended", function() {
+          sfx_ended = true;
+		  console.log('ended playing');
+    });
+	sfx.currentTime = 0;
+	sfx.loop = false;
+	sfx_ended = false;
+	sfx.play();
 }
 
 function addToParams(this_fx_params) {
@@ -135,6 +160,7 @@ function addToParams(this_fx_params) {
 }
 
 let bg_ddg = {};
+let previndex = undefined;
 
 let drawCanvas = function() {
 	resize();
@@ -225,6 +251,11 @@ let drawCanvas = function() {
 			
 			if (speedbump > 0.0) speedbump = speedbump * 0.989;
 			let index = (parseInt(timer*0.0001+speedbump*400, 10) % s_ddg.length);
+			if (index != previndex) {
+				console.log('trying to play while sfx_ended ' + sfx_ended);
+				if (sfx_ended == true) playSFX("click"+(index%6));
+			}
+			previndex = index;
 			
 			if (selected_haiku == 'Spring1') {
 				// hack crop 16:9 images
@@ -444,19 +475,6 @@ let drawCanvas = function() {
 }
 
 let selected_haiku = '';
-let audio = undefined;
-
-function playAudio(source, loop) {
-	if (audio) {
-		audio.pause();
-		delete audio;
-	}
-	audio = document.createElement('audio');
-	audio.setAttribute('src', source);
-	audio.setAttribute('autoplay', 'autoplay');
-	audio.loop = loop;
-	audio.currentTime = 0;
-}
 
 window.onresize = resize;
 
