@@ -1,6 +1,5 @@
 
 let showFPS = false;
-
 let cv;
 let w;
 let h;
@@ -11,16 +10,17 @@ let params = {};
 let votes = {};
 let active_part = 1;
 let audio = undefined;
-
 let address = 'http://';
-
-//let backgrounds = {};
-//let spring_ddg = {};
-//let num_spring_ddg = 24;
 let window_frame;
 let name_plates;
 let speedbump = 0.1;
-let zoom_canvas = 1.0;
+let confs = {
+			"old_frame": {"frame": "wood", "align": "center", "left": 0.5, "top": 0.7, "zoom": 1.0 },
+			"left_text": {"frame": "none", "align": "left", "left": 0.1, "top": 0.15, "zoom": 1.0 },
+			"polaroid":  {"frame": "polaroid", "align": "left", "left": 0.1, "top": 1.0, "zoom": 0.83 },
+			"side_text": {"frame": "wood", "align": undefined, "left": undefined, "top": undefined, "zoom": 0.8 }
+			};
+let active_conf = "left_text";
 
 let cl = [
 	['UPDATE_TIMERS']
@@ -114,10 +114,10 @@ function activateEffect(effect_name) {
 		}
 	}
 	speedbump = 0.3;
-	
+
 	// report the new parameters to the server		
 	sendParameters();
-	
+
 	if (audio != undefined) {
 		audio.pause();
 		audio.currentTime = 0;
@@ -200,7 +200,9 @@ let drawCanvas = function() {
 		
 		// add haiku form to effects
 		var effect = {'on':false, 'params':thisparams, 'call': function() { 
-		
+
+			let conf = confs[active_conf];
+
 			d2 = new Date();
 			n2 = d2.getTime(); 
 			timer = (n2-n);
@@ -216,8 +218,8 @@ let drawCanvas = function() {
 				renderableHeight = h;
 				renderableWidth = fw * (renderableHeight / fh);
 				
-				renderableHeight = renderableHeight*zoom_canvas;
-				renderableWidth = renderableWidth*zoom_canvas;
+				renderableHeight = renderableHeight*conf['zoom'];
+				renderableWidth = renderableWidth*conf['zoom'];
 				
 				xStart = (w - renderableWidth) / 2;
 				yStart = 0;
@@ -225,8 +227,8 @@ let drawCanvas = function() {
 				renderableWidth = w;
 				renderableHeight = fh * (renderableWidth / fw);
 				
-				renderableHeight = renderableHeight*zoom_canvas;
-				renderableWidth = renderableWidth*zoom_canvas;
+				renderableHeight = renderableHeight*conf['zoom'];
+				renderableWidth = renderableWidth*conf['zoom'];
 				
 				xStart = 0;
 				yStart = (h - renderableHeight) / 2;
@@ -234,8 +236,8 @@ let drawCanvas = function() {
 				renderableHeight = h;
 				renderableWidth = w;
 				
-				renderableHeight = renderableHeight*zoom_canvas;
-				renderableWidth = renderableWidth*zoom_canvas;
+				renderableHeight = renderableHeight*conf['zoom'];
+				renderableWidth = renderableWidth*conf['zoom'];
 				
 				xStart = 0;
 				yStart = 0;
@@ -269,19 +271,44 @@ let drawCanvas = function() {
 			//
 			// window frame
 			//
-			ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
+			switch(active_conf) {
+				case 'old_frame': {
+					// frame
+					ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
+					// name plate
+					ctx.drawImage(name_plates, renderableWidth*0.39, renderableHeight*0.89, renderableWidth*0.22, renderableWidth*0.05);
+					// name
+					ctx.font="30px Parisienne";
+					ctx.textAlign="center"; 
+					ctx.fillStyle='rgba(80,50,20,1.0)';
+					ctx.fillText(selected_haiku, renderableWidth*0.5, renderableHeight*0.935);
+					ctx.fillStyle = 'rgba(255,255,255,1.0)';
+				} break;
+				case 'polaroid': {
+					ctx.fillStyle = "rgba(255,255,255,1.0)";
+					ctx.fillRect(0.0, 0.0, pad, renderableHeight);
+					ctx.fillRect(0.0, 0.0, renderableWidth, pad);
+					ctx.fillRect(0.0, h-pad*3.5, renderableWidth, pad*3.5);
+					ctx.fillRect(renderableWidth-pad, 0.0, pad, renderableHeight);
+					ctx.fillStyle = 'rgba(55,55,255,1.0)';
+				} break;
+				case 'side_text': {
+					ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
+					
+					var cardx = w-xStart*0.9*2;
+					var cardy = h*0.4;
+					var cardw = xStart*0.9*2;
+					var cardh = h*0.35;
+					var cardpad = w*0.01;			
+					drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad);
+				} break;
+				case 'left_text':
+				default: {
+					// do nothing
+					ctx.fillStyle = 'rgba(255,255,255,1.0)';
+				} break;
+			}
 
-			//
-			// text card frame
-			//
-			/*var cardx = w-xStart*0.9*2;
-			var cardy = h*0.4;
-			var cardw = xStart*0.9*2;
-			var cardh = h*0.35;
-			var cardpad = w*0.01;
-			
-			drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad);*/
-			
 			
 			
 			//
@@ -291,11 +318,10 @@ let drawCanvas = function() {
 			var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
 			var output = '';
 			var linecounter = 0;
-			ctx.font="30px NothingYouCouldDo";
-			ctx.textAlign="center"; 
-			ctx.fillStyle='rgba(255,255,255,1.0)';
-			ctx.shadowColor='rgba(0,0,0,1.0)';
-			ctx.lineWidth=5;
+			ctx.font = "30px NothingYouCouldDo";
+			ctx.textAlign = conf['align'];
+			ctx.shadowColor = 'rgba(0,0,0,1.0)';
+			ctx.lineWidth = 5;
 			for (lines in haikuforms) {
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
@@ -308,23 +334,12 @@ let drawCanvas = function() {
 				}
 				ctx.shadowBlur=7;
 				var lin = (linecounter++);
-				ctx.strokeText(output, renderableWidth*0.5, renderableHeight*0.7 + lin*w*0.045);
+				if (active_conf != 'polaroid') ctx.strokeText(output, renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
 				ctx.shadowBlur=0;
-				ctx.fillText(output, renderableWidth*0.5, renderableHeight*0.7 + lin*w*0.045);
+				ctx.fillText(output, renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
 				output = '';
 			}
 			ctx.shadowBlur = 0;
-		
-			
-			//ctx.fillStyle = 'rgba(230,150,20,1.0)';
-			//roundRect(ctx, renderableWidth*0.4, renderableHeight*0.89, renderableWidth*0.2, renderableWidth*0.04, 25, true, false);
-
-			ctx.drawImage(name_plates, renderableWidth*0.39, renderableHeight*0.89, renderableWidth*0.22, renderableWidth*0.05);
-			
-			ctx.font="30px Parisienne";
-			ctx.textAlign="center"; 
-			ctx.fillStyle='rgba(80,50,20,1.0)';
-			ctx.fillText(selected_haiku, renderableWidth*0.5, renderableHeight*0.935);
 			
 		} };
 		this.effects[haiku] = effect;
