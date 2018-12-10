@@ -381,9 +381,11 @@ function addToParams(theseparams) {
 	}
 }
 
-expressWs.getWss().on('connection', function(client) {
+expressWs.getWss().on('connection', function(client, req) {
 	console.log('connection open');
     client.id = id++;
+	//console.log(client);
+	client.upgradeReq = req;
 	client.ra = client.upgradeReq.connection.remoteAddress;
     client.send(JSON.stringify({'uniqueID': '2'}));
     active_conn.push({'uid': client.id, 'socket': client, 'latest_message': {}, 'client_type': null, 'latest_timestamp': getTimestamp()});
@@ -439,7 +441,7 @@ app.ws('/', function(ws, req) {
 							logme('received control: ' + data);
 							var thisparam = parsed['parameters']['param'];
 							if (thisparam in params) {
-								console.log(thisparam);
+								//console.log(thisparam);
 								if ('value' in parsed['parameters']) {
 									params[thisparam]['value'] = parsed['parameters']['value'];
 								}
@@ -777,7 +779,5 @@ function clone(obj) {
 
     throw new Error("Unable to copy obj! Its type isn't supported.");
 }
-
-
 
 module.exports = app;
