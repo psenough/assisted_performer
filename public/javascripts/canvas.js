@@ -20,7 +20,7 @@ let confs = {
 			"polaroid":  {"frame": "polaroid", "align": "left", "left": 0.1, "top": 1.0, "zoom": 0.83 },
 			"side_text": {"frame": "wood", "align": undefined, "left": undefined, "top": undefined, "zoom": 0.8 }
 			};
-let active_conf = "left_text";
+let active_conf = "old_frame";
 
 let cl = [
 	['UPDATE_TIMERS']
@@ -81,6 +81,7 @@ function changePart(next_part) {
 		// report the new parameters to the server		
 		sendParameters();
 	}
+	sfx_ended = true;
 }
 
 function activateEffect(effect_name) {

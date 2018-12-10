@@ -712,7 +712,7 @@ stdin.on('data', function (data) {
 			//}
 		}
 	}
-	if (data == 'c') {
+	/*if (data == 'c') {
 		console.log('listing connections:');
 		for (c in connections) {
 			//console.log('connection: ' + connections[c]['ip'] + ' ' + connections[c]['ip']['canvas']);
@@ -720,7 +720,7 @@ stdin.on('data', function (data) {
 				console.log(util.inspect(connections[c]));
 			//}
 		}
-	}
+	}*/
 	if (data == 'p') {
 		//var list = [];
 		//for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
