@@ -1,5 +1,5 @@
 
-let showFPS = false;
+let showFPS = true;
 let cv;
 let w;
 let h;
@@ -163,14 +163,40 @@ function addToParams(this_fx_params) {
 let bg_ddg = {};
 let previndex = undefined;
 
+let nparticles = 1000;
+let max_particle_size = 2;
+let max_particle_life = 2000;
+let particle_fadein = 0.1;
+let particle_fadeout = 0.1;
+let par = [];
+
+let temp_canvas = document.createElement('canvas');
+let temp_ctx    = temp_canvas.getContext('2d');
+
 let drawCanvas = function() {
 	resize();
 	
 	let d = d2 = new Date();
-	let n = n2 = d.getTime();
+	let n = n2 = n3 = d.getTime();
 	let timer = n2-n;
+	let delta = n2-n3;
 	
 	this.effects = {};
+	
+	for (let i=0; i<nparticles; i++) {
+		par[i] = { 	
+					'x': Math.random(),
+					'y': Math.random(),
+					'vx': Math.random(),
+					'vy': Math.random(),
+					'size': Math.random()*max_particle_size,
+					'alpha': Math.random()*0.75+0.25,
+					'lifestart': 0.0,
+					'lifeend': Math.random()*max_particle_life*0.25 + max_particle_life*0.75,
+					'fadein': max_particle_life*particle_fadein,
+					'fadeout': max_particle_life*particle_fadeout
+				}
+	}
 	
 	for (haiku in metagenhaiku['genhaikus']) {
 		console.log(haiku);
@@ -205,8 +231,10 @@ let drawCanvas = function() {
 			let conf = confs[active_conf];
 
 			d2 = new Date();
-			n2 = d2.getTime(); 
+			n3 = n2;
+			n2 = d2.getTime();
 			timer = (n2-n);
+			delta = (n2-n3);
 			
 			let fw = window_frame.width;
 			let fh = window_frame.height;
@@ -260,14 +288,49 @@ let drawCanvas = function() {
 			}
 			previndex = index;
 			
+			//TODO: option between fade trans, particles, clean cut, 
+			
+			//ctx.clearRect(0,0,w,h);
+			ctx.globalAlpha=0.05;
 			if (selected_haiku == 'Spring1') {
 				// hack crop 16:9 images
 				ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+				//temp_ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
 			} else {
 				ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+				//temp_ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
 			}
+			ctx.globalAlpha=1.0;
 			
-			//TODO: test particles
+			// particles
+			/*var imgdata = temp_ctx.getImageData(0,0,w,h);
+			var rgba = imgdata.data;			
+			for (let i=0; i<nparticles; i++) {
+				// update
+				//par[i].x += par[i].vx*(delta/2000);
+				//if (par[i].x > 1.0) par[i].x -= 1.0;
+				//if (par[i].x < 0.0) par[i].x += 1.0;
+				//par[i].y += par[i].vy*(delta/2000);
+				//if (par[i].y > 1.0) par[i].y -= 1.0;
+				//if (par[i].y < 0.0) par[i].y += 1.0;
+				par[i].x = Math.random();
+				par[i].y = Math.random();
+				
+				let tx = parseInt(par[i].x*w,10);
+				let ty = parseInt(par[i].y*h,10);
+				let px = parseInt((tx*4) + (ty*4)*w,10);
+				
+				let r = rgba[px  ];
+				let g = rgba[px+1];
+				let b = rgba[px+2];
+				//let a = rgba[px+3];
+				
+				// draw on screen
+				ctx.fillStyle = 'rgba('+r+','+g+','+b+','+par[i].alpha*0.25+')';
+				ctx.beginPath();
+				ctx.arc(tx,ty,par[i].size,0,2*Math.PI);
+				ctx.fill();
+			}*/
 			
 			//
 			// window frame
@@ -515,6 +578,13 @@ function resize() {
 	ctx.height = h;
 	halfw = w*.5;
 	halfh = h*.5;
+	
+	if (temp_canvas) {
+		temp_canvas.setAttribute("width", w);
+		temp_canvas.setAttribute("height", h);
+		temp_ctx.width = w;
+		temp_ctx.height = h;
+	}
 	
 	if (showFPS) {
 		let fps = document.getElementById("fps"); 
