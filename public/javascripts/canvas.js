@@ -1,5 +1,5 @@
 
-let showFPS = true;
+let showFPS = false;
 let cv;
 let w;
 let h;
@@ -16,9 +16,9 @@ let name_plates;
 let speedbump = 0.1;
 let confs = {
 			"old_frame": {"frame": "wood", "align": "center", "left": 0.5, "top": 0.7, "zoom": 1.0 },
-			"left_text": {"frame": "none", "align": "left", "left": 0.1, "top": 0.15, "zoom": 1.0 },
-			"polaroid":  {"frame": "polaroid", "align": "left", "left": 0.1, "top": 1.0, "zoom": 0.83 },
-			"side_text": {"frame": "wood", "align": undefined, "left": undefined, "top": undefined, "zoom": 0.8 }
+			"left_text": {"frame": "none", "align": "left", "left": 0.05, "top": 0.1, "zoom": 1.0 },
+			"polaroid":  {"frame": "polaroid", "align": "left", "left": 0.1, "top": 1.0, "zoom": 0.83 }
+			//"side_text": {"frame": "wood", "align": undefined, "left": undefined, "top": undefined, "zoom": 0.8 }
 			};
 let active_conf = "old_frame";
 
@@ -163,8 +163,8 @@ function addToParams(this_fx_params) {
 let bg_ddg = {};
 let previndex = undefined;
 
-let nparticles = 1000;
-let max_particle_size = 2;
+let nparticles = 700;
+let max_particle_size = 8;
 let max_particle_life = 2000;
 let particle_fadein = 0.1;
 let particle_fadeout = 0.1;
@@ -190,7 +190,7 @@ let drawCanvas = function() {
 					'vx': Math.random(),
 					'vy': Math.random(),
 					'size': Math.random()*max_particle_size,
-					'alpha': Math.random()*0.75+0.25,
+					'alpha': Math.random()*0.5+0.5,
 					'lifestart': 0.0,
 					'lifeend': Math.random()*max_particle_life*0.25 + max_particle_life*0.75,
 					'fadein': max_particle_life*particle_fadein,
@@ -204,8 +204,20 @@ let drawCanvas = function() {
 		window_frame = document.getElementById('window_frame');
 		name_plates = document.getElementById('name_plates');
 		
+		let thisparams = {};
+		
+		// add frame conf to controllable params
+		let clist = [];
+		for (conf in confs) {
+			clist[clist.length] = conf;
+		}
+		thisparams['conf_list'] = { 'friendly_name': 'conf_list', 'possible': clist, 'value': clist[rand(clist.length)] }
+		
+		// add transition conf to controllable params
+		clist = ['clean cut','fade in','points','particles'];
+		thisparams['tran_list'] = { 'friendly_name': 'tran_list', 'possible': clist, 'value': clist[rand(clist.length)] }
+		
 		// load all wordlists
-		var thisparams = {};
 		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
 			//console.log(wordlist);
 			var wtym =  metagenhaiku['genhaikus'][haiku]['wordlists'][wordlist];
@@ -228,6 +240,7 @@ let drawCanvas = function() {
 		// add haiku form to effects
 		var effect = {'on':false, 'params':thisparams, 'call': function() { 
 
+			if (thisparams['conf_list'] != undefined) active_conf = thisparams['conf_list']['value'];
 			let conf = confs[active_conf];
 
 			d2 = new Date();
@@ -273,13 +286,20 @@ let drawCanvas = function() {
 			}
 
 			let pad = w*0.05;
+			if (active_conf == 'left_text') pad = 0;
+			
+			let polpad = 0;
+			if (active_conf == 'polaroid') {
+				polpad = (w-renderableWidth)*0.5;
+			}
 			
 			//
 			// background image
 			//
+			
+			// figure out what image index to display
 			let s_ddg = bg_ddg[selected_haiku];
 			if (s_ddg.length == 0) return;
-			
 			if (speedbump > 0.0) speedbump = speedbump * 0.989;
 			let index = (parseInt(timer*0.0001+speedbump*400, 10) % s_ddg.length);
 			if (index != previndex) {
@@ -288,55 +308,84 @@ let drawCanvas = function() {
 			}
 			previndex = index;
 			
-			//TODO: option between fade trans, particles, clean cut, 
-			
-			//ctx.clearRect(0,0,w,h);
-			ctx.globalAlpha=0.05;
+			// hack crop for 16:9 images ("Spring1" only)
+			let hackcrop1 = 0;
+			let hackcrop2 = 0;
 			if (selected_haiku == 'Spring1') {
 				// hack crop 16:9 images
-				ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
-				//temp_ctx.drawImage(s_ddg[index], 100, 0, s_ddg[0].width-200, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
-			} else {
-				ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
-				//temp_ctx.drawImage(s_ddg[index], 0, 0, s_ddg[0].width, s_ddg[0].height, 0+pad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+				hackcrop1 = 100;
+				hackcrop2 = 200;
 			}
-			ctx.globalAlpha=1.0;
 			
-			// particles
-			/*var imgdata = temp_ctx.getImageData(0,0,w,h);
-			var rgba = imgdata.data;			
-			for (let i=0; i<nparticles; i++) {
-				// update
-				//par[i].x += par[i].vx*(delta/2000);
-				//if (par[i].x > 1.0) par[i].x -= 1.0;
-				//if (par[i].x < 0.0) par[i].x += 1.0;
-				//par[i].y += par[i].vy*(delta/2000);
-				//if (par[i].y > 1.0) par[i].y -= 1.0;
-				//if (par[i].y < 0.0) par[i].y += 1.0;
-				par[i].x = Math.random();
-				par[i].y = Math.random();
+			// transition
+			switch(thisparams['tran_list']['value']) {
+				case 'fade in': {
+					ctx.globalAlpha=0.05;
+					ctx.drawImage(s_ddg[index], hackcrop1, 0, s_ddg[0].width-hackcrop2, s_ddg[0].height, 0+pad+polpad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+					ctx.globalAlpha=1.0;
+				} break;
+				case 'points': {
+					temp_ctx.drawImage(s_ddg[index], hackcrop1, 0, s_ddg[0].width-hackcrop2, s_ddg[0].height, 0+pad+polpad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+					var imgdata = temp_ctx.getImageData(0,0,w,h);
+					var rgba = imgdata.data;			
+					for (let i=0; i<nparticles; i++) {
+						par[i].x = Math.random();
+						par[i].y = Math.random();
+						let tx = parseInt(par[i].x*w,10);
+						let ty = parseInt(par[i].y*h,10);
+						let px = parseInt((tx*4) + (ty*4)*w,10);
+						let r = rgba[px  ];
+						let g = rgba[px+1];
+						let b = rgba[px+2];
+						ctx.fillStyle = 'rgba('+r+','+g+','+b+','+par[i].alpha*0.25+')';
+						ctx.beginPath();
+						ctx.arc(tx,ty,par[i].size,0,2*Math.PI);
+						ctx.fill();
+					}
+				} break;
+				case 'particles': {
+					temp_ctx.drawImage(s_ddg[index], hackcrop1, 0, s_ddg[0].width-hackcrop2, s_ddg[0].height, 0+pad+polpad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+					var imgdata = temp_ctx.getImageData(0,0,w,h);
+					var rgba = imgdata.data;			
+					for (let i=0; i<nparticles; i++) {
+						par[i].x += par[i].vx*(delta/2000);
+						if (par[i].x > 1.0) par[i].x -= 1.0;
+						if (par[i].x < 0.0) par[i].x += 1.0;
+						par[i].y += par[i].vy*(delta/2000);
+						if (par[i].y > 1.0) par[i].y -= 1.0;
+						if (par[i].y < 0.0) par[i].y += 1.0;
+						
+						let tx = parseInt(par[i].x*w,10);
+						let ty = parseInt(par[i].y*h,10);
+						let px = parseInt((tx*4) + (ty*4)*w,10);
+						
+						let r = rgba[px  ];
+						let g = rgba[px+1];
+						let b = rgba[px+2];
+						//let a = rgba[px+3];
+						
+						// draw on screen
+						ctx.fillStyle = 'rgba('+r+','+g+','+b+','+par[i].alpha*0.25+')';
+						ctx.beginPath();
+						ctx.arc(tx,ty,par[i].size,0,2*Math.PI);
+						ctx.fill();
+					}
+					
+				} break;
+				case 'clean cut':
+				default: {
+					ctx.drawImage(s_ddg[index], hackcrop1, 0, s_ddg[0].width-hackcrop2, s_ddg[0].height, 0+pad+polpad, yStart+pad, renderableWidth-pad*2, renderableHeight-pad*2);
+				} break;
 				
-				let tx = parseInt(par[i].x*w,10);
-				let ty = parseInt(par[i].y*h,10);
-				let px = parseInt((tx*4) + (ty*4)*w,10);
-				
-				let r = rgba[px  ];
-				let g = rgba[px+1];
-				let b = rgba[px+2];
-				//let a = rgba[px+3];
-				
-				// draw on screen
-				ctx.fillStyle = 'rgba('+r+','+g+','+b+','+par[i].alpha*0.25+')';
-				ctx.beginPath();
-				ctx.arc(tx,ty,par[i].size,0,2*Math.PI);
-				ctx.fill();
-			}*/
+			}
 			
 			//
 			// window frame
 			//
 			switch(active_conf) {
 				case 'old_frame': {
+					// clear rect dirty parts
+					ctx.clearRect(w-pad,0,pad,h);
 					// frame
 					ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
 					// name plate
@@ -349,11 +398,15 @@ let drawCanvas = function() {
 					ctx.fillStyle = 'rgba(255,255,255,1.0)';
 				} break;
 				case 'polaroid': {
+					// clear rect dirty parts
+					ctx.clearRect(0,0,polpad,h);
+					ctx.clearRect(w-polpad,0,polpad,h);
+					//sides
 					ctx.fillStyle = "rgba(255,255,255,1.0)";
-					ctx.fillRect(0.0, 0.0, pad, renderableHeight);
-					ctx.fillRect(0.0, 0.0, renderableWidth, pad);
-					ctx.fillRect(0.0, h-pad*3.5, renderableWidth, pad*3.5);
-					ctx.fillRect(renderableWidth-pad, 0.0, pad, renderableHeight);
+					ctx.fillRect(polpad, 0.0, pad, renderableHeight);
+					ctx.fillRect(polpad, 0.0, renderableWidth, pad);
+					ctx.fillRect(polpad, h-pad*3.5, renderableWidth, pad*3.5);
+					ctx.fillRect(polpad+renderableWidth-pad, 0.0, pad, renderableHeight);
 					ctx.fillStyle = 'rgba(55,55,255,1.0)';
 				} break;
 				case 'side_text': {
@@ -368,6 +421,10 @@ let drawCanvas = function() {
 				} break;
 				case 'left_text':
 				default: {
+					ctx.clearRect(0.0, 0.0, pad, renderableHeight);
+					ctx.clearRect(0.0, 0.0, renderableWidth, pad);
+					ctx.clearRect(0.0, renderableHeight-pad, renderableWidth, pad);
+					ctx.clearRect(renderableWidth-pad, 0.0, pad, renderableHeight);
 					// do nothing
 					ctx.fillStyle = 'rgba(255,255,255,1.0)';
 				} break;
@@ -387,6 +444,7 @@ let drawCanvas = function() {
 			ctx.shadowColor = 'rgba(0,0,0,1.0)';
 			ctx.lineWidth = 5;
 			for (lines in haikuforms) {
+				var linepad = 0;
 				for (words in haikuforms[lines]) {
 					var word_ref = haikuforms[lines][words][1];
 					if (params[word_ref]) {
@@ -398,9 +456,13 @@ let drawCanvas = function() {
 				}
 				ctx.shadowBlur=7;
 				var lin = (linecounter++);
-				if (active_conf != 'polaroid') ctx.strokeText(output, renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
+				if (active_conf != 'polaroid') {
+					ctx.strokeText(output, polpad + renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
+				} else {
+					linepad = pad*lin*lin*2;
+				}
 				ctx.shadowBlur=0;
-				ctx.fillText(output, renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
+				ctx.fillText(output, polpad + renderableWidth*conf['left'] + linepad, renderableHeight*conf['top'] + lin*w*0.045);
 				output = '';
 			}
 			ctx.shadowBlur = 0;
