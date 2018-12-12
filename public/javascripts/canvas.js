@@ -126,6 +126,8 @@ function activateEffect(effect_name) {
 	audio = new Audio( "sounds/" + effect_name + ".wav");
 	audio.play();
 	audio.loop = true;
+	
+	sfx_ended = true;
 }
 
 let sfx = undefined;
@@ -454,7 +456,9 @@ let drawCanvas = function() {
 					}
 					output += word + ' ';
 				}
-				ctx.shadowBlur=7;
+				if (active_conf == 'clean cut') { 
+					ctx.shadowBlur=7;
+				}
 				var lin = (linecounter++);
 				if (active_conf != 'polaroid') {
 					ctx.strokeText(output, polpad + renderableWidth*conf['left'], renderableHeight*conf['top'] + lin*w*0.045);
