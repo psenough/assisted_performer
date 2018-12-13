@@ -1,4 +1,11 @@
 
+//
+// say.js
+//
+
+const say = require('say');
+
+
 
 //
 // express dependencies
@@ -426,13 +433,20 @@ app.ws('/', function(ws, req) {
 			
 			switch (parsed['assisted_performer']) {
 				case 'canvas':
-					params = {};
-					//addAudioParams();
-					addToParams(parsed['parameters']);
 					type = 'canvas';
-					logme('received canvas: ' + data);
-					// received message with new parameters, reassigning all existing controller connections
-					reassignParameters();
+					if ('parameters' in parsed) {
+						params = {};
+						//addAudioParams();
+						addToParams(parsed['parameters']);
+						logme('received canvas: ' + data);
+						// received message with new parameters, reassigning all existing controller connections
+						reassignParameters();
+					}
+					if ('words' in parsed) {
+						logme('speak: ' + parsed['words']);
+						say.stop();
+						say.speak(parsed['words'], params['voices_list']['value'], params['voices_speed']['value']);
+					}
 				break;
 				case 'control':
 					type = 'control';
@@ -444,6 +458,8 @@ app.ws('/', function(ws, req) {
 								//console.log(thisparam);
 								if ('value' in parsed['parameters']) {
 									params[thisparam]['value'] = parsed['parameters']['value'];
+									say.stop();
+									say.speak(parsed['parameters']['value'], params['voices_list']['value'], params['voices_speed']['value']);
 								}
 							}
 						}
@@ -480,7 +496,7 @@ app.ws('/', function(ws, req) {
 		// keep latest message in memory
 		var thisid = getID(client.id);
 		if (thisid in active_conn) {
-			//console.log('its updating');
+			//console.log(thisid + ' is updating');
 			active_conn[thisid]['latest_message'] = lmsg;
 			active_conn[thisid]['latest_timestamp'] = getTimestamp();
 			active_conn[thisid]['client_type'] = type;
@@ -669,7 +685,7 @@ function getIDbyRA(thisra) {
 
 var SerialPort = require('serialport');
 var Readline = require('@serialport/parser-readline')
-var serialPort = new SerialPort('COM3', { baudRate: 9600 });
+var serialPort = new SerialPort('/dev/cu.usbmodem1421', { baudRate: 9600 });
 const parser = serialPort.pipe(new Readline());
 var previous_parser_input = '';
 function parserfunction(someinput) {
@@ -707,7 +723,7 @@ stdin.on('data', function (data) {
 	if (data == 'a') {
 		console.log('listing active_conn:');
 		for (a in active_conn) {
-			console.log(active_conn[a]['uid'] + ' ' + active_conn[a]['socket']['id'] + ' ' + active_conn[a]['socket']['ra']);
+			console.log(active_conn[a]['uid'] + ' ' + active_conn[a]['socket']['id'] + ' ' + active_conn[a]['client_type'] + ' ' + active_conn[a]['socket']['ra']);
 			//console.log('connection: ' + connections[c]['ip'] + ' ' + connections[c]['ip']['canvas']);
 			//if ('params' in connections[c]) {
 			//console.log(util.inspect(active_conn[a]));

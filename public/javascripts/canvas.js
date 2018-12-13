@@ -18,9 +18,10 @@ let confs = {
 			"old_frame": {"frame": "wood", "align": "center", "left": 0.5, "top": 0.7, "zoom": 1.0 },
 			"left_text": {"frame": "none", "align": "left", "left": 0.05, "top": 0.1, "zoom": 1.0 },
 			"polaroid":  {"frame": "polaroid", "align": "left", "left": 0.1, "top": 1.0, "zoom": 0.83 }
-			//"side_text": {"frame": "wood", "align": undefined, "left": undefined, "top": undefined, "zoom": 0.8 }
 			};
 let active_conf = "old_frame";
+
+let voices = ['Alex','Daniel','Fiona','Fred','Karen','Moira','Samantha','Tessa','Veena','Victoria'];
 
 let cl = [
 	['UPDATE_TIMERS']
@@ -175,6 +176,9 @@ let par = [];
 let temp_canvas = document.createElement('canvas');
 let temp_ctx    = temp_canvas.getContext('2d');
 
+let time_to_talk = 15000;
+let latest_change = 0;
+
 let drawCanvas = function() {
 	resize();
 	
@@ -218,6 +222,15 @@ let drawCanvas = function() {
 		// add transition conf to controllable params
 		clist = ['clean cut','fade in','points','particles'];
 		thisparams['tran_list'] = { 'friendly_name': 'tran_list', 'possible': clist, 'value': clist[rand(clist.length)] }
+		
+		// add voices to controllable params
+		let shf = shuffle(voices);
+		clist = [shf[0],shf[1],shf[2],shf[3]];
+		thisparams['voices_list'] = { 'friendly_name': 'voices_list', 'possible': clist, 'value': clist[rand(clist.length)] }
+		
+		// add voices speed to controllable params
+		clist = ['0.6','0.8','1.0','1.2'];
+		thisparams['voices_speed'] = { 'friendly_name': 'voices_speed', 'possible': clist, 'value': clist[rand(clist.length)] }
 		
 		// load all wordlists
 		for (wordlist in metagenhaiku['genhaikus'][haiku]['wordlists']) {
@@ -411,16 +424,6 @@ let drawCanvas = function() {
 					ctx.fillRect(polpad+renderableWidth-pad, 0.0, pad, renderableHeight);
 					ctx.fillStyle = 'rgba(55,55,255,1.0)';
 				} break;
-				case 'side_text': {
-					ctx.drawImage(window_frame, 0, yStart, renderableWidth, renderableHeight);
-					
-					var cardx = w-xStart*0.9*2;
-					var cardy = h*0.4;
-					var cardw = xStart*0.9*2;
-					var cardh = h*0.35;
-					var cardpad = w*0.01;			
-					drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad);
-				} break;
 				case 'left_text':
 				default: {
 					ctx.clearRect(0.0, 0.0, pad, renderableHeight);
@@ -490,88 +493,12 @@ let drawCanvas = function() {
 			//console.log(effects[fx]['call']);
 			if (cv.effects[fx]['on'] === true) cv.effects[fx]['call']();
 		}
-	}
-	
-	function drawSideThingie(ctx, cardx, cardy, cardw, cardh, cardpad) {
-		//ctx.fillStyle = 'rgba(15,15,15,0.8)';
-		//roundRect(ctx, cardx-w*0.01, cardy+h*0.05, cardw, cardh, 20, true, false);
 		
-		//ctx.fillStyle = 'rgba(255,255,255,1.0)';
-		//roundRect(ctx, cardx, cardy, cardw, cardh, 60, true, false);
-		
-		// bevel
-		/*ctx.save();
-		ctx.clip();
-		ctx.shadowColor = '#000';
-		for(var i=0;i<3;i++){
-			for(var j=0;j<3;j++){
-				ctx.shadowBlur=4+i;
-				ctx.lineWidth=2.0;
-				ctx.stroke();
-			}
+		let this_time = (new Date()).getTime();
+		if (this_time > time_to_talk + latest_change) {
+			latest_change = this_time;
+			sendTextToSay();
 		}
-		ctx.restore();*/
-		
-		ctx.fillStyle = 'rgba(250,250,250,1.0)';
-		roundRect(ctx, cardx+cardpad, cardy+cardpad, cardw-cardpad*2, cardh-cardpad*2, 30, true, false);
-
-		// bevel
-		ctx.save();
-		ctx.clip();
-		ctx.strokeStyle = 'rgba(250,250,250,1.0)';
-		ctx.shadowColor = '#000';
-		for(var i=0;i<3;i++){
-			for(var j=0;j<3;j++){
-				ctx.shadowBlur=4+i;
-				ctx.lineWidth=0.50;
-				ctx.stroke();
-			}
-		}
-		ctx.restore();
-		
-		//
-		// haiku text on text card
-		//
-		var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
-		var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
-		var output = '';
-		var linecounter = 0;
-		ctx.font="14px Verdana";
-		ctx.textAlign="center"; 
-		ctx.fillStyle='rgba(0,0,0,1.0)';
-		for (lines in haikuforms) {
-			for (words in haikuforms[lines]) {
-				var word_ref = haikuforms[lines][words][1];
-				if (params[word_ref]) {
-					word = params[word_ref]['value'];
-				} else {
-					word = wordlists[word_ref][0];
-				}
-				output += word + ' ';
-			}
-			ctx.fillText(output, cardx+cardw*0.5, cardy+cardh*0.2 + (linecounter++)*w*0.025);
-			output = '';
-		}
-		
-		
-		//
-		// divider line on text card
-		//
-		ctx.strokeStyle = 'rgba(0,0,0,1.0)';
-		ctx.moveTo(cardx+cardpad*4, cardy+cardh*0.5);
-		ctx.lineTo(cardx+cardw-cardpad*4, cardy+cardh*0.5);
-		ctx.stroke();
-
-		//
-		// router connection text on text card
-		//
-		ctx.textAlign="left";
-		ctx.font="12px Verdana";
-		ctx.fillText('Use smartphone to interact', cardx+cardpad*4, cardy+cardh*0.5 + 2*w*0.02);
-		//ctx.fillText('Access network "HaikuDream"', cardx+cardpad*2, cardy+cardh*0.5 + 3*w*0.02);
-		//ctx.fillText('Visit page http://haiku.dream', cardx+cardpad*2, cardy+cardh*0.5 + 4*w*0.02);
-		ctx.fillText('Network "celeiro"', cardx+cardpad*4, cardy+cardh*0.5 + 3*w*0.02);
-		ctx.fillText('http://192.168.0.103', cardx+cardpad*4, cardy+cardh*0.5 + 4*w*0.02);	
 	}
 	
 	requestAnimationFrame( animate );
@@ -685,6 +612,11 @@ function connectWebSockets() {
 		let obj = {'assisted_performer': 'canvas', 'parameters': params};
 		this_ws.send(JSON.stringify(obj));
 	};
+	
+	this_ws.sendTextToSay = function() {
+		let obj = {'assisted_performer': 'canvas', 'words': getHaikuWords()};
+		this_ws.send(JSON.stringify(obj));
+	};
 
 	this_ws.onmessage = function(evt) {
 		//console.log(evt.data);
@@ -697,6 +629,7 @@ function connectWebSockets() {
 						//if (parsed[instance]['value'] != undefined) {
 							if (params[instance]['value'] != parsed[instance]['value']) {
 								speedbump = 0.3;
+								latest_change = (new Date()).getTime();
 							}
 						//}
 					//}
@@ -865,6 +798,10 @@ function sendParameters() {
 	if ((this_ws != null) && (this_ws.readyState == 1)) this_ws.sendParameters();
 }
 
+function sendTextToSay() {
+	if ((this_ws != null) && (this_ws.readyState == 1)) this_ws.sendTextToSay();
+}
+
 /**
  * Draws a rounded rectangle using the current state of the canvas.
  * If you omit the last three params, it will draw a rectangle
@@ -1029,3 +966,35 @@ var fitImageOn = function(ctx, imageObj) {
 	}
 	ctx.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
 };
+
+function shuffle(array) {
+    var i = array.length,
+        j = 0,
+        temp;
+    while (i--) {
+        j = Math.floor(Math.random() * (i+1));
+        // swap randomly chosen element with current element
+        temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
+function getHaikuWords() {
+	var haikuforms = metagenhaiku['genhaikus'][selected_haiku]['forms']['Form1'];
+	var wordlists = metagenhaiku['genhaikus'][selected_haiku]['wordlists'];
+	let output = '';
+	for (lines in haikuforms) {
+		for (words in haikuforms[lines]) {
+			var word_ref = haikuforms[lines][words][1];
+			if (params[word_ref]) {
+				word = params[word_ref]['value'];
+			} else {
+				word = wordlists[word_ref][0];
+			}
+			output += word + ' ';
+		}
+	}
+	return output;
+}
