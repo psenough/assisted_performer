@@ -176,7 +176,7 @@ let par = [];
 let temp_canvas = document.createElement('canvas');
 let temp_ctx    = temp_canvas.getContext('2d');
 
-let time_to_talk = 15000;
+let time_to_talk = 20000;
 let latest_change = 0;
 
 let drawCanvas = function() {

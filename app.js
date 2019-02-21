@@ -685,7 +685,7 @@ function getIDbyRA(thisra) {
 
 var SerialPort = require('serialport');
 var Readline = require('@serialport/parser-readline')
-var serialPort = new SerialPort('/dev/cu.usbmodem1421', { baudRate: 9600 });
+var serialPort = new SerialPort('/dev/cu.usbmodem1411', { baudRate: 9600 });
 const parser = serialPort.pipe(new Readline());
 var previous_parser_input = '';
 function parserfunction(someinput) {
