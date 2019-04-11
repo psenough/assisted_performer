@@ -2,6 +2,8 @@
 
 Assisted Performer is a node.js server that serves small webpages and acts as a proxy for parameter controllers. Bridging MIDI, OSC, websockets, HTTP requests, etc between applications.
 
+![Pavilhão Conhecimento 22-23 March 2019](./pav_conhecimento_bins/20190323_114106.jpg "Pavilhão Conhecimento 22-23 March 2019")
+
 ## Installing
 
 Tested in Windows 10 and MacOS 10.13
@@ -35,6 +37,8 @@ If you use `launch_server.bat` make sure you edit the path.
 On Google Chrome change `chrome://flags/#autoplay-policy` to not require user interaction
 
 Load `http://localhost/canvas` to display main screen `F11` to fullscreen
+
+Mac has more text to speech voices available by default.
 
 ## Debug Keys
 
