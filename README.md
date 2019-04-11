@@ -104,6 +104,8 @@ The system can be configured to send logs to [winston](http://thisdavej.com/usin
 
 * [Evoke 2018 - Interactive fun with accents!](http://www.pouet.net/prod.php?which=77814) ([interactive_standup branch](https://github.com/psenough/assisted_performer/tree/interactive_stand_up))
 
+* [Residência Expand 2018 - Collaborative Haiku Dream](https://www.youtube.com/watch?v=zji3Ft6pEhg) ([residencia_expand branch](https://github.com/psenough/assisted_performer/tree/residencia_expand))
+
 # Tutorial Videos
 
 Some day, who knows? :)
