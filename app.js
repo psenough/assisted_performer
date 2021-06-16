@@ -22,14 +22,10 @@ var util = require('util')
 // init express
 //
 
-var port = 80;
+var port = 8080;
 var httpServer = http.createServer(app);
 httpServer.on('error', onError);
 app.listen(port);
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -51,48 +47,6 @@ var logdir = '';
 //
 // express request handling
 //
-
-// serve crosswords page
-app.get('/', crosswords);
-app.get('/crosswords', crosswords);
-function crosswords(req, res, next) {
-	res.render('crosswords', {title: 'Crosswords'});
-}
-
-// serve hints page
-app.get('/hints', hints);
-function hints(req, res, next) {
-	res.render('hints', {title: 'Hints'});
-}
-
-// serve master page
-app.get('/points', master);
-function master(req, res) {
-	res.render('points', {title: 'Points'});
-}
-
-// serve favicon
-app.get('/favicon.ico', function(req, res){
-	var options = {
-		root: __dirname + '/public/',
-		dotfiles: 'deny',
-		headers: {
-			'x-timestamp': Date.now(),
-			'x-sent': true
-		}
-	};
-	var fileName = 'images/favicon.ico';
-	res.sendFile(fileName, options, function (err) {
-		if (err) {
-		  console.log(err);
-		  //res.status(err.status).end();
-		} else {
-		  //console.log('Sent:', fileName);
-		}
-	});
-	res.attachment(fileName);
-});
-
 
 app.post('/ping', function(req, res) {
 	// get timestamp
@@ -579,6 +533,27 @@ function getIDbyRA(thisra) {
 // twitch bot
 // TODO
 
+const oauth = require('./oauth.js');
+const tmi = require('tmi.js');
+const tmi_client = new tmi.Client({
+	options: { debug: true, messagesLogLevel: "info" },
+	connection: {
+		reconnect: true,
+		secure: true
+	},
+	identity: {
+		username: oauth.botname,
+		password: oauth.oauth
+	},
+	channels: [ 'psenough' ]
+});
+tmi_client.connect().catch(console.error);
+tmi_client.on('message', (channel, tags, message, self) => {
+	if(self) return;
+	if(message.toLowerCase() === '!hello') {
+		tmi_client.say(channel, `@${tags.username}, heya!`);
+	}
+});
 
 
 
