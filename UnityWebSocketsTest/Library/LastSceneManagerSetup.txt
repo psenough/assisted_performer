@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/AssistedPerformer.unity
-  isLoaded: 1
-  isActive: 1

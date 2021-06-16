@@ -1,13 +1,5 @@
 
 //
-// say.js
-//
-
-const say = require('say');
-
-
-
-//
 // express dependencies
 //
 
@@ -60,80 +52,23 @@ var logdir = '';
 // express request handling
 //
 
-// serve controller page
-app.get('/', catchall);
-app.get('/controller', catchall);
-app.get('/slider', catchall);
-function catchall(req, res, next) {
-	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	
-	console.log('new controller page request');
-
-	// get timestamp
-	var d = new Date();
-	var n = d.getTime();
-	var thistime = d.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-
-	// check if IP is already listed and with a properly assigned parameter
-	var found = false;
-	for (var i=0; i<connections.length; i++) {
-		console.log('connections list: ' + i + ' :: ' + connections[i]['ip']);
-		// ip needs to be the same
-		if (ip == connections[i]['ip']) {
-			// param assigned needs to exist in list of valid params
-			var parapara = false;
-			for (p in params) {
-				if ('params' in connections[i]) {
-					//console.log('params in ' + connections[i]['ip'] + ' ' + connections[i]['params']);
-					for (p2 in connections[i]['params']) {
-						//console.log('comparing ' + connections[i]['params'][p2] + ' with ' + p);
-						if (connections[i]['params'][p2] == p) {
-							found = true;
-							connections[i]['lasttime'] = n;
-							parapara = true;
-						}
-					}
-				}
-			}
-			if (!parapara) connections.splice(i, 1);
-			break;
-			
-			//found = true;
-		}
-	}
-	
-	// if we are dealing with a new IP, give it an unused param
-	if (!found)
-	{
-		var param = getUntakenParam();
-		
-		// add the info to our connections records
-		// params is an array because we might want to pass multiple parameters to a controller at some point
-		if (param == undefined) {
-			connections.push({ip: ip, lasttime: n});
-			console.log('ip: ' + ip + ' on waiting list, total connections: ' + connections.length);
-		} else {
-			connections.push({ip: ip, params: [param], lasttime: n});
-			console.log('ip: ' + ip + ' now controlling param ' + param + ', total connections: ' + connections.length);
-		}
-	}
-
-	res.render('select', {title: 'Haiku'});
-	res.end();
+// serve crosswords page
+app.get('/', crosswords);
+app.get('/crosswords', crosswords);
+function crosswords(req, res, next) {
+	res.render('crosswords', {title: 'Crosswords'});
 }
 
-// serve canvas page
-app.get('/canvas', canvas);
-function canvas(req, res, next) {
-	res.render('canvas', {title: 'Assisted Performer Canvas'});
-	// not adding our canvas to the connections list
+// serve hints page
+app.get('/hints', hints);
+function hints(req, res, next) {
+	res.render('hints', {title: 'Hints'});
 }
 
 // serve master page
-app.get('/master', master);
+app.get('/points', master);
 function master(req, res) {
-	res.render('master', {title: 'Assisted Performer Master'});
-	// not adding master to the connections list
+	res.render('points', {title: 'Points'});
 }
 
 // serve favicon
@@ -158,45 +93,6 @@ app.get('/favicon.ico', function(req, res){
 	res.attachment(fileName);
 });
 
-// receive control values to affect parameter
-app.post('/control', function(req, res) {
-	// get timestamp
-	var d = new Date();
-	var n = d.getTime();
-
-	var thisparam = req.body.param;
-	var thistype = req.body.type;
-	
-	if (thisparam in params) {
-		//var step = (params[thisparam]['max'] - params[thisparam]['min']) / 20;
-		switch(thistype) {
-			case 'add':
-				params[thisparam]['value'] += params[thisparam]['step'];
-				if (params[thisparam]['value'] > params[thisparam]['max']) params[thisparam]['value'] = params[thisparam]['max'];
-			break;
-			case 'minus':
-				params[thisparam]['value'] -= params[thisparam]['step'];
-				if (params[thisparam]['value'] < params[thisparam]['min']) params[thisparam]['value'] = params[thisparam]['min'];
-			break;
-			default:
-				console.log('weird type received:'+thistype);
-			break;
-		}
-		
-		// update param on canvas via websockets
-		sendWebSocketUpdateToCanvas(thisparam);
-	}
-
-	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	for (var i=0; i<connections.length; i++) {
-		if (ip == connections[i]['ip']) {
-			connections[i]['lasttime'] = n;
-			break;
-		}
-	}
-
-	res.send('rcvd');
-});
 
 app.post('/ping', function(req, res) {
 	// get timestamp
@@ -432,7 +328,7 @@ app.ws('/', function(ws, req) {
 			}
 			
 			switch (parsed['assisted_performer']) {
-				case 'canvas':
+				/*case 'canvas':
 					type = 'canvas';
 					if ('parameters' in parsed) {
 						params = {};
@@ -486,7 +382,7 @@ app.ws('/', function(ws, req) {
 
 						}
 					}
-				break;
+				break;*/
 				default:
 					logme('unknown assisted perfomer');
 				break;
@@ -680,37 +576,10 @@ function getIDbyRA(thisra) {
 
 
 //
-// serial port
-//
+// twitch bot
+// TODO
 
-var SerialPort = require('serialport');
-var Readline = require('@serialport/parser-readline')
-var serialPort = new SerialPort('/dev/cu.usbmodem1411', { baudRate: 9600 });
-const parser = serialPort.pipe(new Readline());
-var previous_parser_input = '';
-function parserfunction(someinput) {
-	if (someinput != previous_parser_input) {
-		//console.log('banana changed:'  + someinput);
-		if (parseInt(someinput,10) == 1) {
-			sendChangeSeason();
-		}
-		previous_parser_input = someinput;
-	}
-}
-parser.on('data', parserfunction);
 
-function sendChangeSeason() {
-	console.log('send message to change season!!!');
-	for (var i = 0; i < active_conn.length; i++) {
-		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == 'canvas')) {
-			try {
-				active_conn[i]['socket'].send(JSON.stringify({'changeseason':true}));
-			} catch(exc) {
-				console.log('failed to send conn to canvas');
-			}
-		}
-	}
-}
 
 
 //
@@ -730,27 +599,12 @@ stdin.on('data', function (data) {
 			//}
 		}
 	}
-	/*if (data == 'c') {
-		console.log('listing connections:');
-		for (c in connections) {
-			//console.log('connection: ' + connections[c]['ip'] + ' ' + connections[c]['ip']['canvas']);
-			//if ('params' in connections[c]) {
-				console.log(util.inspect(connections[c]));
-			//}
-		}
-	}*/
-	if (data == 'p') {
+	/*if (data == 'p') {
 		//var list = [];
 		//for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
 		console.log('listing parameters:');
 		console.log(util.inspect(params));
-	}
-	if (data == 'r') {
-		reassignParameters();
-	}
-	if (data == 'c') {
-		sendChangeSeason();
-	}
+	}*/
     //process.stdout.write('Captured Key : ' + data + "\n");
 });
 stdin.setEncoding('utf8');
