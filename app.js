@@ -531,7 +531,11 @@ function getIDbyRA(thisra) {
 
 //
 // twitch bot
-// TODO
+// 
+
+let teams = [];
+let users = [];
+let started = false;
 
 const oauth = require('./oauth.js');
 const tmi = require('tmi.js');
@@ -549,10 +553,50 @@ const tmi_client = new tmi.Client({
 });
 tmi_client.connect().catch(console.error);
 tmi_client.on('message', (channel, tags, message, self) => {
-	if(self) return;
-	if(message.toLowerCase() === '!hello') {
+	if (self) return;
+	if (message[0] != '!') return;
+	
+	let call = message.split(' ')[0].toLowerCase();
+	if(call === '!hello') {
 		tmi_client.say(channel, `@${tags.username}, heya!`);
+	} else if (call === '!start') {
+		if (tags.username === 'psenough') {
+			teams = [];
+			usernames = [];
+			started = true;
+			tmi_client.say(channel, `Crosswords challenge started!');
+			tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
+			tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
+		}
+	} else if (call === '!help') {
+		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
+		tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
+	} else if (call === '!team') {
+		if (usernames[tags.username] != undefined) {
+			tmi_client.say(channel, `@${tags.username} you're already part of team @${usernames[tags.username].team}. Can't change team until end of challenge.`);
+		} else {		
+			let inp = message[1].toLowerCase();
+			let is_hexadec = /^#([0-9a-f]{3}){1,2}$/i.test(inp);		
+			if (is_hexadec) {					
+				usernames[tags.username] = {
+					'team':  inp,
+					'points': 0
+				}
+				tmi_client.say(channel, `@${tags.username} you're not part of team @${inp}.`);
+			} else {
+				tmi_client.say(channel, `Sorry, you can't join a team that is not a valid hexadecimal color code.`);
+			}
+		}
+	} else {
+		let position = call.split('!')[1];
+		let guess = message[1].toLowerCase();
+		//TODO: validate position is of type Hint or Vint; (just check it exists in json?)
+		//TODO: validate the guess is matching the string to the crosswords json
+		//TODO: update points
+		//TODO: update screens with new points / word
+		//TODO: message twitch
 	}
+	
 });
 
 
