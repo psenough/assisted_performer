@@ -539,6 +539,7 @@ let started = false;
 let rawdata = fs.readFileSync('export.json');
 let crosswords = JSON.parse(rawdata);
 let running_multiplier = 1.0;
+let allow_guess_without_team = false;
 
 //console.log(crosswords["H1"]);
 const oauth = require('./oauth.js');
@@ -577,7 +578,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 		tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
 	} else if (call === '!team') {
 		if (usernames[tags.username] != undefined) {
-			tmi_client.say(channel, `@${tags.username} you're already part of team @${usernames[tags.username].team}. Can't change team until end of challenge.`);
+			tmi_client.say(channel, `@${tags.username} you're already part of team ${usernames[tags.username].team}. Can't change team until end of challenge.`);
 		} else {		
 			let inp = message.split(' ')[1].toLowerCase();
 			console.log(inp);
@@ -587,24 +588,33 @@ tmi_client.on('message', (channel, tags, message, self) => {
 					'team':  inp,
 					'points': 0.0
 				}
-				tmi_client.say(channel, `@${tags.username} you're now part of team @${inp}.`);
+				tmi_client.say(channel, `@${tags.username} you are now part of team ${inp}.`);
 			} else {
 				tmi_client.say(channel, `Sorry, you can't join a team that is not a valid hexadecimal color code.`);
 			}
 		}
 	} else {
+		
+		if (!allow_guess_without_team) {
+			if (usernames[tags.username] ==  undefined) {
+				tmi_client.say(channel, `@${tags.username} you must join a team before guessing.`);
+				tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
+				return;
+			}				
+		}
+		
 		let position = call.split('!')[1].toUpperCase();
 		let guess = message.split(' ')[1].toLowerCase();
 		console.log(position + ' ' + guess);
 		if (crosswords[position]) {
-			if (crosswords[position].guessed == undefined) {
-				tmi_client.say(channel, `@${tags.username} position @${position} is already guessed!`);
+			if (crosswords[position].guessed != undefined) {
+				tmi_client.say(channel, `@${tags.username} position ${position} is already guessed!`);
 			} else if (crosswords[position].word == guess) {
 				tmi_client.say(channel, `@${tags.username} computer says... yes!?!`);
 				crosswords[position].guessed = true;
 				let points = guess.length * running_multiplier
 				usernames[tags.username]['points'] += points;
-				tmi_client.say(channel, `@${points} points for @${tags.username}! total: @${tusernames[tags.username]['points']}`);
+				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
 				//TODO: list new points of usernames' team
 				//TODO: send points page refresh call
 				//TODO: add word to crosswords page
@@ -612,7 +622,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				tmi_client.say(channel, `@${tags.username} computer says... no!`);
 				let points = -1 * running_multiplier;
 				usernames[tags.username]['points'] += points;
-				tmi_client.say(channel, `@${points} points for @${tags.username}! total: @${tusernames[tags.username]['points']}`);
+				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
 				//TODO: list new points of usernames' team
 				//TODO: send points page refresh call
 			}
