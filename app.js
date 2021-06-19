@@ -562,7 +562,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 	if (message[0] != '!') return;
 	
 	let call = message.split(' ')[0].toLowerCase();
-	if(call === '!hello') {
+	if (call === '!hello') {
 		tmi_client.say(channel, `@${tags.username}, heya!`);
 	} else if (call === '!start') {
 		if (tags.username === 'psenough') {
