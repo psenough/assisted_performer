@@ -250,8 +250,11 @@ expressWs.getWss().on('connection', function(client, req) {
 	logme('total ws active conns: ' + active_conn.length);
 });
 
+let thisws;
+
 app.ws('/', function(ws, req) {
   var client = ws;
+  thisws=ws;
   //console.log('received ws');
 
   ws.on('message', function(data) {
@@ -337,6 +340,9 @@ app.ws('/', function(ws, req) {
 						}
 					}
 				break;*/
+				case 'crosswords':
+					logme('let\'s get crosswording!');
+				break;
 				default:
 					logme('unknown assisted perfomer');
 				break;
@@ -354,7 +360,7 @@ app.ws('/', function(ws, req) {
 		
 		// if IP is not listed on connections, send message to refresh page automatically
 		//console.log('checking ra: ' + active_conn[thisid]['socket'].ra);
-		var found = false;
+		/*var found = false;
 		for (c in connections) {
 			try {
 				if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra) ){
@@ -371,7 +377,7 @@ app.ws('/', function(ws, req) {
 			ws.send(JSON.stringify({'refresh': 'mebeautiful'}));
 
 			// will only be properly interpreted by controller pages to reload themselves automatically
-		}
+		}*/
 
   });
   
@@ -617,7 +623,8 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
 				//TODO: list new points of usernames' team
 				//TODO: send points page refresh call
-				//TODO: add word to crosswords page
+				// add word to crosswords page
+				if (thisws) thisws.send(JSON.stringify({'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].x}));
 			} else {
 				tmi_client.say(channel, `@${tags.username} computer says... no!`);
 				let points = -1 * running_multiplier;

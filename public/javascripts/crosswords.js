@@ -108,3 +108,100 @@ document.addEventListener('DOMContentLoaded', function(event)
     };
   });
 });
+
+window.onload = function(){ init(); };
+
+function init() {
+	try {
+		connectWebSockets();
+	} catch(e) {
+		console.log(e);
+	}
+}
+
+let params = {};
+let this_websockets = 'ws://'+location.host.split(':')[0]+':8080';
+let this_ws = null;
+let this_timeout = false;
+let vote_results;
+
+function connectWebSockets() {
+
+	console.log("attempt to connect");
+	this_timeout = false;
+
+	this_ws = new WebSocket(this_websockets);        
+
+	this_ws.onopen = function() {
+		console.log("opened socket");
+		this_ws.sendParameters();
+	};
+	
+	this_ws.sendParameters = function() {
+		let obj = {'assisted_performer': 'crosswords', 'parameters': params};
+		this_ws.send(JSON.stringify(obj));
+	};
+
+	this_ws.onmessage = function(evt) {
+		//console.log(evt.data);
+		let parsed = JSON.parse(evt.data);
+		/*for (instance in parsed) {
+			if (instance in params) {
+				//if (params[instance]['value'] != undefined) {
+				//	if (params[instance]['value']['value'] != undefined) {
+						// value changed
+						//if (parsed[instance]['value'] != undefined) {
+							if (params[instance]['value'] != parsed[instance]['value']) {
+								speedbump = 0.3;
+								latest_change = (new Date()).getTime();
+							}
+						//}
+					//}
+				//}
+				// update params
+				params[instance]['value'] = parsed[instance]['value'];
+			}
+			if (instance == 'changeseason') {
+				//console.log('time for a change');
+				var newstyle = randomProperty(metagenhaiku['genhaikus']);
+				while (selected_haiku == newstyle) {
+					newstyle = randomProperty(metagenhaiku['genhaikus']);
+				}
+				activateEffect(newstyle);
+			}
+		}*/
+		/*if (parsed['vote_results'] != undefined) {
+			vote_results = parsed['vote_results'];
+		}*/
+		
+		console.log(parsed);
+		if (parsed.pos)
+		{
+			let x = parsed.x-1;
+			let y = parsed.y-1;
+			let counter = 0;
+			let dx = 0;
+			let dy = 0;
+			if (parsed.pos[0] == 'H') {dx = 1;} else {dx = 0;}
+			if (parsed.pos[0] == 'V') {dy = 1;} else {dy = 0;}
+		
+			for (letter in parsed.word) {
+				//console.log(parsed.pos + ' ' + parsed.word);			
+				document.querySelector("div[data-x='"+(x+dx*counter)+"'][data-y='"+(y+dy*counter)+"'] input").value = parsed.word[letter];
+				counter++;
+			}
+		}
+	};
+
+	this_ws.onclose = function() {
+		console.log("closed socket");
+		this_ws = null;
+		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
+	};
+
+	this_ws.onerror = function() {
+		console.log("error on socket");
+		this_ws = null;
+		if (!this_timeout) this_timeout = setTimeout(function(){connectWebSockets()},5000);
+	};
+};
