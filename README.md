@@ -32,10 +32,6 @@ On the nodejs command line box
 
 ## TODO
 
-- converter from wizium board to crosswords.html (use qwx/outline css layout)
-
-- converter from wizium board to hints.html
-
 - twitch bot !team, keep track of usernames teams and points (send points info to connected points.html via ws)
 
 - twitch bot !guess, reply, resend points to points.html, send info to crosswords.html, send info to hints.html to cross it out from list)

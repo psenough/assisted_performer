@@ -9,4 +9,3 @@
 <script type="text/javascript" src="./javascripts/crosswords.js"></script>
 </head>
 <body>
-<div>
