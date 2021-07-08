@@ -8,6 +8,7 @@ let export_json = true;
 let export_json_filename = 'export.json';
 let export_hints_template = true;
 let export_hints_template_filename = 'export_hints_template.html';
+let include_hints_in_crosswords_html = true;
 
 let htmlout = '';
 let jsonout = '{';
@@ -16,9 +17,9 @@ let hintsout = '';
 fs.readFile('crosswords_html_header.txt', (error, txtString) => {
     if (error) throw err;
     htmlout = txtString.toString();
-	htmlout += '<div>';
+	htmlout += '<div style="float: left">\n';
 	
-	hintsout = txtString.toString();
+	if (include_hints_in_crosswords_html == false) hintsout = txtString.toString();
 	hintsout += '<div class="hints">\n<table class="maintable">\n<thead>\n<td><b>Across</b></td>\n<td>&nbsp;</td>\n<td><b>Down</b></td>\n</thead>\n<tr>\n<td valign="top"><table>\n';
 
 	fs.readFile(wizium_file, (err, data) => {
@@ -95,27 +96,31 @@ fs.readFile('crosswords_html_header.txt', (error, txtString) => {
 		jsonout = jsonout.slice(0, -1)+'}';
 		
 		for(let j=0; j<filt.length+1; j++) {
-			htmlout += '<div class="hr" style="left:0px;top:'+(36*j)+'px;width:'+(36*filt[0].length)+'px;"></div>';
+			htmlout += '<div class="hr" style="left:0px;top:'+(36*j)+'px;width:'+(36*filt[0].length)+'px;"></div>\n';
 		}
 
 		for(let i=0; i<filt[0].length+1; i++) {
-			htmlout += '<div class="vr" style="left:'+(36*i)+'px;top:0px;height:'+(36*filt.length)+'px;"></div>';
+			htmlout += '<div class="vr" style="left:'+(36*i)+'px;top:0px;height:'+(36*filt.length)+'px;"></div>\n';
 		}
 					
-		htmlout += '</div></div>\n</body>\n</html>';
+		htmlout += '</div></div>\n</div>\n';
 		
 		hintsout += '</table></td>\n<td>&nbsp;</td>\n<td valign="top"><table>\n';
 		hintsout += tempverthints;
-		hintsout += '</table></td>\n</tr>\n</table></div>\n</body></html>\n';
+		hintsout += '</table></td>\n</tr>\n</table></div>\n';
 		
-		//console.log(jsonout);
-		//console.log(filt);
+		if (include_hints_in_crosswords_html == true) htmlout += hintsout;
+			
+		htmlout += '</body>\n</html>\n';
+
+		hintsout += '</body>\n</html>\n';
+
 
 		fs.writeFileSync(export_json_filename, jsonout);
 		
 		fs.writeFileSync(export_html_filename, htmlout);
 		
-		fs.writeFileSync(export_hints_template_filename, hintsout);
+		if (include_hints_in_crosswords_html == false) fs.writeFileSync(export_hints_template_filename, hintsout);
 	});
 
 });
