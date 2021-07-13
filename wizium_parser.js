@@ -1,7 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 
-let wizium_file = 'evoke_test_1.wiz';
+let wizium_file = 'evoke_test_6.wiz';
 let export_html = true;
 let export_html_filename = 'public/crosswords.html';
 let export_json = true;
