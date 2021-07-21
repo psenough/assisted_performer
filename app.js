@@ -250,11 +250,11 @@ expressWs.getWss().on('connection', function(client, req) {
 	logme('total ws active conns: ' + active_conn.length);
 });
 
-let thisws;
+//let thisws;
 
 app.ws('/', function(ws, req) {
   var client = ws;
-  thisws=ws;
+  //thisws=ws;
   //console.log('received ws');
 
   ws.on('message', function(data) {
@@ -342,6 +342,11 @@ app.ws('/', function(ws, req) {
 				break;*/
 				case 'crosswords':
 					logme('let\'s get crosswording!');
+					type='crosswords';
+				break;
+				case 'points':
+					logme('let\'s get pointing!');
+					type='points';
 				break;
 				default:
 					logme('unknown assisted perfomer');
@@ -484,6 +489,21 @@ function sendWebSocketUpdateToCanvas(thisparam) {
 	}
 }
 
+function sendWebSocketMessage(type, obj) {
+	console.log(obj);
+	for (var i = 0; i < active_conn.length; i++) {
+		if (active_conn[i]['socket'] && (active_conn[i]['client_type'] == type)) {
+			try {
+				active_conn[i]['socket'].send(JSON.stringify(obj));
+			} catch(exc) {
+				console.log(exc);
+				active_conn.splice(i,1);
+			}
+		}
+	}
+}
+
+
 var streaming_milliseconds = 100;
 
 var send_value_and_active = true;
@@ -539,8 +559,7 @@ function getIDbyRA(thisra) {
 // twitch bot
 // 
 
-let teams = [];
-let usernames = [];
+let usernames = {};
 let started = false;
 let rawdata = fs.readFileSync('export.json');
 let crosswords = JSON.parse(rawdata);
@@ -572,7 +591,6 @@ tmi_client.on('message', (channel, tags, message, self) => {
 		tmi_client.say(channel, `@${tags.username}, heya!`);
 	} else if (call === '!start') {
 		if (tags.username === 'psenough') {
-			teams = [];
 			usernames = [];
 			started = true;
 			tmi_client.say(channel, `Crosswords challenge started!`);
@@ -616,22 +634,41 @@ tmi_client.on('message', (channel, tags, message, self) => {
 			if (crosswords[position].guessed != undefined) {
 				tmi_client.say(channel, `@${tags.username} position ${position} is already guessed!`);
 			} else if (crosswords[position].word == guess) {
-				tmi_client.say(channel, `@${tags.username} computer says... yes!?!`);
+				tmi_client.say(channel, `@${tags.username} computer says... YES!?!`);
 				crosswords[position].guessed = true;
 				let points = guess.length * running_multiplier
 				usernames[tags.username]['points'] += points;
+				console.log(usernames);
+				
 				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
-				//TODO: list new points of usernames' team
-				//TODO: send points page refresh call
+
+				// list new points of usernames' team
+				let team_points = 0;
+				for (u in usernames) {
+					if (usernames[u]['team'] == usernames[tags.username]['team']) team_points += usernames[u]['points'];
+				}
+				tmi_client.say(channel, `${usernames[tags.username]['team']} now has ${team_points} points!`);
+
+				// update points page
+				sendWebSocketMessage('points', {'points':usernames});
+				
 				// add word to crosswords page
-				if (thisws) thisws.send(JSON.stringify({'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].x}));
+				sendWebSocketMessage('crosswords', {'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].x});
 			} else {
 				tmi_client.say(channel, `@${tags.username} computer says... no!`);
 				let points = -1 * running_multiplier;
 				usernames[tags.username]['points'] += points;
 				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
-				//TODO: list new points of usernames' team
-				//TODO: send points page refresh call
+
+				// list new points of usernames' team
+				let team_points = 0;
+				for (u in usernames) {
+					if (usernames[u]['team'] == usernames[tags.username]['team']) team_points += usernames[u]['points'];
+				}
+				tmi_client.say(channel, `${usernames[tags.username]['team']} now has ${team_points} points!`);
+
+				// update points page
+				sendWebSocketMessage('points', {'points':usernames});
 			}
 		} else {
 			tmi_client.say(channel, `@${tags.username} no such position on crosswords challenge.`);

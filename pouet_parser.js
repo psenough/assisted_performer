@@ -124,5 +124,3 @@ fs.readFile('all_prods.json', (err, data) => {
 });
 
 console.log('This is after the read call');
-
-
