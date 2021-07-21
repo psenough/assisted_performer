@@ -697,12 +697,9 @@ stdin.on('data', function (data) {
 			//}
 		}
 	}
-	/*if (data == 'p') {
-		//var list = [];
-		//for (p in params) list.push(p + ' :: ' + params[p]['friendly_name'] + ' :: ' + params[p]['value']);
-		console.log('listing parameters:');
-		console.log(util.inspect(params));
-	}*/
+	if (data == 'p') {
+		sendWebSocketMessage('points', {'points': {'psenough': {'team':'#f00', points:4.35},'psenough1': {'team':'#f00', points:44.35},'psenough2': {'team':'#f00', points:14.35},'tomato': {'team':'#f00',points:20.0},'lettuce': {'team':'#008000',points:21},'largerthen25charsornot21345': {'team':'#0280D0',points:35},'psenough4': {'team':'#0280D0', points:4.35},'psenough5': {'team':'#0280D0', points:425},'psenough6': {'team':'#0280D0', points:35},'psenough7': {'team':'#0280D0', points:35}}});
+	}
     //process.stdout.write('Captured Key : ' + data + "\n");
 });
 stdin.setEncoding('utf8');

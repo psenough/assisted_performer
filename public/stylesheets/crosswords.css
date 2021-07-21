@@ -2,15 +2,15 @@
 font-family: 'AtariFont';
 src: url('AtariClassic-gry3.ttf')  format('truetype')
 }
-body {background-color: #00E000; font-family:'AtariFont'}
-div.bk {position:absolute;font-size:0px;border-left:black 0px solid;border-right:black 0px solid;border-top:black 36px solid;border-bottom:black 0px solid;width:36px;height:36px;}
-div.hb {position:absolute;font-size:0px;border-left:black 0px solid;border-right:black 0px solid;border-top:black 2px solid;border-bottom:black 0px solid;width:37px;}
-div.hb0 {position:absolute;font-size:0px;border-left:black 0px solid;border-right:black 0px solid;border-top:black 2px solid;border-bottom:black 0px solid;width:39px;}
-div.vb {position:absolute;font-size:0px;border-left:black 2px solid;border-right:black 0px solid;border-top:black 0px solid;border-bottom:black 0px solid;height:37px;}
-div.vb0 {position:absolute;font-size:0px;border-left:black 2px solid;border-right:black 0px solid;border-top:black 0px solid;border-bottom:black 0px solid;height:39px;}
-div.hr {position:absolute;font-size:0px;border-left:black 0px solid;border-right:black 0px solid;border-top:black 1px solid;border-bottom:black 0px solid;}
-div.hr {position:absolute;font-size:0px;border-left:black 0px solid;border-right:black 0px solid;border-top:black 1px solid;border-bottom:black 0px solid;}
-div.vr {position:absolute;font-size:0px;border-left:black 1px solid;border-right:black 0px solid;border-top:black 0px solid;border-bottom:black 0px solid;}
+body {background-color: #00d68f; font-family:'AtariFont'}
+div.bk {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 36px solid;border-bottom:#00082f 0px solid;width:36px;height:36px;}
+div.hb {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 2px solid;border-bottom:#00082f 0px solid;width:37px;}
+div.hb0 {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 2px solid;border-bottom:#00082f 0px solid;width:39px;}
+div.vb {position:absolute;font-size:0px;border-left:#00082f 2px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;height:37px;}
+div.vb0 {position:absolute;font-size:0px;border-left:#00082f 2px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;height:39px;}
+div.hr {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 1px solid;border-bottom:#00082f 0px solid;}
+div.hr {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 1px solid;border-bottom:#00082f 0px solid;}
+div.vr {position:absolute;font-size:0px;border-left:#00082f 1px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;}
 div.nu {position:absolute;font-size:8px;font-family:'AtariFont';width:12px;height:12px;z-index:21}
 div.lt {position:absolute;text-align:center;width:36px;font-family:sans-serif}
 input {
@@ -26,15 +26,15 @@ font-size: 16pt;
 padding:0px;
 margin:0px;
 caret-color: transparent;
-background-color: #DEDEDE;
+background-color: #fff;
 }
 input:focus{
 
 }
 .maintable{
 margin-left: 1em;
-background-color: #DEDEDE;
-border: 1px solid black;
+background-color: #fff;
+border: 1px solid #00082f;
 }
 
 div.hints{
@@ -44,8 +44,8 @@ height:100%;
 width:50%;
 }
 div.hints tr.highlight {
-  background: black;
-  color: #DEDEDE;
+  background: #00082f;
+  color: #fff;
 }
 
 @media

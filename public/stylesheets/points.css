@@ -1,0 +1,47 @@
+* {
+	padding:0px;
+	margin:0px;
+}
+
+@font-face {
+	font-family: 'AtariFont';
+	src: url('AtariClassic-gry3.ttf')  format('truetype')
+}
+
+div {
+	padding: 6px;
+	text-align-last: justify;
+}
+
+#content {
+	padding:0px;
+}
+
+body {
+	font-family:'AtariFont';
+	background: transparent;
+	font-size: 22px;
+	overflow: hidden;
+}
+
+@supports (-webkit-text-stroke: 1px black) {
+  div {
+    -webkit-text-stroke: 1px black;
+    -webkit-text-fill-color: white;
+	opacity: 1.0;
+	text-shadow:
+     3px  3px 0 #000,
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+  }
+}
+
+.row {
+  display: none;
+}
+
+.row:nth-child(-n+3) {
+  display: block;
+}

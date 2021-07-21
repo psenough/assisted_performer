@@ -35,56 +35,97 @@ function connectWebSockets() {
 	};
 
 	this_ws.onmessage = function(evt) {
-		console.log(evt.data);
+		//console.log(evt.data);
 		let parsed = JSON.parse(evt.data);
 		console.log(parsed);
 		for (instance in parsed) {
 			if (instance == 'points') {
 				let p = parsed[instance];
 				for (i in p) {
-					console.log(i + ' ' + p[i]['team'] + ' ' + p[i]['points']);
+					//console.log(i + ' ' + p[i]['team'] + ' ' + p[i]['points']);
 					
 					// aggregate team points
 					let has_team = false;
 					for(t in teams) {
 						if (t == p[i]['team']) {
+							//console.log(t + ' with ' + teams[t] + ' adding points ' + p[i]['points']);
 							teams[t] += p[i]['points'];
-							has_team == true;
+							has_team = true;
 							break;
 						}
 					}
-					if (!has_team) teams[p[i]['team']] = p[i]['points'];
+					if (!has_team) {
+						teams[p[i]['team']] = p[i]['points'];
+						//console.log('no team for ' + i);
+					}
 										
 					// update team divs
 					let t_dom = document.getElementById(p[i]['team']);
 					if (t_dom) {
-						//t_dom.innerHTML = teams[p[i]['team']];
+						t_dom.setAttribute("data-val", teams[p[i]['team']]);
+						//console.log(teams);
+						//t_dom.setAttribute("data-val", 42);
 					} else {
 						t_dom = document.createElement("div");
 						t_dom.setAttribute("id", p[i]['team']);
-						t_dom.style.color = p[i]['team'];
-						t_dom.style.opacity = 0.5;
+						t_dom.setAttribute("data-val", teams[p[i]['team']]);
+						t_dom.classList.add('team');
+						t_dom.style.backgroundColor = p[i]['team'];
 						let cont = document.getElementById("content");
 						if (cont) cont.appendChild(t_dom);
 					}
 					
 					// update person divs
+					let charlimit = 10;
+					let pstring = i.substring(0,charlimit) + ' ' + parseInt(p[i]['points'],10);
 					let p_dom = document.getElementById(i);
 					if (p_dom) {
-						p_dom.innerHTML = i + ' ' + p[i]['points'];
+						p_dom.innerHTML = pstring;
+						p_dom.setAttribute("data-val", parseInt(p[i]['points'],10));
 					} else {
 						p_dom = document.createElement("div");
 						p_dom.setAttribute("id", i);
-						p_dom.innerTHML = i + ' ' + p[i]['points'];
+						p_dom.setAttribute("data-val", parseInt(p[i]['points'],10));
+						p_dom.innerHTML = pstring;
+						p_dom.classList.add('row');
 						let team = document.getElementById(p[i]['team']);
 						if (team) team.appendChild(p_dom);
 					}
 					
 				}
 				
-				//TODO: reorder divs based on points
+				// reorder team divs based on points
+				var classname = document.getElementsByClassName('team');
+				var divs = [];
+				for (var i = 0; i < classname.length; ++i) {
+					divs.push(classname[i]);
+				}
+				divs.sort(function(a, b) {
+					return parseInt(b.dataset.val,10) - parseInt(a.dataset.val,10);
+				});
+				divs.forEach(function(el) {
+					let parent = el.parentElement;
+					let temp = el;
+					el.parentElement.removeChild(el);
+					parent.appendChild(temp);
+				});
 				
-				//TODO: only show top n players per team (by css)
+				// reorder people divs based on points
+				var classnamer = document.getElementsByClassName('row');
+				var divsr = [];
+				for (var i = 0; i < classnamer.length; ++i) {
+					divsr.push(classnamer[i]);
+				}
+				divsr.sort(function(a, b) {
+					return parseInt(b.dataset.val,10) - parseInt(a.dataset.val,10);
+				});
+				divsr.forEach(function(el) {
+					let parent = el.parentElement;
+					let temp = el;
+					el.parentElement.removeChild(el);
+					parent.appendChild(temp);
+				});
+				
 			}
 		}
 	};
