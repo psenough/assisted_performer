@@ -1,51 +1,78 @@
-@font-face {
-font-family: 'AtariFont';
-src: url('AtariClassic-gry3.ttf')  format('truetype')
-}
-body {background-color: #00d68f; font-family:'AtariFont'}
-div.bk {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 36px solid;border-bottom:#00082f 0px solid;width:36px;height:36px;}
-div.hb {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 2px solid;border-bottom:#00082f 0px solid;width:37px;}
-div.hb0 {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 2px solid;border-bottom:#00082f 0px solid;width:39px;}
-div.vb {position:absolute;font-size:0px;border-left:#00082f 2px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;height:37px;}
-div.vb0 {position:absolute;font-size:0px;border-left:#00082f 2px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;height:39px;}
-div.hr {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 1px solid;border-bottom:#00082f 0px solid;}
-div.hr {position:absolute;font-size:0px;border-left:#00082f 0px solid;border-right:#00082f 0px solid;border-top:#00082f 1px solid;border-bottom:#00082f 0px solid;}
-div.vr {position:absolute;font-size:0px;border-left:#00082f 1px solid;border-right:#00082f 0px solid;border-top:#00082f 0px solid;border-bottom:#00082f 0px solid;}
-div.nu {position:absolute;font-size:8px;font-family:'AtariFont';width:12px;height:12px;z-index:21}
-div.lt {position:absolute;text-align:center;width:36px;font-family:sans-serif}
-input {
-position:relative;
-top:-27px;
-border: 0px;
-z-index: 20;
-width: 22px;
-left: 7px;
-text-transform:uppercase;
-font-family:'AtariFont';
-font-size: 16pt;
-padding:0px;
-margin:0px;
-caret-color: transparent;
-background-color: #fff;
-}
-input:focus{
 
+body {
+	/*background-color: #00d68f;*/
+	background-color: #00082f;
+	font-family:ff-tisa-web-pro;
+	color: #fff;
 }
+
+:root {
+	--border: #404663;
+	--cw-text: #000
+}
+
+div.bk {position:absolute;font-size:0px;border-top: var(--border) 36px solid;width:36px;height:36px;}
+div.hb {position:absolute;font-size:0px;border-top: var(--border) 2px solid;width:37px;}
+div.hb0 {position:absolute;font-size:0px;border-top: var(--border) 2px solid;width:39px;}
+div.vb {position:absolute;font-size:0px;border-left: var(--border) 2px solid;height:37px;}
+div.vb0 {position:absolute;font-size:0px;border-left: var(--border) 2px solid;height:39px;}
+div.hr {position:absolute;font-size:0px;border-top: var(--border) 1px solid;}
+div.hr {position:absolute;font-size:0px;border-top: var(--border) 1px solid;}
+div.vr {position:absolute;font-size:0px;border-left: var(--border) 1px solid;}
+div.nu {position:absolute;font-size:8px;width:12px;height:12px;color: var(--cw-text);z-index:21;}
+div.lt {position:absolute;text-align:center;width:36px;}
+
+input {
+	position:relative;
+	top:-34px;
+	border: 2px solid transparent;
+	z-index: 20;
+	width: 22px;
+	height: 28px;
+	left: 7px;
+	text-transform:uppercase;
+	font-family:ff-tisa-web-pro;
+	font-size: 16pt;
+	padding:0px;
+	margin:0px;
+	caret-color: transparent;
+	background-color: transparent;
+	text-align: center;
+	color: var(--cw-text);
+}
+
+input:focus{
+	outline:none;
+	border-bottom: 2px solid black;
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #fff;
+  }
+}
+
 .maintable{
-margin-left: 1em;
-background-color: #fff;
-border: 1px solid #00082f;
+	margin-left: 1em;
+	background-color: #00082f;
+	color: #fff;
+	border: 1px solid var(--border);
 }
 
 div.hints{
-float:left;
-overflow-y:scroll;
-height:100%;
-width:50%;
+	float:left;
+	overflow-y:scroll;
+	height:100%;
+	width:50%;
 }
+
 div.hints tr.highlight {
-  background: #00082f;
-  color: #fff;
+	background: #43a5ff;
+	color: #00082f;
 }
 
 @media
@@ -55,12 +82,14 @@ only screen and (max-width: 760px),
 /* Force table to not be like tables anymore */
 table, thead, tbody, th, td, tr {
 display: block;
+background-color: #00082f;
+color: #fff;
 }
 
 td {
 /* Behave  like a "row" */
 border: none;
-border-bottom: 1px solid #eee;
+border-bottom: 1px solid #404663;
 position: relative;
 }
 

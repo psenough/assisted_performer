@@ -2,9 +2,10 @@
 <html>
 <head>
 <title>Crosswords</title>
-<link rel="icon" href="favicon.gif" type="image/gif" />
+<link rel="icon" href="favicon.png" type="image/pngf" />
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="./stylesheets/bow8ixn.css">
 <link rel="stylesheet" type="text/css" href="./stylesheets/crosswords.css">
 <script type="text/javascript" src="./javascripts/crosswords.js"></script>
 </head>
