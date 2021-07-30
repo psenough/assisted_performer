@@ -3,7 +3,7 @@ const readline = require('readline');
 
 let wizium_file = 'evoke_test_6.wiz';
 let export_html = true;
-let export_html_filename = 'public/crosswords.html';
+let export_html_filename = 'public/crosswords_hints.html';
 let export_html_without_hints = true;
 let export_html_without_hints_filename = 'public/crosswords_nohints.html';
 let export_json = true;

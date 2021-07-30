@@ -561,7 +561,7 @@ function getIDbyRA(thisra) {
 
 let usernames = {};
 let started = false;
-let rawdata = fs.readFileSync('export.json');
+let rawdata = fs.readFileSync('nevoke.json');
 let crosswords = JSON.parse(rawdata);
 let running_multiplier = 1.0;
 let allow_guess_without_team = false;

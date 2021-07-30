@@ -6,7 +6,7 @@ function moveFocus( ox, oy, dx, dy )
   {
     x += dx;
     y += dy;
-    if (x < 0 || x > 14 || y < 0 || y > 16)
+    if (x < 0 || x > 15 || y < 0 || y > 15)
     {
       return;
     }
@@ -35,7 +35,7 @@ function findHintNum( ox, oy, dir )
   var y = oy;
   while( true )
   {
-    if (x < 0 || x > 14 || y < 0 || y > 16)
+    if (x < 0 || x > 15 || y < 0 || y > 15)
     {
       return - 1;
     }
@@ -143,38 +143,8 @@ function connectWebSockets() {
 	};
 
 	this_ws.onmessage = function(evt) {
-		//console.log(evt.data);
 		let parsed = JSON.parse(evt.data);
-		/*for (instance in parsed) {
-			if (instance in params) {
-				//if (params[instance]['value'] != undefined) {
-				//	if (params[instance]['value']['value'] != undefined) {
-						// value changed
-						//if (parsed[instance]['value'] != undefined) {
-							if (params[instance]['value'] != parsed[instance]['value']) {
-								speedbump = 0.3;
-								latest_change = (new Date()).getTime();
-							}
-						//}
-					//}
-				//}
-				// update params
-				params[instance]['value'] = parsed[instance]['value'];
-			}
-			if (instance == 'changeseason') {
-				//console.log('time for a change');
-				var newstyle = randomProperty(metagenhaiku['genhaikus']);
-				while (selected_haiku == newstyle) {
-					newstyle = randomProperty(metagenhaiku['genhaikus']);
-				}
-				activateEffect(newstyle);
-			}
-		}*/
-		/*if (parsed['vote_results'] != undefined) {
-			vote_results = parsed['vote_results'];
-		}*/
-		
-		console.log(parsed);
+		//console.log(parsed);
 		if (parsed.pos)
 		{
 			let x = parsed.x-1;

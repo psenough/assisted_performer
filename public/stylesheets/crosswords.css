@@ -67,12 +67,16 @@ div.hints{
 	float:left;
 	overflow-y:scroll;
 	height:100%;
-	width:50%;
+	width:60%;
 }
 
 div.hints tr.highlight {
 	background: #43a5ff;
 	color: #00082f;
+}
+
+.maintable thead tr td:first-child {
+	width: 50%;
 }
 
 @media
