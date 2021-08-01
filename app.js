@@ -600,21 +600,28 @@ tmi_client.on('message', (channel, tags, message, self) => {
 	} else if (call === '!help') {
 		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
 		tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
-	} else if (call === '!team') {
+	} else if ((call === '!team') || (call === '!join')) {
 		if (usernames[tags.username] != undefined) {
 			tmi_client.say(channel, `@${tags.username} you're already part of team ${usernames[tags.username].team}. Can't change team until end of challenge.`);
-		} else {		
-			let inp = message.split(' ')[1].toLowerCase();
-			console.log(inp);
-			let is_hexadec = /^#([0-9a-f]{3}){1,2}$/i.test(inp);		
-			if (is_hexadec) {					
-				usernames[tags.username] = {
-					'team':  inp,
-					'points': 0.0
+		} else {
+			
+			let splits = message.split(' ');
+			if (splits.length > 1) {
+				
+				let inp = message.split(' ')[1].toLowerCase();
+				console.log(inp);
+				let is_hexadec = /^#([0-9a-f]{3}){1,2}$/i.test(inp);		
+				if (is_hexadec) {					
+					usernames[tags.username] = {
+						'team':  inp,
+						'points': 0.0
+					}
+					tmi_client.say(channel, `@${tags.username} you are now part of team ${inp}.`);
+				} else {
+					tmi_client.say(channel, `Sorry, you can't join a team that is not a valid hexadecimal color code.`);
 				}
-				tmi_client.say(channel, `@${tags.username} you are now part of team ${inp}.`);
 			} else {
-				tmi_client.say(channel, `Sorry, you can't join a team that is not a valid hexadecimal color code.`);
+				tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
 			}
 		}
 	} else {
@@ -653,7 +660,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				sendWebSocketMessage('points', {'points':usernames});
 				
 				// add word to crosswords page
-				sendWebSocketMessage('crosswords', {'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].x});
+				sendWebSocketMessage('crosswords', {'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].y});
 			} else {
 				tmi_client.say(channel, `@${tags.username} computer says... no!`);
 				let points = -1 * running_multiplier;

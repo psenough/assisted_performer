@@ -144,11 +144,11 @@ function connectWebSockets() {
 
 	this_ws.onmessage = function(evt) {
 		let parsed = JSON.parse(evt.data);
-		//console.log(parsed);
+		console.log(parsed);
 		if (parsed.pos)
 		{
-			let x = parsed.x-1;
-			let y = parsed.y-1;
+			let x = parsed.x - 1;
+			let y = parsed.y - 1;
 			let counter = 0;
 			let dx = 0;
 			let dy = 0;
