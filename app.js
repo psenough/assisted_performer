@@ -591,11 +591,40 @@ tmi_client.on('message', (channel, tags, message, self) => {
 		tmi_client.say(channel, `@${tags.username}, heya!`);
 	} else if (call === '!start') {
 		if (tags.username === 'psenough') {
-			usernames = [];
+			usernames = {};
 			started = true;
 			tmi_client.say(channel, `Crosswords challenge started!`);
-			tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
-			tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
+			tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. All hexadec color values valid! You can not change team half-way, choose wisely!`);
+			tmi_client.say(channel, `Guess a word: \"!H3 banana\" to guess \"banana\" on the horizontal word 3 slot.`);
+		}
+	} else if (call === '!info') {
+		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. All hexadec color values valid! You can not change team half-way, choose wisely!`);
+		tmi_client.say(channel, `Guess a word: \"!H3 banana\" to guess \"banana\" on the horizontal word 3 slot.`);
+	} else if (call === '!remove') {
+		if (tags.username === 'psenough') {
+			let splits = message.split(' ');
+			if (splits.length > 1) {
+				let inp = splits[1].toLowerCase();
+				delete usernames[inp];
+			}
+		}
+	} else if (call === '!reassign') {
+		if (tags.username === 'psenough') {
+			let splits = message.split(' ');
+			if (splits.length > 2) {
+				let inp = splits[1].toLowerCase();
+				let team = splits[2].toLowerCase();
+				let is_hexadec = /^#([0-9a-f]{3}){1,2}$/i.test(team);		
+				if (is_hexadec) {
+					if (usernames[splits[1]]) {
+						usernames[splits[1].toLowerCase()]['team'] = splits[2].toLowerCase();
+					} else {
+						tmi_client.say(channel, `Can't reassign a username that doesn't exist. ($(inp))`);				
+					}
+				} else {
+					tmi_client.say(channel, `Can't reassign username to a team that is not a valid hexadecimal color code. ($(team))`);
+				}
+			}
 		}
 	} else if (call === '!help') {
 		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
@@ -608,7 +637,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 			let splits = message.split(' ');
 			if (splits.length > 1) {
 				
-				let inp = message.split(' ')[1].toLowerCase();
+				let inp = splits[1].toLowerCase();
 				console.log(inp);
 				let is_hexadec = /^#([0-9a-f]{3}){1,2}$/i.test(inp);		
 				if (is_hexadec) {					
@@ -645,7 +674,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				crosswords[position].guessed = true;
 				let points = guess.length * running_multiplier
 				usernames[tags.username]['points'] += points;
-				console.log(usernames);
+				//console.log(usernames);
 				
 				tmi_client.say(channel, `${points} points for @${tags.username}! total: ${usernames[tags.username]['points']}`);
 
@@ -706,6 +735,17 @@ stdin.on('data', function (data) {
 	}
 	if (data == 'p') {
 		sendWebSocketMessage('points', {'points': {'psenough': {'team':'#f00', points:4.35},'psenough1': {'team':'#f00', points:44.35},'psenough2': {'team':'#f00', points:14.35},'tomato': {'team':'#f00',points:20.0},'lettuce': {'team':'#008000',points:21},'largerthen25charsornot21345': {'team':'#0280D0',points:35},'psenough4': {'team':'#0280D0', points:4.35},'psenough5': {'team':'#0280D0', points:425},'psenough6': {'team':'#0280D0', points:35},'psenough7': {'team':'#0280D0', points:35}}});
+	}
+	if (data == 's') {
+		console.log(usernames);
+		fs.writeFileSync("temp_savefile.json", JSON.stringify(usernames));
+	}
+	if (data == 'l') {
+		fs.readFile('temp_savefile.json', (err, data) => {
+			if (err) throw err;
+			usernames = JSON.parse(data);
+			console.log(usernames);
+		});
 	}
     //process.stdout.write('Captured Key : ' + data + "\n");
 });

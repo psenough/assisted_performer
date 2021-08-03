@@ -8,7 +8,7 @@ let export_html_without_hints = true;
 let export_html_without_hints_filename = 'public/crosswords_nohints.html';
 let export_json = true;
 let export_json_filename = 'export.json';
-let export_hints_template = true;
+let export_hints_template = false;
 let export_hints_template_filename = 'export_hints_template.html';
 
 let header = '';
@@ -84,7 +84,7 @@ fs.readFile('crosswords_html_header.txt', (error, txtString) => {
 					}
 					if (word.length > 1) {
 						jsonout += '\"V'+word_count_starts+'\":\{\"word\":"'+word+'\",\"x\":'+(j+1)+',\"y\":'+(i+1)+'},';
-						htmlout += '<div class="nu" data-x="'+j+'" data-y="'+i+'" data-hint="'+word_count_starts+'" style="left:'+(36*j+4)+'px;top:'+(36*i+1)+'px;text-align:left">'+word_count_starts+'</div>\n';
+						if (!dirty) htmlout += '<div class="nu" data-x="'+j+'" data-y="'+i+'" data-hint="'+word_count_starts+'" style="left:'+(36*j+4)+'px;top:'+(36*i+1)+'px;text-align:left">'+word_count_starts+'</div>\n';
 						tempverthints += '<tr data-hintdir=\'down\' data-hint=\''+word_count_starts+'\'><td width="0" align="right" valign="top"><b>'+word_count_starts+'</b></td>\n';
 						tempverthints += '<td valign="top">'+word+'('+word.length+')</td></tr>\n';
 						dirty = true;
