@@ -285,68 +285,19 @@ app.ws('/', function(ws, req) {
 			}
 			
 			switch (parsed['assisted_performer']) {
-				/*case 'canvas':
-					type = 'canvas';
-					if ('parameters' in parsed) {
-						params = {};
-						//addAudioParams();
-						addToParams(parsed['parameters']);
-						logme('received canvas: ' + data);
-						// received message with new parameters, reassigning all existing controller connections
-						reassignParameters();
-					}
-					if ('words' in parsed) {
-						logme('speak: ' + parsed['words']);
-						say.stop();
-						say.speak(parsed['words'], params['voices_list']['value'], params['voices_speed']['value']);
-					}
-				break;
-				case 'control':
-					type = 'control';
-					if ('parameters' in parsed) {
-						if ('param' in parsed['parameters']) {
-							logme('received control: ' + data);
-							var thisparam = parsed['parameters']['param'];
-							if (thisparam in params) {
-								//console.log(thisparam);
-								if ('value' in parsed['parameters']) {
-									params[thisparam]['value'] = parsed['parameters']['value'];
-									say.stop();
-									say.speak(parsed['parameters']['value'], params['voices_list']['value'], params['voices_speed']['value']);
-								}
-							}
-						}
-					}
-					if ('ping' in parsed) {
-						// send back a pong in similar way to POST pong
-						var thisid = getID(client.id);
-						if (thisid in active_conn) {
-							
-							// only send the params assigned to this connection
-							var prr = {};
-							for (c in connections) {
-								//console.log('pong connection: ' + connections[c]['ip'] + ' ' + active_conn[thisid]['socket'].ra);
-								if ((connections[c]['ip'] == active_conn[thisid]['socket'].ra) || (connections[c]['ip'] == '::ffff:'+active_conn[thisid]['socket'].ra)) {
-									if ('params' in connections[c]) {
-										//console.log(connections[c]['params']);
-										prr[connections[c]['params']] = params[connections[c]['params']];
-									}
-								}
-							}
-							
-							//active_conn[thisid]['socket'].send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
-							ws.send(JSON.stringify({'pong': 'pong', 'parameters': prr}));
-
-						}
-					}
-				break;*/
 				case 'crosswords':
 					logme('let\'s get crosswording!');
 					type='crosswords';
+					for (u in crosswords) {
+						if (crosswords[u].guessed == true) {
+							ws.send(JSON.stringify({'pos': u, 'word': crosswords[u].word, 'x': crosswords[u].x ,'y': crosswords[u].y}));
+						}
+					}
 				break;
 				case 'points':
 					logme('let\'s get pointing!');
 					type='points';
+					ws.send(JSON.stringify({'points':usernames}));
 				break;
 				default:
 					logme('unknown assisted perfomer');
@@ -619,13 +570,24 @@ tmi_client.on('message', (channel, tags, message, self) => {
 					if (usernames[splits[1]]) {
 						usernames[splits[1].toLowerCase()]['team'] = splits[2].toLowerCase();
 					} else {
-						tmi_client.say(channel, `Can't reassign a username that doesn't exist. ($(inp))`);				
+						tmi_client.say(channel, `Can't reassign a username that doesn't exist. ($(inp))`);
 					}
 				} else {
 					tmi_client.say(channel, `Can't reassign username to a team that is not a valid hexadecimal color code. ($(team))`);
 				}
 			}
 		}
+	} else if (call === '!mul') {
+		if (tags.username === 'psenough') {
+			let splits = message.split(' ');
+			if (splits.length > 1) {
+				let mult = parseFloat(splits[1]);
+				if (!isNaN(mult)) {
+					running_multiplier = mult;
+					tmi_client.say(channel, `Points are now x$(running_multiplier)`);
+				}
+			}
+		}	
 	} else if (call === '!help') {
 		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
 		tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
@@ -672,7 +634,7 @@ tmi_client.on('message', (channel, tags, message, self) => {
 			} else if (crosswords[position].word == guess) {
 				tmi_client.say(channel, `@${tags.username} computer says... YES!?!`);
 				crosswords[position].guessed = true;
-				let points = guess.length * running_multiplier
+				let points = guess.length * running_multiplier;
 				usernames[tags.username]['points'] += points;
 				//console.log(usernames);
 				
@@ -733,18 +695,25 @@ stdin.on('data', function (data) {
 			//}
 		}
 	}
-	if (data == 'p') {
+	/*if (data == 'p') {
 		sendWebSocketMessage('points', {'points': {'psenough': {'team':'#f00', points:4.35},'psenough1': {'team':'#f00', points:44.35},'psenough2': {'team':'#f00', points:14.35},'tomato': {'team':'#f00',points:20.0},'lettuce': {'team':'#008000',points:21},'largerthen25charsornot21345': {'team':'#0280D0',points:35},'psenough4': {'team':'#0280D0', points:4.35},'psenough5': {'team':'#0280D0', points:425},'psenough6': {'team':'#0280D0', points:35},'psenough7': {'team':'#0280D0', points:35}}});
-	}
+	}*/
 	if (data == 's') {
 		console.log(usernames);
-		fs.writeFileSync("temp_savefile.json", JSON.stringify(usernames));
+		fs.writeFileSync("temp_savefile.json", JSON.stringify({"usernames": usernames, "crosswords": crosswords}));
 	}
 	if (data == 'l') {
 		fs.readFile('temp_savefile.json', (err, data) => {
 			if (err) throw err;
-			usernames = JSON.parse(data);
-			console.log(usernames);
+			let parsed = JSON.parse(data);
+			//console.log(parsed);
+			usernames = parsed['usernames'];
+			sendWebSocketMessage('points', {'points':usernames});
+			crosswords = parsed['crosswords'];
+			for (position in crosswords) {
+				if (crosswords[position].guessed == true) 
+					sendWebSocketMessage('crosswords', {'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].y});
+			}
 		});
 	}
     //process.stdout.write('Captured Key : ' + data + "\n");
