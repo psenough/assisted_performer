@@ -584,13 +584,16 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				let mult = parseFloat(splits[1]);
 				if (!isNaN(mult)) {
 					running_multiplier = mult;
-					tmi_client.say(channel, `Points are now x$(running_multiplier)`);
+					tmi_client.say(channel, `Points are now x${running_multiplier}`);
 				}
+			} else {
+			tmi_client.say(channel, `Current point multiplier: x${running_multiplier}`);
 			}
-		}	
+		}
 	} else if (call === '!help') {
-		tmi_client.say(channel, `Join the team of your favorite color by typing \"!team #ff0000\" for red or \"!team #0000ff\" for blue. Other hexadec color values accepted! You can only be part of a single team for the whole challenge, choose wisely!`);
-		tmi_client.say(channel, `Guess a word example: \"!H3 banana\" to guess \"banana\" on the horizontal word 3.`);
+		tmi_client.say(channel, `Join a team of your favorite color using !join, for example \"!join #ff0000\" joins red team. Any hex color values allowed! You can't change teams mid game!`);
+		tmi_client.say(channel, `Guess a word using !H or !V, for example: \"!H3 banana\" guesses \"banana\" on horizontal 3.`);
+		tmi_client.say(channel, `Read hints at http://scenes.at/nevoke`);
 	} else if ((call === '!team') || (call === '!join')) {
 		if (usernames[tags.username] != undefined) {
 			tmi_client.say(channel, `@${tags.username} you're already part of team ${usernames[tags.username].team}. Can't change team until end of challenge.`);
