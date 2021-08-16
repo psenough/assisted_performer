@@ -516,6 +516,7 @@ let rawdata = fs.readFileSync('nevoke.json');
 let crosswords = JSON.parse(rawdata);
 let running_multiplier = 1.0;
 let allow_guess_without_team = false;
+let autosave = true;
 
 //console.log(crosswords["H1"]);
 const oauth = require('./oauth.js');
@@ -628,8 +629,8 @@ tmi_client.on('message', (channel, tags, message, self) => {
 			}				
 		}
 		
-		let position = call.split('!')[1].toUpperCase();
-		let guess = message.split(' ')[1].toLowerCase();
+		let position = (call.split('!')[1] || "").toUpperCase();
+		let guess = (message.split(' ')[1] || "").toLowerCase();
 		console.log(position + ' ' + guess);
 		if (crosswords[position]) {
 			if (crosswords[position].guessed != undefined) {
@@ -655,6 +656,9 @@ tmi_client.on('message', (channel, tags, message, self) => {
 				
 				// add word to crosswords page
 				sendWebSocketMessage('crosswords', {'pos': position, 'word': crosswords[position].word, 'x': crosswords[position].x ,'y': crosswords[position].y});
+				
+				if (autosave == true) savetemp();
+				
 			} else {
 				tmi_client.say(channel, `@${tags.username} computer says... no!`);
 				let points = -1 * running_multiplier;
@@ -670,6 +674,8 @@ tmi_client.on('message', (channel, tags, message, self) => {
 
 				// update points page
 				sendWebSocketMessage('points', {'points':usernames});
+				
+				if (autosave == true) savetemp();
 			}
 		} else {
 			tmi_client.say(channel, `@${tags.username} no such position on crosswords challenge.`);
@@ -703,7 +709,7 @@ stdin.on('data', function (data) {
 	}*/
 	if (data == 's') {
 		console.log(usernames);
-		fs.writeFileSync("temp_savefile.json", JSON.stringify({"usernames": usernames, "crosswords": crosswords}));
+		savetemp();
 	}
 	if (data == 'l') {
 		fs.readFile('temp_savefile.json', (err, data) => {
@@ -726,6 +732,11 @@ stdin.setRawMode(true);
 stdin.resume();
 
 
+
+function savetemp() {
+	fs.writeFileSync("temp_savefile.json", JSON.stringify({"usernames": usernames, "crosswords": crosswords}));
+}
+			
 //
 // generic functions
 //

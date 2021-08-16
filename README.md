@@ -30,8 +30,16 @@ On the nodejs command line box
 
 `a` lists active connections
 
+`s` saves current state to temp file
+
+`l` loads current state from temp file
+
 ## TODO
 
-- twitch bot !team, keep track of usernames teams and points (send points info to connected points.html via ws)
+- #DC5 and #dc5 point missmatch???
 
-- twitch bot !guess, reply, resend points to points.html, send info to crosswords.html, send info to hints.html to cross it out from list)
+- points.html not reordering teams
+
+- alternative !a and !d to across and down instead of just v h
+
+- W gets eaten
