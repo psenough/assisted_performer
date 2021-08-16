@@ -36,10 +36,13 @@ On the nodejs command line box
 
 ## TODO
 
-- #DC5 and #dc5 point missmatch???
+- #DC5 and #dc5 point missmatch on what twitch says and points.html???
 
 - points.html not reordering teams
 
 - alternative !a and !d to across and down instead of just v h
 
-- W gets eaten
+- W letter gets eaten by small input
+
+- round float points on twitch text
+
