@@ -90,6 +90,8 @@ The system can be configured to send logs to [winston](http://thisdavej.com/usin
 
 * integration with computer vision protocols (OpenTSPS)
 
+* integration with twitch chat (chatbot server)
+
 * logging
 
 # Project Examples
@@ -105,6 +107,8 @@ The system can be configured to send logs to [winston](http://thisdavej.com/usin
 * [Evoke 2018 - Interactive fun with accents!](http://www.pouet.net/prod.php?which=77814) ([interactive_standup branch](https://github.com/psenough/assisted_performer/tree/interactive_stand_up))
 
 * [Residência Expand 2018 - Collaborative Haiku Dream](https://www.youtube.com/watch?v=zji3Ft6pEhg) ([residencia_expand branch](https://github.com/psenough/assisted_performer/tree/residencia_expand))
+
+* [Névoke 2021 - Community crossword twitch stream](https://www.youtube.com/watch?v=KQx4DMMS4pI) ([twitch_crosswords](https://github.com/psenough/assisted_performer/tree/twitch_crosswords))
 
 # Tutorial Videos
 
